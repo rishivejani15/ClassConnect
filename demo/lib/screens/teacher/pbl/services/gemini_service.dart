@@ -6,12 +6,8 @@ import 'package:google_generative_ai/google_generative_ai.dart';
 import 'package:syncfusion_flutter_pdf/pdf.dart' as sfpdf;
 import '../models/pbl_project.dart';
 
-// AIzaSyBvCy5ipUpuStRYglRd9_SMBGi4Y6Woy98
-// AIzaSyC9bC_WFVQJLe3fiUbIs8gExh_oz_AgItE
-// AIzaSyBtkJpDZ3IH6MSaKVyuvt3t2DEDXxkLaJ8
-
 class GeminiService {
-  static const String apiKey = 'AIzaSyDtNsnfmW5CygOjU34xHzpvU5W9IdwlelA';
+  static const String apiKey = 'GeminiService_API_KEY';
 
   static final _conceptModel = GenerativeModel(
     model: 'gemini-2.5-flash-lite',
