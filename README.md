@@ -65,38 +65,6 @@ Modern classrooms face several challenges:
 
 ---
 
-## 🗂️ Firestore Data Model (Simplified)
-
-```
-classes/
- └── {classId}
-     └── PBL/
-         └── {pblId}
-             ├── title
-             ├── miniProjects[]
-             └── selections/
-                 └── {studentId}
-                     ├── studentId
-                     ├── title
-                     ├── selectedAt
-                     ├── submitted
-                     ├── submissionUrl
-                     └── steps[]
-```
-
-```
-students/
- └── {studentId}
-     ├── name
-     ├── email
-     ├── role
-     └── photoUrl
-```
-
-🔑 **Design Principle:** Firestore does not support joins, so relationships are managed using `studentId` references.
-
----
-
 ## 🔄 Application Flow
 
 ### Student Flow
