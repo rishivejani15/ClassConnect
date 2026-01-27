@@ -1,10 +1,8 @@
 import 'dart:convert';
 import 'package:http/http.dart' as http;
 
-// AIzaSyBtkJpDZ3IH6MSaKVyuvt3t2DEDXxkLaJ8
-
 class GeminiHomeworkService {
-  static const String _apiKey = "AIzaSyCDoAWAiHVywnopzanzmtKE845xOJl8BP0";
+  static const String _apiKey = "GeminiHomeworkService_GEMINI_API_KEY";
   static const String _url =
       "https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=$_apiKey";
 
