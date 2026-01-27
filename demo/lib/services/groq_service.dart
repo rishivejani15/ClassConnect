@@ -2,7 +2,7 @@ import 'dart:convert';
 import 'package:http/http.dart' as http;
 
 class GroqService {
-  static const String _apiKey = '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';
+  static const String _apiKey = 'GroqService_API_KEY';
   static const String _baseUrl = 'https://api.groq.com/openai/v1/chat/completions';
 
   /// Generates concept-aligned micro-steps for a mini project.
