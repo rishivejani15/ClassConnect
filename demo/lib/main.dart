@@ -16,8 +16,8 @@ void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await Firebase.initializeApp();
   await Supabase.initialize(
-    url: 'https://ycjwwlxzynfrmnanueyh.supabase.co',
-    anonKey: 'sb_publishable_wlwZTAlRomiBGNKUD1IqiA_bKCCf9cE',
+    url: 'SUPABASE_URL',
+    anonKey: 'SUPABASE_KEY',
   );
   WeeklyReportScheduler.initialize();
   runApp(const MyApp());
