@@ -131,10 +131,15 @@ This project demonstrates:
 
 ---
 
-## 🧑‍💻 Developed By
+## 🧑‍💻 Developed By  
 
-**Class Connect Team**
+**Class Connect Team**  
 An initiative focused on **adaptive learning, mastery, and engagement**.
+
+- **Daksh Gopani** – [LinkedIn](https://www.linkedin.com/in/daksh-gopani-a13993251/)
+- **Rishi Vejani** – [LinkedIn](https://www.linkedin.com/in/rishi-vejani-56b923257/)
+- **Rudra Parmar** – [LinkedIn](https://www.linkedin.com/in/rudra-parmar-089125245/)
+- **Samyak Chheda** – [LinkedIn](https://www.linkedin.com/in/samyakchheda/)
 
 ---
 
