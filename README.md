@@ -61,7 +61,6 @@ Modern classrooms face several challenges:
 
 * **Firebase Authentication** – secure login & role handling
 * **Cloud Firestore** – real-time NoSQL database
-* **Firebase Storage** – project submissions (optional)
 
 ---
 
