@@ -4,6 +4,8 @@
 
 Class Connect is a **modern, data-driven ed-tech platform** built to support **Project-Based Learning (PBL)** with structured workflows, real-time engagement tracking, and personalized mastery progression. It bridges the gap between **traditional classroom teaching** and **adaptive, student-centric learning**.
 
+For recent AME integration changes, see [README_AME_INTEGRATION.md](README_AME_INTEGRATION.md).
+
 ---
 
 ## 🚀 Problem Statement
