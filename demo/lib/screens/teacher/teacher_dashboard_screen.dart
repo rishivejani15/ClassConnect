@@ -1,7 +1,11 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:fl_chart/fl_chart.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import '../../config/feature_flags.dart';
+import '../../services/ame_api_service.dart';
 
 class TeacherDashboardPage extends StatefulWidget {
   const TeacherDashboardPage({super.key});
@@ -13,6 +17,7 @@ class TeacherDashboardPage extends StatefulWidget {
 class _TeacherDashboardPageState extends State<TeacherDashboardPage> {
   final TextEditingController _searchController = TextEditingController();
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
+  final AmeApiService _ameApiService = AmeApiService.instance;
 
   bool _isLoading = true;
 
@@ -34,6 +39,16 @@ class _TeacherDashboardPageState extends State<TeacherDashboardPage> {
   List<Map<String, dynamic>> _attendanceData = [];
   Map<String, int> _taskWorkload = {};
   List<Map<String, dynamic>> _communityEngagement = [];
+  List<String> _teacherClassIds = [];
+
+  // Risk + recommendation analytics with fallback-first behavior.
+  Map<String, int> _riskSummary = {'HIGH': 0, 'MEDIUM': 0, 'LOW': 0};
+  List<Map<String, dynamic>> _riskCases = [];
+  String _recommendedIntervention = 'peer_instruction';
+  List<String> _focusConcepts = [];
+  String _interventionReason =
+      'Fallback based on current Firestore performance data.';
+  bool _usingAmeTeacherAnalytics = false;
 
   @override
   void initState() {
@@ -45,8 +60,10 @@ class _TeacherDashboardPageState extends State<TeacherDashboardPage> {
   Future<void> _loadDashboardData() async {
     setState(() => _isLoading = true);
 
+    String? teacherId;
+
     try {
-      final teacherId = FirebaseAuth.instance.currentUser?.uid;
+      teacherId = FirebaseAuth.instance.currentUser?.uid;
       if (teacherId == null) return;
 
       await Future.wait([
@@ -57,10 +74,16 @@ class _TeacherDashboardPageState extends State<TeacherDashboardPage> {
         _fetchTaskWorkload(teacherId),
         _fetchCommunityData(),
       ]);
+
+      _buildFallbackTeacherAnalytics();
     } catch (e) {
       debugPrint('Error loading dashboard: $e');
     } finally {
       setState(() => _isLoading = false);
+    }
+
+    if (teacherId != null && FeatureFlags.ameEnabled) {
+      unawaited(_refreshAmeTeacherAnalytics());
     }
   }
 
@@ -70,6 +93,7 @@ class _TeacherDashboardPageState extends State<TeacherDashboardPage> {
         .where('teacherId', isEqualTo: teacherId)
         .get();
 
+    _teacherClassIds = classesSnapshot.docs.map((d) => d.id).toList();
     _totalClasses = classesSnapshot.docs.length;
     _totalConcepts = 0;
     _totalPBLs = 0;
@@ -301,6 +325,232 @@ class _TeacherDashboardPageState extends State<TeacherDashboardPage> {
     _weakConcepts = _weakConcepts.take(10).toList();
   }
 
+  int _toInt(dynamic value) {
+    if (value is int) return value;
+    if (value is num) return value.toInt();
+    return int.tryParse(value?.toString() ?? '') ?? 0;
+  }
+
+  double _toDouble(dynamic value) {
+    if (value is double) return value;
+    if (value is num) return value.toDouble();
+    return double.tryParse(value?.toString() ?? '') ?? 0;
+  }
+
+  void _buildFallbackTeacherAnalytics() {
+    final fallbackSummary = {'HIGH': 0, 'MEDIUM': 0, 'LOW': 0};
+    final fallbackCases = <Map<String, dynamic>>[];
+
+    for (final student in students) {
+      final mastery = _toDouble(student['quiz_score']);
+      final attendance = _toDouble(student['attendance']);
+
+      String severity;
+      if (mastery < 60 && attendance < 60) {
+        severity = 'HIGH';
+      } else if (mastery < 70 || attendance < 70) {
+        severity = 'MEDIUM';
+      } else {
+        severity = 'LOW';
+      }
+
+      fallbackSummary[severity] = (fallbackSummary[severity] ?? 0) + 1;
+
+      if (severity != 'LOW') {
+        fallbackCases.add({
+          'student_id': student['name'] ?? 'Unknown',
+          'concept_id': _weakConcepts.isNotEmpty
+              ? _weakConcepts.first['concept'] ?? 'General'
+              : 'General',
+          'severity': severity,
+          'signals': {'mastery': mastery, 'attendance': attendance},
+        });
+      }
+    }
+
+    final severityWeight = {'HIGH': 0, 'MEDIUM': 1, 'LOW': 2};
+    fallbackCases.sort((a, b) {
+      final left = severityWeight[a['severity']] ?? 2;
+      final right = severityWeight[b['severity']] ?? 2;
+      if (left != right) return left.compareTo(right);
+
+      final leftMastery = _toDouble((a['signals'] as Map)['mastery']);
+      final rightMastery = _toDouble((b['signals'] as Map)['mastery']);
+      return leftMastery.compareTo(rightMastery);
+    });
+
+    _riskSummary = fallbackSummary;
+    _riskCases = fallbackCases.take(8).toList();
+
+    final highRiskCount = fallbackSummary['HIGH'] ?? 0;
+    final mediumRiskCount = fallbackSummary['MEDIUM'] ?? 0;
+
+    if (highRiskCount > 0) {
+      _recommendedIntervention = 'reteach';
+    } else if (mediumRiskCount > 0) {
+      _recommendedIntervention = 'group_activity';
+    } else {
+      _recommendedIntervention = 'peer_instruction';
+    }
+
+    _focusConcepts = _weakConcepts
+        .take(3)
+        .map((c) => (c['concept'] ?? '').toString())
+        .where((c) => c.trim().isNotEmpty)
+        .toList();
+
+    _interventionReason =
+        'Fallback based on Firestore weak concepts and student performance trends.';
+    _usingAmeTeacherAnalytics = false;
+  }
+
+  Future<void> _refreshAmeTeacherAnalytics() async {
+    try {
+      await _fetchAmeTeacherAnalytics();
+      if (mounted) {
+        setState(() {});
+      }
+    } catch (e) {
+      debugPrint('Error loading AME analytics: $e');
+    }
+  }
+
+  Future<void> _fetchAmeTeacherAnalytics() async {
+    if (_teacherClassIds.isEmpty) {
+      debugPrint('[AME] No classes available for teacher analytics.');
+      return;
+    }
+
+    final weakFrequency = <String, int>{};
+    final riskSummary = {'HIGH': 0, 'MEDIUM': 0, 'LOW': 0};
+    final riskCases = <Map<String, dynamic>>[];
+    final interventionFrequency = <String, int>{};
+    final focusFrequency = <String, int>{};
+
+    bool weakLoaded = false;
+    bool riskLoaded = false;
+    bool interventionLoaded = false;
+
+    for (final classId in _teacherClassIds) {
+      final weakConcepts = await _ameApiService.getClassWeakConcepts(
+        classId: classId,
+      );
+      if (weakConcepts != null) {
+        weakLoaded = true;
+        for (final item in weakConcepts) {
+          final conceptId = (item['concept_id'] ?? '').toString().trim();
+          if (conceptId.isEmpty) continue;
+
+          final count = _toInt(item['students_below_60']);
+          weakFrequency[conceptId] = (weakFrequency[conceptId] ?? 0) +
+              (count > 0 ? count : 1);
+        }
+      }
+
+      final riskData = await _ameApiService.getClassRisk(classId: classId);
+      if (riskData != null) {
+        riskLoaded = true;
+
+        final summaryData = riskData['risk_summary'];
+        if (summaryData is Map) {
+          riskSummary['HIGH'] = (riskSummary['HIGH'] ?? 0) +
+              _toInt(summaryData['HIGH']);
+          riskSummary['MEDIUM'] = (riskSummary['MEDIUM'] ?? 0) +
+              _toInt(summaryData['MEDIUM']);
+          riskSummary['LOW'] = (riskSummary['LOW'] ?? 0) +
+              _toInt(summaryData['LOW']);
+        }
+
+        final casesData = riskData['risk_cases'];
+        if (casesData is List) {
+          for (final item in casesData) {
+            if (item is! Map) continue;
+            final mappedItem = Map<String, dynamic>.from(item);
+            mappedItem['class_id'] = classId;
+            riskCases.add(mappedItem);
+          }
+        }
+      }
+
+      final interventionData = await _ameApiService.getClassIntervention(
+        classId: classId,
+      );
+      if (interventionData != null) {
+        interventionLoaded = true;
+
+        final intervention =
+            (interventionData['recommended_intervention'] ?? '')
+                .toString()
+                .trim();
+        if (intervention.isNotEmpty) {
+          interventionFrequency[intervention] =
+              (interventionFrequency[intervention] ?? 0) + 1;
+        }
+
+        final concepts = interventionData['focus_concepts'];
+        if (concepts is List) {
+          for (final concept in concepts) {
+            final normalized = concept.toString().trim();
+            if (normalized.isEmpty) continue;
+            focusFrequency[normalized] = (focusFrequency[normalized] ?? 0) + 1;
+          }
+        }
+      }
+    }
+
+    if (!weakLoaded && !riskLoaded && !interventionLoaded) {
+      debugPrint('[AME] Teacher analytics unavailable. Keeping fallback path.');
+      return;
+    }
+
+    if (weakLoaded) {
+      _weakConcepts = weakFrequency.entries
+          .map((entry) => {'concept': entry.key, 'count': entry.value})
+          .toList()
+        ..sort((a, b) => (b['count'] as int).compareTo(a['count'] as int));
+
+      _weakConcepts = _weakConcepts.take(10).toList();
+    }
+
+    if (riskLoaded) {
+      _riskSummary = riskSummary;
+
+      final severityWeight = {'HIGH': 0, 'MEDIUM': 1, 'LOW': 2};
+      riskCases.sort((a, b) {
+        final left = severityWeight[(a['severity'] ?? '').toString()] ?? 2;
+        final right = severityWeight[(b['severity'] ?? '').toString()] ?? 2;
+        if (left != right) return left.compareTo(right);
+
+        final leftMastery =
+            _toDouble((a['signals'] as Map?)?['mastery'] ?? 100);
+        final rightMastery =
+            _toDouble((b['signals'] as Map?)?['mastery'] ?? 100);
+        return leftMastery.compareTo(rightMastery);
+      });
+
+      _riskCases = riskCases.take(8).toList();
+    }
+
+    if (interventionLoaded && interventionFrequency.isNotEmpty) {
+      final topIntervention = interventionFrequency.entries.toList()
+        ..sort((a, b) => b.value.compareTo(a.value));
+      _recommendedIntervention = topIntervention.first.key;
+
+      final topFocusConcepts = focusFrequency.entries.toList()
+        ..sort((a, b) => b.value.compareTo(a.value));
+      _focusConcepts = topFocusConcepts
+          .take(5)
+          .map((entry) => entry.key)
+          .toList();
+
+      _interventionReason =
+          'Based on AME intervention analytics across ${_teacherClassIds.length} classes.';
+    }
+
+    _usingAmeTeacherAnalytics = true;
+    debugPrint('[AME] Teacher analytics loaded with fallback-safe merge.');
+  }
+
   Future<void> _fetchTaskWorkload(String teacherId) async {
     final tasksSnapshot = await _firestore
         .collection('teacher_tasks')
@@ -487,6 +737,14 @@ class _TeacherDashboardPageState extends State<TeacherDashboardPage> {
                     _buildWeakConceptsSection(),
                     const SizedBox(height: 30),
                   ],
+
+                  _sectionTitle('Risk Overview'),
+                  _buildRiskCardsSection(),
+                  const SizedBox(height: 30),
+
+                  _sectionTitle('Recommendation Panel'),
+                  _buildInterventionPanel(),
+                  const SizedBox(height: 30),
 
                   // Task Workload
                   _sectionTitle('Task Workload'),
@@ -691,6 +949,245 @@ class _TeacherDashboardPageState extends State<TeacherDashboardPage> {
             ),
           );
         }).toList(),
+      ),
+    );
+  }
+
+  Widget _buildRiskCardsSection() {
+    return Column(
+      children: [
+        Row(
+          children: [
+            Expanded(
+              child: _buildRiskSummaryCard(
+                title: 'High',
+                value: _riskSummary['HIGH'] ?? 0,
+                color: const Color(0xFFFF6B6B),
+              ),
+            ),
+            const SizedBox(width: 10),
+            Expanded(
+              child: _buildRiskSummaryCard(
+                title: 'Medium',
+                value: _riskSummary['MEDIUM'] ?? 0,
+                color: const Color(0xFFFFD93D),
+              ),
+            ),
+            const SizedBox(width: 10),
+            Expanded(
+              child: _buildRiskSummaryCard(
+                title: 'Low',
+                value: _riskSummary['LOW'] ?? 0,
+                color: const Color(0xFF6BCB77),
+              ),
+            ),
+          ],
+        ),
+        const SizedBox(height: 12),
+        if (_riskCases.isEmpty)
+          Container(
+            width: double.infinity,
+            padding: const EdgeInsets.all(14),
+            decoration: BoxDecoration(
+              color: Colors.white.withValues(alpha: 0.08),
+              borderRadius: BorderRadius.circular(10),
+              border: Border.all(
+                color: Colors.white.withValues(alpha: 0.15),
+              ),
+            ),
+            child: const Text(
+              'No at-risk students detected from current analytics.',
+              style: TextStyle(color: Colors.white70),
+            ),
+          )
+        else
+          Column(
+            children: _riskCases.take(5).map((risk) {
+              final severity = (risk['severity'] ?? 'LOW').toString();
+              final studentId =
+                  (risk['student_id'] ?? risk['student_name'] ?? 'Unknown')
+                      .toString();
+              final conceptId = (risk['concept_id'] ?? 'General').toString();
+              final rawSignals = risk['signals'];
+              final signals = rawSignals is Map
+                  ? Map<String, dynamic>.from(rawSignals)
+                  : <String, dynamic>{};
+              final mastery = _toDouble(signals['mastery']).toStringAsFixed(1);
+              final attendance =
+                  _toDouble(signals['attendance']).toStringAsFixed(1);
+
+              Color severityColor;
+              if (severity == 'HIGH') {
+                severityColor = const Color(0xFFFF6B6B);
+              } else if (severity == 'MEDIUM') {
+                severityColor = const Color(0xFFFFD93D);
+              } else {
+                severityColor = const Color(0xFF6BCB77);
+              }
+
+              return Container(
+                width: double.infinity,
+                margin: const EdgeInsets.only(bottom: 8),
+                padding: const EdgeInsets.all(12),
+                decoration: BoxDecoration(
+                  color: Colors.white.withValues(alpha: 0.08),
+                  borderRadius: BorderRadius.circular(10),
+                  border: Border.all(
+                    color: severityColor.withValues(alpha: 0.5),
+                    width: 1,
+                  ),
+                ),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Row(
+                      children: [
+                        Container(
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 8,
+                            vertical: 4,
+                          ),
+                          decoration: BoxDecoration(
+                            color: severityColor.withValues(alpha: 0.2),
+                            borderRadius: BorderRadius.circular(8),
+                          ),
+                          child: Text(
+                            severity,
+                            style: TextStyle(
+                              color: severityColor,
+                              fontWeight: FontWeight.w700,
+                              fontSize: 11,
+                            ),
+                          ),
+                        ),
+                        const SizedBox(width: 8),
+                        Expanded(
+                          child: Text(
+                            studentId,
+                            style: const TextStyle(
+                              color: Colors.white,
+                              fontWeight: FontWeight.w600,
+                            ),
+                            overflow: TextOverflow.ellipsis,
+                          ),
+                        ),
+                      ],
+                    ),
+                    const SizedBox(height: 6),
+                    Text(
+                      'Concept: $conceptId | Mastery: $mastery | Attendance: $attendance',
+                      style: const TextStyle(color: Colors.white70, fontSize: 12),
+                    ),
+                  ],
+                ),
+              );
+            }).toList(),
+          ),
+      ],
+    );
+  }
+
+  Widget _buildRiskSummaryCard({
+    required String title,
+    required int value,
+    required Color color,
+  }) {
+    return Container(
+      padding: const EdgeInsets.all(12),
+      decoration: BoxDecoration(
+        color: color.withValues(alpha: 0.15),
+        borderRadius: BorderRadius.circular(10),
+        border: Border.all(color: color.withValues(alpha: 0.45), width: 1),
+      ),
+      child: Column(
+        children: [
+          Text(
+            '$value',
+            style: TextStyle(
+              fontSize: 22,
+              fontWeight: FontWeight.w800,
+              color: color,
+            ),
+          ),
+          const SizedBox(height: 2),
+          Text(
+            title,
+            style: const TextStyle(
+              fontSize: 11,
+              fontWeight: FontWeight.w600,
+              color: Colors.white70,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildInterventionPanel() {
+    final sourceLabel = _usingAmeTeacherAnalytics
+        ? 'Source: AME analytics'
+        : 'Source: Firestore fallback';
+
+    return Container(
+      width: double.infinity,
+      padding: const EdgeInsets.all(14),
+      decoration: BoxDecoration(
+        color: Colors.white.withValues(alpha: 0.08),
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(color: Colors.white.withValues(alpha: 0.2)),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            'Recommended intervention: ${_recommendedIntervention.toUpperCase()}',
+            style: const TextStyle(
+              color: Color(0xFF00D9FF),
+              fontSize: 15,
+              fontWeight: FontWeight.w700,
+            ),
+          ),
+          const SizedBox(height: 6),
+          Text(
+            _interventionReason,
+            style: const TextStyle(color: Colors.white70, fontSize: 12),
+          ),
+          const SizedBox(height: 10),
+          Text(
+            sourceLabel,
+            style: const TextStyle(color: Colors.white54, fontSize: 11),
+          ),
+          if (_focusConcepts.isNotEmpty) ...[
+            const SizedBox(height: 10),
+            Wrap(
+              spacing: 8,
+              runSpacing: 8,
+              children: _focusConcepts.take(5).map((concept) {
+                return Container(
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 10,
+                    vertical: 6,
+                  ),
+                  decoration: BoxDecoration(
+                    color: const Color(0xFF00D9FF).withValues(alpha: 0.15),
+                    borderRadius: BorderRadius.circular(999),
+                    border: Border.all(
+                      color: const Color(0xFF00D9FF).withValues(alpha: 0.4),
+                    ),
+                  ),
+                  child: Text(
+                    concept,
+                    style: const TextStyle(
+                      color: Colors.white,
+                      fontSize: 11,
+                      fontWeight: FontWeight.w600,
+                    ),
+                  ),
+                );
+              }).toList(),
+            ),
+          ],
+        ],
       ),
     );
   }

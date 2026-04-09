@@ -89,6 +89,93 @@ class AmeApiService {
     }
   }
 
+  Future<List<Map<String, dynamic>>?> getClassWeakConcepts({
+    required String classId,
+  }) async {
+    final response = await _getWithRetry(
+      path: '/ame/class/$classId/concepts/weak',
+      operation: 'getClassWeakConcepts',
+    );
+
+    if (response == null) {
+      return null;
+    }
+
+    return _decodeJsonObjectList(
+      response.body,
+      operation: 'getClassWeakConcepts',
+    );
+  }
+
+  Future<Map<String, dynamic>?> getClassRisk({
+    required String classId,
+  }) async {
+    final response = await _getWithRetry(
+      path: '/ame/class/$classId/risk',
+      operation: 'getClassRisk',
+    );
+
+    if (response == null) {
+      return null;
+    }
+
+    return _decodeJsonObject(response.body, operation: 'getClassRisk');
+  }
+
+  Future<Map<String, dynamic>?> getClassIntervention({
+    required String classId,
+  }) async {
+    final response = await _getWithRetry(
+      path: '/ame/class/$classId/intervention',
+      operation: 'getClassIntervention',
+    );
+
+    if (response == null) {
+      return null;
+    }
+
+    return _decodeJsonObject(response.body, operation: 'getClassIntervention');
+  }
+
+  Map<String, dynamic>? _decodeJsonObject(
+    String body, {
+    required String operation,
+  }) {
+    try {
+      final decoded = jsonDecode(body);
+      if (decoded is Map<String, dynamic>) {
+        return decoded;
+      }
+
+      debugPrint('[AME] $operation returned non-object JSON. Fallback to null.');
+      return null;
+    } catch (e) {
+      debugPrint('[AME] $operation JSON parse error: $e. Fallback to null.');
+      return null;
+    }
+  }
+
+  List<Map<String, dynamic>>? _decodeJsonObjectList(
+    String body, {
+    required String operation,
+  }) {
+    try {
+      final decoded = jsonDecode(body);
+      if (decoded is List) {
+        return decoded
+            .whereType<Map>()
+            .map((item) => Map<String, dynamic>.from(item))
+            .toList();
+      }
+
+      debugPrint('[AME] $operation returned non-list JSON. Fallback to null.');
+      return null;
+    } catch (e) {
+      debugPrint('[AME] $operation JSON parse error: $e. Fallback to null.');
+      return null;
+    }
+  }
+
   Future<http.Response?> _postJsonWithRetry({
     required String path,
     required Map<String, dynamic> payload,
