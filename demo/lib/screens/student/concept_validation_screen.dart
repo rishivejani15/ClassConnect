@@ -1,5 +1,8 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import '../../../services/ame_api_service.dart';
 import '../../../services/gemini_text_validation_service.dart';
 
 class ConceptValidationScreen extends StatefulWidget {
@@ -25,6 +28,7 @@ class ConceptValidationScreen extends StatefulWidget {
 
 class _ConceptValidationScreenState extends State<ConceptValidationScreen> {
   final TextEditingController _controller = TextEditingController();
+  final AmeApiService _ameApiService = AmeApiService.instance;
   late final ValueNotifier<int> wordCountNotifier;
   bool submitting = false;
 
@@ -158,6 +162,17 @@ class _ConceptValidationScreenState extends State<ConceptValidationScreen> {
         'masteryScore': masteryScore,
       });
     }
+
+    unawaited(
+      _ameApiService.sendEvent(
+        studentId: widget.studentId,
+        conceptId: widget.conceptName,
+        classId: widget.classId,
+        eventType: 'explanation',
+        score: individualMasteryScore.toDouble(),
+        timestamp: DateTime.now().toUtc(),
+      ),
+    );
 
     setState(() => submitting = false);
 

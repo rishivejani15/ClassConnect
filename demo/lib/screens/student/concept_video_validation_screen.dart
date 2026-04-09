@@ -1,7 +1,9 @@
+import 'dart:async';
 import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:image_picker/image_picker.dart';
+import '../../../services/ame_api_service.dart';
 import '../../../services/gemini_video_validation_service.dart';
 import '../../../services/supabase_video_service.dart';
 import '../../../services/global_xp_service.dart';
@@ -33,6 +35,7 @@ class ConceptVideoValidationScreen extends StatefulWidget {
 class _ConceptVideoValidationScreenState
     extends State<ConceptVideoValidationScreen> {
   File? videoFile;
+  final AmeApiService _ameApiService = AmeApiService.instance;
   bool uploading = false;
   late final String challengePhrase;
 
@@ -175,6 +178,17 @@ examples, and why it is important.
         'masteryScore': masteryScore,
       });
     }
+
+    unawaited(
+      _ameApiService.sendEvent(
+        studentId: widget.studentId,
+        conceptId: widget.conceptName,
+        classId: widget.classId,
+        eventType: 'explanation',
+        score: 100.0,
+        timestamp: DateTime.now().toUtc(),
+      ),
+    );
 
     /* =====================================================
      🔹 4. AWARD XP

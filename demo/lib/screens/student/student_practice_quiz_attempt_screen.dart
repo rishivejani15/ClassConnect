@@ -1,7 +1,10 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'concept_validation_screen.dart';
 import 'concept_video_validation_screen.dart';
+import '../../services/ame_api_service.dart';
 
 class StudentPracticeQuizAttemptScreen extends StatefulWidget {
   final String classId;
@@ -29,6 +32,7 @@ class StudentPracticeQuizAttemptScreen extends StatefulWidget {
 class _StudentPracticeQuizAttemptScreenState
     extends State<StudentPracticeQuizAttemptScreen> {
   final Map<String, String> answers = {};
+  final AmeApiService _ameApiService = AmeApiService.instance;
   int score = 0;
   bool submitted = false;
 
@@ -74,6 +78,19 @@ class _StudentPracticeQuizAttemptScreenState
 
       await chapterAttemptRef.update({'conceptMastery': conceptMastery});
     }
+
+    final percentScore =
+        questions.isEmpty ? 0.0 : (score / questions.length) * 100;
+    unawaited(
+      _ameApiService.sendEvent(
+        studentId: widget.studentId,
+        conceptId: widget.conceptName,
+        classId: widget.classId,
+        eventType: 'practice',
+        score: percentScore,
+        timestamp: DateTime.now().toUtc(),
+      ),
+    );
 
     setState(() => submitted = true);
   }

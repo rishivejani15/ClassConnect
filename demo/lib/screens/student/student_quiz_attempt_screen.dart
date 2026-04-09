@@ -1,7 +1,10 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'practice_concept_list_screen.dart';
 import 'student_class_detail_screen.dart';
+import '../../services/ame_api_service.dart';
 import '../../services/global_xp_service.dart';
 import '../../services/class_xp_service.dart';
 
@@ -26,6 +29,7 @@ class StudentQuizAttemptScreen extends StatefulWidget {
 
 class _StudentQuizAttemptScreenState extends State<StudentQuizAttemptScreen> {
   final Map<String, String> answers = {};
+  final AmeApiService _ameApiService = AmeApiService.instance;
   bool submitted = false;
   int score = 0;
 
@@ -104,6 +108,11 @@ class _StudentQuizAttemptScreenState extends State<StudentQuizAttemptScreen> {
       'submittedAt': FieldValue.serverTimestamp(),
     });
 
+    _sendChapterAssignmentEventsToAme(
+      conceptTotal: conceptTotal,
+      conceptMistakes: conceptMistakes,
+    );
+
     /// 🎯 XP
     await GlobalXpService.awardXp(studentId: widget.studentId, xpToAdd: 15);
 
@@ -115,6 +124,33 @@ class _StudentQuizAttemptScreenState extends State<StudentQuizAttemptScreen> {
     );
 
     setState(() => submitted = true);
+  }
+
+  void _sendChapterAssignmentEventsToAme({
+    required Map<String, int> conceptTotal,
+    required Map<String, int> conceptMistakes,
+  }) {
+    final timestamp = DateTime.now().toUtc();
+
+    for (final entry in conceptTotal.entries) {
+      final conceptId = entry.key;
+      final total = entry.value;
+      final mistakes = conceptMistakes[conceptId] ?? 0;
+      final correct = total - mistakes;
+      final safeCorrect = correct < 0 ? 0 : correct;
+      final percentScore = total > 0 ? (safeCorrect / total) * 100 : 0.0;
+
+      unawaited(
+        _ameApiService.sendEvent(
+          studentId: widget.studentId,
+          conceptId: conceptId,
+          classId: widget.classId,
+          eventType: 'assignment',
+          score: percentScore,
+          timestamp: timestamp,
+        ),
+      );
+    }
   }
 
   /// ============================================================
