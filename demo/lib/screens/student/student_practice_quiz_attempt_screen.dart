@@ -79,8 +79,9 @@ class _StudentPracticeQuizAttemptScreenState
       await chapterAttemptRef.update({'conceptMastery': conceptMastery});
     }
 
-    final percentScore =
-        questions.isEmpty ? 0.0 : (score / questions.length) * 100;
+    final percentScore = questions.isEmpty
+        ? 0.0
+        : (score / questions.length) * 100;
     unawaited(
       _ameApiService.sendEvent(
         studentId: widget.studentId,

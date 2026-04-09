@@ -9,8 +9,7 @@ class AmeApiService {
 
   static final AmeApiService instance = AmeApiService._();
 
-  static const String _baseUrl =
-      'https://rudraaaa76-ame-backend.hf.space';
+  static const String _baseUrl = 'https://rudraaaa76-ame-backend.hf.space';
   static const Duration _requestTimeout = Duration(seconds: 6);
   static const int _maxRetries = 2;
   static const Duration _initialBackoff = Duration(milliseconds: 400);
@@ -148,9 +147,7 @@ class AmeApiService {
       }
 
       if (attempt < _maxRetries) {
-        debugPrint(
-          '[AME] $operation retrying in ${backoff.inMilliseconds}ms',
-        );
+        debugPrint('[AME] $operation retrying in ${backoff.inMilliseconds}ms');
         await Future<void>.delayed(backoff);
         backoff = Duration(milliseconds: backoff.inMilliseconds * 2);
       }
