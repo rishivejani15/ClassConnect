@@ -107,9 +107,7 @@ class AmeApiService {
     );
   }
 
-  Future<Map<String, dynamic>?> getClassRisk({
-    required String classId,
-  }) async {
+  Future<Map<String, dynamic>?> getClassRisk({required String classId}) async {
     final response = await _getWithRetry(
       path: '/ame/class/$classId/risk',
       operation: 'getClassRisk',
@@ -147,7 +145,9 @@ class AmeApiService {
         return decoded;
       }
 
-      debugPrint('[AME] $operation returned non-object JSON. Fallback to null.');
+      debugPrint(
+        '[AME] $operation returned non-object JSON. Fallback to null.',
+      );
       return null;
     } catch (e) {
       debugPrint('[AME] $operation JSON parse error: $e. Fallback to null.');

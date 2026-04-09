@@ -442,8 +442,8 @@ class _TeacherDashboardPageState extends State<TeacherDashboardPage> {
           if (conceptId.isEmpty) continue;
 
           final count = _toInt(item['students_below_60']);
-          weakFrequency[conceptId] = (weakFrequency[conceptId] ?? 0) +
-              (count > 0 ? count : 1);
+          weakFrequency[conceptId] =
+              (weakFrequency[conceptId] ?? 0) + (count > 0 ? count : 1);
         }
       }
 
@@ -453,12 +453,12 @@ class _TeacherDashboardPageState extends State<TeacherDashboardPage> {
 
         final summaryData = riskData['risk_summary'];
         if (summaryData is Map) {
-          riskSummary['HIGH'] = (riskSummary['HIGH'] ?? 0) +
-              _toInt(summaryData['HIGH']);
-          riskSummary['MEDIUM'] = (riskSummary['MEDIUM'] ?? 0) +
-              _toInt(summaryData['MEDIUM']);
-          riskSummary['LOW'] = (riskSummary['LOW'] ?? 0) +
-              _toInt(summaryData['LOW']);
+          riskSummary['HIGH'] =
+              (riskSummary['HIGH'] ?? 0) + _toInt(summaryData['HIGH']);
+          riskSummary['MEDIUM'] =
+              (riskSummary['MEDIUM'] ?? 0) + _toInt(summaryData['MEDIUM']);
+          riskSummary['LOW'] =
+              (riskSummary['LOW'] ?? 0) + _toInt(summaryData['LOW']);
         }
 
         final casesData = riskData['risk_cases'];
@@ -504,10 +504,11 @@ class _TeacherDashboardPageState extends State<TeacherDashboardPage> {
     }
 
     if (weakLoaded) {
-      _weakConcepts = weakFrequency.entries
-          .map((entry) => {'concept': entry.key, 'count': entry.value})
-          .toList()
-        ..sort((a, b) => (b['count'] as int).compareTo(a['count'] as int));
+      _weakConcepts =
+          weakFrequency.entries
+              .map((entry) => {'concept': entry.key, 'count': entry.value})
+              .toList()
+            ..sort((a, b) => (b['count'] as int).compareTo(a['count'] as int));
 
       _weakConcepts = _weakConcepts.take(10).toList();
     }
@@ -521,10 +522,12 @@ class _TeacherDashboardPageState extends State<TeacherDashboardPage> {
         final right = severityWeight[(b['severity'] ?? '').toString()] ?? 2;
         if (left != right) return left.compareTo(right);
 
-        final leftMastery =
-            _toDouble((a['signals'] as Map?)?['mastery'] ?? 100);
-        final rightMastery =
-            _toDouble((b['signals'] as Map?)?['mastery'] ?? 100);
+        final leftMastery = _toDouble(
+          (a['signals'] as Map?)?['mastery'] ?? 100,
+        );
+        final rightMastery = _toDouble(
+          (b['signals'] as Map?)?['mastery'] ?? 100,
+        );
         return leftMastery.compareTo(rightMastery);
       });
 
@@ -991,9 +994,7 @@ class _TeacherDashboardPageState extends State<TeacherDashboardPage> {
             decoration: BoxDecoration(
               color: Colors.white.withValues(alpha: 0.08),
               borderRadius: BorderRadius.circular(10),
-              border: Border.all(
-                color: Colors.white.withValues(alpha: 0.15),
-              ),
+              border: Border.all(color: Colors.white.withValues(alpha: 0.15)),
             ),
             child: const Text(
               'No at-risk students detected from current analytics.',
@@ -1013,8 +1014,9 @@ class _TeacherDashboardPageState extends State<TeacherDashboardPage> {
                   ? Map<String, dynamic>.from(rawSignals)
                   : <String, dynamic>{};
               final mastery = _toDouble(signals['mastery']).toStringAsFixed(1);
-              final attendance =
-                  _toDouble(signals['attendance']).toStringAsFixed(1);
+              final attendance = _toDouble(
+                signals['attendance'],
+              ).toStringAsFixed(1);
 
               Color severityColor;
               if (severity == 'HIGH') {
@@ -1076,7 +1078,10 @@ class _TeacherDashboardPageState extends State<TeacherDashboardPage> {
                     const SizedBox(height: 6),
                     Text(
                       'Concept: $conceptId | Mastery: $mastery | Attendance: $attendance',
-                      style: const TextStyle(color: Colors.white70, fontSize: 12),
+                      style: const TextStyle(
+                        color: Colors.white70,
+                        fontSize: 12,
+                      ),
                     ),
                   ],
                 ),
