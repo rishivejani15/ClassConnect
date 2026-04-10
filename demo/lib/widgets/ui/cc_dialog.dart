@@ -10,6 +10,7 @@ Future<T?> showCcDialog<T>({
   return showDialog<T>(
     context: context,
     barrierDismissible: barrierDismissible,
+    useRootNavigator: true,
     builder: (context) {
       return AlertDialog(
         title: Text(title),

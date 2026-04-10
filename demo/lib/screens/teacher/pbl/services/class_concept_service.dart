@@ -37,6 +37,11 @@ class ClassConceptService {
         .doc(classId)
         .collection('chapters');
 
+    final existing = await chaptersRef.limit(1).get();
+    if (existing.docs.isNotEmpty) {
+      return;
+    }
+
     final batch = _firestore.batch();
     int order = 0;
 

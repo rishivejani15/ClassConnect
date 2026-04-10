@@ -22,7 +22,7 @@ class ProductivityScreen extends StatelessWidget {
     return user.uid;
   }
 
-  static const _backgroundGradient = Color(0xFF0F1C3F);
+  static const _backgroundGradient = Color(0xFFF4F8FF);
 
   String _formatDate(DateTime date) {
     String pad(int value) => value.toString().padLeft(2, '0');
@@ -39,7 +39,10 @@ class ProductivityScreen extends StatelessWidget {
       appBar: AppBar(
         title: const Text(
           'My Productivity',
-          style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
+          style: TextStyle(
+            color: Color(0xFF0D1B3D),
+            fontWeight: FontWeight.bold,
+          ),
         ),
         elevation: 0,
         backgroundColor: const Color(0xFFF4F8FF), // Matching your theme
@@ -49,14 +52,14 @@ class ProductivityScreen extends StatelessWidget {
           icon: const Icon(
             Icons.arrow_back_ios_new_rounded,
           ), // Modern rounded back icon
-          color: Colors.white, // Matching your Cyan accent
+          color: Color(0xFF0D1B3D), // Dark text color
           onPressed: () {
             if (Navigator.canPop(context)) {
               Navigator.pop(context);
             }
           },
         ),
-        iconTheme: const IconThemeData(color: Colors.white),
+        iconTheme: const IconThemeData(color: Color(0xFF0D1B3D)),
       ),
       body: Container(
         color: _backgroundGradient,
@@ -72,7 +75,7 @@ class ProductivityScreen extends StatelessWidget {
               return const Center(
                 child: Text(
                   'Unable to load productivity data right now.',
-                  style: TextStyle(color: Colors.white),
+                  style: TextStyle(color: Color(0xFF0D1B3D)),
                 ),
               );
             }
@@ -90,7 +93,7 @@ class ProductivityScreen extends StatelessWidget {
                   'Plan a few tasks to see your productivity trends.',
                   textAlign: TextAlign.center,
                   style: TextStyle(
-                    color: Colors.white,
+                    color: Color(0xFF0D1B3D),
                     fontWeight: FontWeight.w500,
                   ),
                 ),
@@ -194,8 +197,8 @@ class ProductivityScreen extends StatelessWidget {
       children: [
         CircleAvatar(
           radius: 18,
-          backgroundColor: Colors.white.withOpacity(0.2),
-          child: Icon(icon, color: Colors.white),
+          backgroundColor: Color(0xFF2E6BFF).withOpacity(0.1),
+          child: Icon(icon, color: Color(0xFF2E6BFF)),
         ),
         const SizedBox(width: 12),
         Expanded(
@@ -205,11 +208,11 @@ class ProductivityScreen extends StatelessWidget {
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
-                  Text(label, style: const TextStyle(color: Colors.white70)),
+                  Text(label, style: const TextStyle(color: Color(0xFF5C6B8C))),
                   Text(
                     '${value.toStringAsFixed(0)}%',
                     style: const TextStyle(
-                      color: Colors.white,
+                      color: Color(0xFF0D1B3D),
                       fontWeight: FontWeight.w600,
                     ),
                   ),
@@ -221,8 +224,8 @@ class ProductivityScreen extends StatelessWidget {
                 child: LinearProgressIndicator(
                   value: normalized,
                   minHeight: 6,
-                  backgroundColor: Colors.white24,
-                  valueColor: const AlwaysStoppedAnimation(Colors.white),
+                  backgroundColor: Color(0xFF8DA6D8).withOpacity(0.2),
+                  valueColor: const AlwaysStoppedAnimation(Color(0xFF2E6BFF)),
                 ),
               ),
             ],
@@ -236,15 +239,15 @@ class ProductivityScreen extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
       decoration: BoxDecoration(
-        color: Colors.white.withOpacity(0.15),
+        color: Color(0xFFF0F4FF),
         borderRadius: BorderRadius.circular(999),
       ),
       child: Row(
         mainAxisSize: MainAxisSize.min,
         children: [
-          Icon(icon, color: Colors.white, size: 16),
+          Icon(icon, color: Color(0xFF2E6BFF), size: 16),
           const SizedBox(width: 6),
-          Text(label, style: const TextStyle(color: Colors.white)),
+          Text(label, style: const TextStyle(color: Color(0xFF0D1B3D))),
         ],
       ),
     );

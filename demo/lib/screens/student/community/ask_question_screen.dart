@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:demo/services/firestore_service.dart';
 import 'package:demo/services/moderation_service.dart';
+import 'package:demo/services/student_chatbot_service.dart';
 import 'package:demo/models/tag.dart';
+import 'package:demo/models/question.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:demo/widgets/ui/cc_button.dart';
 import 'package:demo/widgets/ui/cc_card.dart';
@@ -96,7 +98,7 @@ class _AskQuestionScreenState extends State<AskQuestionScreen> {
 
     // Content approved, post the question
     try {
-      await _firestoreService.addQuestion(
+      final question = await _firestoreService.addQuestion(
         userId: _currentUserId,
         userName: _userName,
         userAvatar: _userAvatar,
@@ -104,6 +106,9 @@ class _AskQuestionScreenState extends State<AskQuestionScreen> {
         description: _descriptionController.text,
         tags: _selectedTags,
       );
+
+      // Fire and forget so the user is not blocked if AI is slow.
+      _postAutomaticAiAnswer(question);
 
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
@@ -117,6 +122,34 @@ class _AskQuestionScreenState extends State<AskQuestionScreen> {
           context,
         ).showSnackBar(SnackBar(content: Text('Error posting question: $e')));
       }
+    }
+  }
+
+  Future<void> _postAutomaticAiAnswer(Question question) async {
+    try {
+      final aiReply = await StudentChatbotService.sendMessage(
+        message:
+            'A student posted this community question. Write one direct, useful answer with short steps. '
+            'If details are missing, include a brief clarifying suggestion.\n\n'
+            'Title: ${question.title}\n'
+            'Description: ${question.description}',
+        studentName: _userName,
+      );
+
+      final content = aiReply.trim();
+      if (content.isEmpty) {
+        return;
+      }
+
+      await _firestoreService.addSystemAnswer(
+        questionId: question.id,
+        userId: 'classconnect_ai_assistant',
+        userName: 'ClassConnect AI',
+        userAvatar: '🤖',
+        content: content,
+      );
+    } catch (_) {
+      // Non-blocking: question is already posted successfully.
     }
   }
 

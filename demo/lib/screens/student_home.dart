@@ -160,7 +160,7 @@ class _StudentHomeState extends State<StudentHome> {
               icon: const Icon(Icons.more_vert, color: Color(0xFF0D1B3D)),
               onSelected: (value) {
                 if (value == 'join') {
-                  _showJoinClassDialog();
+                  Future<void>.microtask(_showJoinClassDialog);
                 }
               },
               itemBuilder: (context) => const [

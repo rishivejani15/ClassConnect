@@ -18,9 +18,9 @@ class AttendanceMarkingScreen extends StatefulWidget {
 class _AttendanceMarkingScreenState extends State<AttendanceMarkingScreen> {
   final AttendanceService _attendanceService = AttendanceService();
   final FirebaseFirestore _db = FirebaseFirestore.instance;
-  
-  final Color _themeColor = const Color(0xFF0F1C3F);
-  final Color _cardColor = const Color(0xFF1E2E52);
+
+  final Color _themeColor = const Color(0xFFF4F8FF);
+  final Color _cardColor = Colors.white;
 
   /// Students marked PRESENT
   final Set<String> _presentStudentIds = {};
@@ -112,10 +112,13 @@ class _AttendanceMarkingScreenState extends State<AttendanceMarkingScreen> {
       appBar: AppBar(
         title: const Text(
           'Mark Attendance',
-          style: TextStyle(fontWeight: FontWeight.bold, color: Colors.white),
+          style: TextStyle(
+            fontWeight: FontWeight.bold,
+            color: Color(0xFF0D1B3D),
+          ),
         ),
         backgroundColor: _themeColor,
-        iconTheme: const IconThemeData(color: Colors.white),
+        iconTheme: const IconThemeData(color: Color(0xFF0D1B3D)),
         elevation: 0,
         centerTitle: true,
         actions: [
@@ -123,17 +126,25 @@ class _AttendanceMarkingScreenState extends State<AttendanceMarkingScreen> {
             Padding(
               padding: const EdgeInsets.only(right: 16),
               child: Container(
-                padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 10,
+                  vertical: 4,
+                ),
                 decoration: BoxDecoration(
-                  color: Colors.white.withOpacity(0.1),
+                  color: const Color(0xFF2E6BFF).withOpacity(0.08),
                   borderRadius: BorderRadius.circular(20),
-                  border: Border.all(color: Colors.white24),
+                  border: Border.all(
+                    color: const Color(0xFF2E6BFF).withOpacity(0.15),
+                  ),
                 ),
                 child: const Row(
                   children: [
-                    Icon(Icons.lock, color: Colors.white70, size: 16),
+                    Icon(Icons.lock, color: Color(0xFF2E6BFF), size: 16),
                     SizedBox(width: 4),
-                    Text("Locked", style: TextStyle(color: Colors.white70, fontSize: 12)),
+                    Text(
+                      "Locked",
+                      style: TextStyle(color: Color(0xFF0D1B3D), fontSize: 12),
+                    ),
                   ],
                 ),
               ),
@@ -151,13 +162,13 @@ class _AttendanceMarkingScreenState extends State<AttendanceMarkingScreen> {
               _todayLabel,
               textAlign: TextAlign.center,
               style: const TextStyle(
-                color: Colors.white70,
+                color: Color(0xFF5C6B8C),
                 fontSize: 16,
                 fontWeight: FontWeight.w600,
               ),
             ),
           ),
-          
+
           Expanded(
             child: SingleChildScrollView(
               padding: const EdgeInsets.symmetric(horizontal: 16),
@@ -165,15 +176,24 @@ class _AttendanceMarkingScreenState extends State<AttendanceMarkingScreen> {
                 children: [
                   _infoBanner(),
                   const SizedBox(height: 16),
-                   StreamBuilder<QuerySnapshot>(
+                  StreamBuilder<QuerySnapshot>(
                     stream: _studentsStream(),
                     builder: (context, snapshot) {
                       if (snapshot.connectionState == ConnectionState.waiting) {
-                        return const Center(child: CircularProgressIndicator(color: Colors.white));
+                        return const Center(
+                          child: CircularProgressIndicator(
+                            color: Color(0xFF2E6BFF),
+                          ),
+                        );
                       }
 
                       if (!snapshot.hasData || snapshot.data!.docs.isEmpty) {
-                        return const Center(child: Text('No students found', style: TextStyle(color: Colors.white54)));
+                        return const Center(
+                          child: Text(
+                            'No students found',
+                            style: TextStyle(color: Color(0xFF5C6B8C)),
+                          ),
+                        );
                       }
 
                       final students = snapshot.data!.docs;
@@ -219,12 +239,14 @@ class _AttendanceMarkingScreenState extends State<AttendanceMarkingScreen> {
       width: double.infinity,
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: isLocked 
-            ? Colors.white.withOpacity(0.05) 
-            : const Color(0xFF3B82F6).withOpacity(0.1),
+        color: isLocked
+            ? Colors.white
+            : const Color(0xFF3B82F6).withOpacity(0.08),
         borderRadius: BorderRadius.circular(12),
         border: Border.all(
-          color: isLocked ? Colors.white12 : const Color(0xFF3B82F6).withOpacity(0.3),
+          color: isLocked
+              ? const Color(0x1A2E6BFF)
+              : const Color(0xFF3B82F6).withOpacity(0.22),
           width: 1,
         ),
       ),
@@ -232,7 +254,7 @@ class _AttendanceMarkingScreenState extends State<AttendanceMarkingScreen> {
         children: [
           Icon(
             isLocked ? Icons.lock_outline : Icons.info_outline,
-            color: isLocked ? Colors.white54 : const Color(0xFF60A5FA),
+            color: isLocked ? const Color(0xFF5C6B8C) : const Color(0xFF2E6BFF),
           ),
           const SizedBox(width: 12),
           Expanded(
@@ -242,7 +264,9 @@ class _AttendanceMarkingScreenState extends State<AttendanceMarkingScreen> {
                   : 'Mark for today only.\nUntick to mark ABSENT.',
               style: TextStyle(
                 fontSize: 14,
-                color: isLocked ? Colors.white70 : Colors.blue[100],
+                color: isLocked
+                    ? const Color(0xFF5C6B8C)
+                    : const Color(0xFF2E6BFF),
                 height: 1.4,
               ),
             ),
@@ -255,17 +279,23 @@ class _AttendanceMarkingScreenState extends State<AttendanceMarkingScreen> {
   /// Student Card Item
   Widget _buildStudentCard(String studentId) {
     return FutureBuilder<DocumentSnapshot>(
-      future: FirebaseFirestore.instance.collection('students').doc(studentId).get(),
+      future: FirebaseFirestore.instance
+          .collection('students')
+          .doc(studentId)
+          .get(),
       builder: (context, snap) {
         if (!snap.hasData || !snap.data!.exists) {
-           // Minimal placeholder
-           return Container(height: 70, margin: const EdgeInsets.only(bottom: 8)); 
+          // Minimal placeholder
+          return Container(
+            height: 70,
+            margin: const EdgeInsets.only(bottom: 8),
+          );
         }
 
         final data = snap.data!.data() as Map<String, dynamic>;
         final String name = data['name'] ?? 'Student';
         final String? photoURL = data['photoURL'];
-        
+
         final bool isPresent = _presentStudentIds.contains(studentId);
 
         return Container(
@@ -275,25 +305,33 @@ class _AttendanceMarkingScreenState extends State<AttendanceMarkingScreen> {
             borderRadius: BorderRadius.circular(12),
             boxShadow: [
               BoxShadow(
-                color: Colors.black.withOpacity(0.1),
+                color: const Color(0xFF2E6BFF).withOpacity(0.06),
                 blurRadius: 4,
                 offset: const Offset(0, 2),
               ),
             ],
             border: Border.all(
-              color: isPresent ? Colors.white.withOpacity(0.05) : Colors.red.withOpacity(0.5),
+              color: isPresent
+                  ? const Color(0x1A2E6BFF)
+                  : Colors.red.withOpacity(0.3),
               width: 1.5,
             ),
           ),
           child: ListTile(
-            contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
+            contentPadding: const EdgeInsets.symmetric(
+              horizontal: 16,
+              vertical: 4,
+            ),
             leading: CircleAvatar(
-              backgroundColor: Colors.white.withOpacity(0.1),
+              backgroundColor: const Color(0xFF2E6BFF).withOpacity(0.08),
               backgroundImage: photoURL != null ? NetworkImage(photoURL) : null,
               child: photoURL == null
                   ? Text(
                       name.isNotEmpty ? name[0].toUpperCase() : '?',
-                      style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
+                      style: const TextStyle(
+                        color: Color(0xFF0D1B3D),
+                        fontWeight: FontWeight.bold,
+                      ),
                     )
                   : null,
             ),
@@ -301,9 +339,11 @@ class _AttendanceMarkingScreenState extends State<AttendanceMarkingScreen> {
               name,
               style: TextStyle(
                 fontWeight: FontWeight.w600,
-                color: Colors.white,
-                decoration: !isPresent && !_alreadySubmitted ? TextDecoration.lineThrough : null,
-                decorationColor: Colors.white54,
+                color: const Color(0xFF0D1B3D),
+                decoration: !isPresent && !_alreadySubmitted
+                    ? TextDecoration.lineThrough
+                    : null,
+                decorationColor: const Color(0xFF5C6B8C),
               ),
             ),
             trailing: Transform.scale(
@@ -311,8 +351,13 @@ class _AttendanceMarkingScreenState extends State<AttendanceMarkingScreen> {
               child: Checkbox(
                 activeColor: const Color(0xFF3B82F6),
                 checkColor: Colors.white,
-                side: BorderSide(color: Colors.white.withOpacity(0.5), width: 2),
-                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(4)),
+                side: BorderSide(
+                  color: Colors.white.withOpacity(0.5),
+                  width: 2,
+                ),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(4),
+                ),
                 value: isPresent,
                 onChanged: _alreadySubmitted
                     ? null
@@ -335,7 +380,7 @@ class _AttendanceMarkingScreenState extends State<AttendanceMarkingScreen> {
         child: ElevatedButton(
           style: ElevatedButton.styleFrom(
             backgroundColor: const Color(0xFF3B82F6),
-            disabledBackgroundColor: Colors.white12,
+            disabledBackgroundColor: const Color(0xFFE3ECFF),
             shape: RoundedRectangleBorder(
               borderRadius: BorderRadius.circular(16),
             ),
@@ -357,14 +402,19 @@ class _AttendanceMarkingScreenState extends State<AttendanceMarkingScreen> {
               ? const SizedBox(
                   height: 24,
                   width: 24,
-                  child: CircularProgressIndicator(color: Colors.white, strokeWidth: 2),
+                  child: CircularProgressIndicator(
+                    color: Colors.white,
+                    strokeWidth: 2,
+                  ),
                 )
               : Text(
                   _alreadySubmitted ? 'Submitted' : 'Save Attendance',
                   style: TextStyle(
                     fontSize: 18,
                     fontWeight: FontWeight.bold,
-                    color: _alreadySubmitted ? Colors.white38 : Colors.white,
+                    color: _alreadySubmitted
+                        ? const Color(0xFF8DA6D8)
+                        : Colors.white,
                   ),
                 ),
         ),

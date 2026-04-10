@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
+import 'dart:io';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/services.dart';
+import 'package:file_picker/file_picker.dart';
 import 'package:demo/services/class_service.dart';
 import 'package:share_plus/share_plus.dart';
 import 'package:demo/widgets/ui/cc_button.dart';
@@ -9,6 +11,8 @@ import 'package:demo/widgets/ui/cc_card.dart';
 import 'package:demo/widgets/ui/cc_dialog.dart';
 import 'package:demo/widgets/ui/cc_section_header.dart';
 import 'package:demo/widgets/ui/cc_text_field.dart';
+
+enum EnrollmentMode { automatic, manual }
 
 class CreateClassPage extends StatefulWidget {
   const CreateClassPage({super.key});
@@ -30,6 +34,11 @@ class _CreateClassPageState extends State<CreateClassPage> {
 
   String? _collegeName;
   String? _teacherDepartment;
+  EnrollmentMode _enrollmentMode = EnrollmentMode.manual;
+  bool _pblEnabled = true;
+  bool _studentCanPost = false;
+  File? _syllabusFile;
+  String? _syllabusFileName;
 
   @override
   void initState() {
@@ -92,7 +101,7 @@ class _CreateClassPageState extends State<CreateClassPage> {
       // -1 => school, otherwise => college
       final String targetStudentType = (semester == -1) ? 'school' : 'college';
 
-      final classCode = await _classService.createClass(
+      final result = await _classService.createClass(
         className: _classNameController.text.trim(),
         subject: _subjectController.text.trim(),
         description: _descriptionController.text.trim(),
@@ -100,16 +109,56 @@ class _CreateClassPageState extends State<CreateClassPage> {
         studentDiv: _divisionController.text.trim(),
         collegeSchoolName: _collegeName!,
         studentType: targetStudentType,
+        autoAddStudents: _enrollmentMode == EnrollmentMode.automatic,
+        pblEnabled: _pblEnabled,
+        studentCanPost: _studentCanPost,
+        syllabusFile: _syllabusFile,
       );
 
       if (!mounted) return;
-      _showClassCodeDialog(classCode);
+      if (_enrollmentMode == EnrollmentMode.manual) {
+        _showClassCodeDialog(result.classCode);
+      } else {
+        final enrolled = result.autoEnrolledCount;
+        final syllabusMsg = _syllabusFile == null
+            ? ''
+            : (result.syllabusProcessed
+                  ? ' Syllabus extracted successfully.'
+                  : ' Syllabus was uploaded but extraction failed.');
+
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(
+              'Class created. Auto-added $enrolled student${enrolled == 1 ? '' : 's'}.$syllabusMsg',
+            ),
+          ),
+        );
+        Navigator.pop(context);
+      }
     } catch (e) {
       if (!mounted) return;
       ScaffoldMessenger.of(
         context,
       ).showSnackBar(SnackBar(content: Text(e.toString())));
     }
+  }
+
+  Future<void> _pickSyllabusFile() async {
+    final result = await FilePicker.platform.pickFiles(
+      type: FileType.custom,
+      allowedExtensions: ['pdf', 'doc', 'docx', 'jpg', 'jpeg', 'png', 'webp'],
+    );
+
+    if (result == null ||
+        result.files.isEmpty ||
+        result.files.first.path == null) {
+      return;
+    }
+
+    setState(() {
+      _syllabusFile = File(result.files.first.path!);
+      _syllabusFileName = result.files.first.name;
+    });
   }
 
   void _showClassCodeDialog(String classCode) {
@@ -203,19 +252,21 @@ class _CreateClassPageState extends State<CreateClassPage> {
 
   @override
   Widget build(BuildContext context) {
+    final colorScheme = Theme.of(context).colorScheme;
+
     return Scaffold(
       backgroundColor: const Color(0xFFF4F8FF),
       appBar: AppBar(
-        title: const Text(
+        title: Text(
           'Create New Class',
-          style: TextStyle(color: Colors.white),
+          style: TextStyle(color: colorScheme.onSurface),
         ),
         backgroundColor: const Color(0xFFF4F8FF),
         elevation: 0,
         leading: IconButton(
-          icon: const Icon(
+          icon: Icon(
             Icons.arrow_back_ios_new_rounded,
-            color: Colors.white,
+            color: colorScheme.onSurface,
           ),
           onPressed: () {
             Navigator.pop(context);
@@ -229,12 +280,12 @@ class _CreateClassPageState extends State<CreateClassPage> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              const Text(
+              Text(
                 'Class Details',
                 style: TextStyle(
                   fontSize: 24,
                   fontWeight: FontWeight.bold,
-                  color: Colors.white,
+                  color: colorScheme.onSurface,
                 ),
               ),
               const SizedBox(height: 20),
@@ -260,8 +311,8 @@ class _CreateClassPageState extends State<CreateClassPage> {
                         Expanded(
                           child: Text(
                             _collegeName ?? 'Loading...',
-                            style: const TextStyle(
-                              color: Colors.white,
+                            style: TextStyle(
+                              color: colorScheme.onSurface,
                               fontSize: 14,
                               fontWeight: FontWeight.w500,
                             ),
@@ -281,8 +332,8 @@ class _CreateClassPageState extends State<CreateClassPage> {
                         Expanded(
                           child: Text(
                             _teacherDepartment ?? 'Loading...',
-                            style: const TextStyle(
-                              color: Colors.white,
+                            style: TextStyle(
+                              color: colorScheme.onSurface,
                               fontSize: 14,
                               fontWeight: FontWeight.w500,
                             ),
@@ -295,6 +346,147 @@ class _CreateClassPageState extends State<CreateClassPage> {
               ),
 
               const SizedBox(height: 24),
+
+              CcCard(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    const CcSectionHeader(
+                      title: 'Class Options',
+                      subtitle: 'Configure enrollment and access controls',
+                    ),
+                    const SizedBox(height: 10),
+                    const Text(
+                      'Student Enrollment Mode',
+                      style: TextStyle(fontWeight: FontWeight.w600),
+                    ),
+                    RadioListTile<EnrollmentMode>(
+                      contentPadding: EdgeInsets.zero,
+                      title: const Text('Automatically add matching students'),
+                      value: EnrollmentMode.automatic,
+                      groupValue: _enrollmentMode,
+                      onChanged: (value) {
+                        if (value == null) return;
+                        setState(() => _enrollmentMode = value);
+                      },
+                    ),
+                    RadioListTile<EnrollmentMode>(
+                      contentPadding: EdgeInsets.zero,
+                      title: const Text('Manually add using class code'),
+                      value: EnrollmentMode.manual,
+                      groupValue: _enrollmentMode,
+                      onChanged: (value) {
+                        if (value == null) return;
+                        setState(() => _enrollmentMode = value);
+                      },
+                    ),
+                    const SizedBox(height: 6),
+                    SwitchListTile(
+                      contentPadding: EdgeInsets.zero,
+                      title: const Text('Enable PBL for this class'),
+                      subtitle: const Text('Controls PBL section visibility'),
+                      value: _pblEnabled,
+                      onChanged: (value) {
+                        setState(() => _pblEnabled = value);
+                      },
+                    ),
+                    SwitchListTile(
+                      contentPadding: EdgeInsets.zero,
+                      title: const Text(
+                        'Allow students to post in class posts',
+                      ),
+                      subtitle: const Text(
+                        'Students can publish text posts in Posts tab',
+                      ),
+                      value: _studentCanPost,
+                      onChanged: (value) {
+                        setState(() => _studentCanPost = value);
+                      },
+                    ),
+                  ],
+                ),
+              ),
+
+              const SizedBox(height: 20),
+
+              CcCard(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    const CcSectionHeader(
+                      title: 'Optional Syllabus',
+                      subtitle:
+                          'Upload image/PDF to auto-extract chapters and concepts',
+                    ),
+                    const SizedBox(height: 12),
+                    LayoutBuilder(
+                      builder: (context, constraints) {
+                        final compact = constraints.maxWidth < 380;
+
+                        if (compact) {
+                          return Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(
+                                _syllabusFileName ?? 'No file selected',
+                                maxLines: 1,
+                                overflow: TextOverflow.ellipsis,
+                                style: TextStyle(
+                                  color: _syllabusFileName == null
+                                      ? colorScheme.onSurfaceVariant
+                                      : colorScheme.onSurface,
+                                ),
+                              ),
+                              const SizedBox(height: 10),
+                              CcButton(
+                                label: 'Choose File',
+                                variant: CcButtonVariant.secondary,
+                                icon: const Icon(
+                                  Icons.upload_file_rounded,
+                                  size: 18,
+                                ),
+                                onPressed: _pickSyllabusFile,
+                              ),
+                            ],
+                          );
+                        }
+
+                        return Row(
+                          children: [
+                            Expanded(
+                              child: Text(
+                                _syllabusFileName ?? 'No file selected',
+                                maxLines: 1,
+                                overflow: TextOverflow.ellipsis,
+                                style: TextStyle(
+                                  color: _syllabusFileName == null
+                                      ? colorScheme.onSurfaceVariant
+                                      : colorScheme.onSurface,
+                                ),
+                              ),
+                            ),
+                            const SizedBox(width: 10),
+                            SizedBox(
+                              width: 140,
+                              child: CcButton(
+                                label: 'Choose File',
+                                variant: CcButtonVariant.secondary,
+                                icon: const Icon(
+                                  Icons.upload_file_rounded,
+                                  size: 18,
+                                ),
+                                onPressed: _pickSyllabusFile,
+                              ),
+                            ),
+                          ],
+                        );
+                      },
+                    ),
+                  ],
+                ),
+              ),
+
+              const SizedBox(height: 20),
 
               CcTextField(
                 controller: _classNameController,

@@ -1,103 +1,55 @@
 import 'dart:convert';
 import 'dart:io';
 import 'package:flutter/foundation.dart';
-import 'package:google_generative_ai/google_generative_ai.dart';
+import 'package:http/http.dart' as http;
 
-import 'package:syncfusion_flutter_pdf/pdf.dart' as sfpdf;
 import '../models/pbl_project.dart';
 
 class GeminiService {
-  static const String apiKey = 'GeminiService_API_KEY';
+  static const String _baseUrl = 'https://samyak000-amep.hf.space';
+  static const String _chaptersConceptsUrl =
+      '$_baseUrl/api/v1/pbl/chapters-concepts';
+  static const String _scenariosUrl = '$_baseUrl/api/v1/pbl/scenarios';
+  static const String _projectDetailsUrl =
+      '$_baseUrl/api/v1/pbl/project-details';
+  static const String _extractPdfUrl = '$_baseUrl/api/v1/pbl/extract/pdf';
+  static const String _extractDocUrl = '$_baseUrl/api/v1/pbl/extract/doc';
+  static const String _extractImageUrl = '$_baseUrl/api/v1/pbl/extract/image';
 
-  static final _conceptModel = GenerativeModel(
-    model: 'gemini-2.5-flash-lite',
-    apiKey: apiKey,
-  );
-
-  static final _pblModel = GenerativeModel(
-    model: 'gemini-2.5-flash-lite',
-    apiKey: apiKey,
-  );
-
-  /// STEP 1: Extract main concepts (Legacy - keeping for fallback if needed, or remove if unused)
+  /// STEP 1: Extract main concepts
   static Future<List<String>> extractConcepts(String syllabusText) async {
-    final prompt =
-        r'''
-You are an expert teacher.
-
-From the syllabus text below, extract ONLY the main academic concepts.
-Return STRICT JSON in this format:
-{
-  "concepts": ["Concept 1", "Concept 2"]
-}
-
-Syllabus:
-''' +
-        syllabusText;
-
-    final response = await _conceptModel.generateContent([
-      Content.text(prompt),
-    ]);
-
-    try {
-      final Map<String, dynamic> json = jsonDecode(
-        _clean(response.text ?? '{}'),
-      );
-      final list = json['concepts'] ?? [];
-      return (list as List).map((item) => _toStringValue(item)).toList();
-    } catch (e) {
-      debugPrint('Concept extraction error: $e');
-      return [];
+    final chapters = await extractChaptersAndConcepts(syllabusText);
+    final concepts = <String>[];
+    for (final chapterConcepts in chapters.values) {
+      for (final concept in chapterConcepts) {
+        if (concept.isNotEmpty && !concepts.contains(concept)) {
+          concepts.add(concept);
+        }
+      }
     }
+    return concepts;
   }
 
   /// STEP 1 (New): Extract Chapters and Concepts
   static Future<Map<String, List<String>>> extractChaptersAndConcepts(
     String syllabusText,
   ) async {
-    final prompt =
-        r'''
-You are an expert curriculum designer.
-
-From the syllabus text below, extract the Chapter Names and all the specific academic concepts for each chapter.
-Return STRICT JSON in this format:
-{
-  "chapters": [
-    {
-      "name": "Chapter 1 Title",
-      "concepts": ["Concept 1", "Concept 2", "Concept 3"]
-    },
-    {
-      "name": "Chapter 2 Title",
-      "concepts": ["Concept A", "Concept B"]
-    }
-  ]
-}
-
-Syllabus:
-''' +
-        syllabusText;
-
-    final response = await _conceptModel.generateContent([
-      Content.text(prompt),
-    ]);
-
     try {
-      final Map<String, dynamic> json = jsonDecode(
-        _clean(response.text ?? '{}'),
-      );
-      final List<dynamic> chapters = json['chapters'] ?? [];
+      final body = await _postJson(_chaptersConceptsUrl, {
+        'syllabusText': syllabusText,
+      });
+      final List<dynamic> chapters = body['chapters'] ?? [];
 
       final Map<String, List<String>> result = {};
-
-      for (var chapter in chapters) {
+      for (final chapter in chapters) {
         if (chapter is Map) {
           final String name = _toStringValue(chapter['name']);
           final List<dynamic> conceptsJson = chapter['concepts'] ?? [];
           final List<String> concepts = conceptsJson
               .map((c) => _toStringValue(c))
+              .where((c) => c.isNotEmpty)
               .toList();
-          if (name.isNotEmpty && concepts.isNotEmpty) {
+          if (name.isNotEmpty) {
             result[name] = concepts;
           }
         }
@@ -113,57 +65,17 @@ Syllabus:
   static Future<List<Map<String, dynamic>>> generateProjectScenarios(
     List<String> concepts,
   ) async {
-    final prompt =
-        r'''
-    You are an expert PBL (Project-Based Learning) designer.
-    
-    The teacher wants to teach the following concepts:
-    ''' +
-        concepts.join(', ') +
-        r'''
-
-    Generate 3 DISTINCT, ENGAGING problem scenarios that would require students to learn and apply these concepts to solve.
-    Encourage a MULTIDISCIPLINARY approach (connecting with Technology).
-    
-    For each scenario, provide:
-    1. A catchy Title.
-    2. A compelling Problem Statement (The Driving Question).
-    3. A brief explanation of how it triggers learning of the concepts.
-    4. 10 Mini Project Titles and brief descriptions related to this problem scenario that students can choose.
-
-    Return STRICT JSON in this format:
-    {
-      "scenarios": [
-        {
-          "title": "...",
-          "problemStatement": "...",
-          "educationalValue": "...",
-          "miniProjects": [
-            {"title": "Mini Project 1", "description": "Brief description..."},
-            ... (10 items)
-          ]
-        }
-      ]
-    }
-    ''';
-
-    final response = await _pblModel.generateContent([Content.text(prompt)]);
-
     try {
-      final Map<String, dynamic> json = jsonDecode(
-        _clean(response.text ?? '{}'),
-      );
+      final json = await _postJson(_scenariosUrl, {'concepts': concepts});
       final List<dynamic> list = json['scenarios'] ?? [];
       return list.map((e) {
         if (e is Map) {
-          // Parse basic string fields
           final map = <String, dynamic>{
             'title': _toStringValue(e['title']),
             'problemStatement': _toStringValue(e['problemStatement']),
             'educationalValue': _toStringValue(e['educationalValue']),
           };
 
-          // Parse miniProjects
           final miniList = e['miniProjects'];
           if (miniList is List) {
             map['miniProjects'] = miniList.map((m) {
@@ -195,100 +107,141 @@ Syllabus:
     String problemStatement,
     List<String> concepts,
   ) async {
-    final prompt =
-        r'''
-    Create a complete, detailed Project-Based Learning (PBL) plan.
+    try {
+      final json = await _postJson(_projectDetailsUrl, {
+        'title': title,
+        'problemStatement': problemStatement,
+        'concepts': concepts,
+      });
 
-    Title: ''' +
-        title +
-        r'''
-    Problem Statement: ''' +
-        problemStatement +
-        r'''
-    Core Concepts: ''' +
-        concepts.join(', ') +
-        r'''
+      final learningObjectives = (json['learningObjectives'] ?? [])
+          .map((e) => _toStringValue(e))
+          .toList()
+          .cast<String>();
 
-    Requirements:
-    1. Objectives: clearly stated learning goals.
-    2. Milestones: sequential steps for the project lifecycle.
-    3. Rubric: must be MULTIDISCIPLINARY and MEASURABLE.
-       - Include specific criteria for 'Collaboration', 'Communication', and 'Critical Thinking'.
-       - For each criterion, provide a brief descriptor of what 'Exemplary' performance looks like.
-    4. Mini Projects: Generate 10 DISTINCT mini-project titles with small descriptions related to this PBL.
-       - These should be smaller tasks that students can choose from to demonstrate understanding.
-    
-    Return STRICT JSON ONLY:
-    {
-      "learningObjectives": ["Objective 1", "Objective 2"],
-      "milestones": ["Milestone 1", "Milestone 2"],
-      "rubric": [
-        {
-          "criteria": "Collaboration", 
-          "weight": 20, 
-          "descriptor": "Student actively facilitates group consensus and values all contributions."
-        }
-      ],
-      "miniProjects": [
-        {
-          "title": "Mini Project 1",
-          "description": "Description of mini project 1"
-        }
-      ]
-    }
-    ''';
+      final milestones = (json['milestones'] ?? [])
+          .map((e) => _toStringValue(e))
+          .toList()
+          .cast<String>();
 
-    final response = await _pblModel.generateContent([Content.text(prompt)]);
-
-    final Map<String, dynamic> json = jsonDecode(_clean(response.text ?? '{}'));
-
-    // Safely parse learning objectives and milestones to strings
-    final learningObjectives = (json['learningObjectives'] ?? [])
-        .map((e) => _toStringValue(e))
-        .toList()
-        .cast<String>();
-
-    final milestones = (json['milestones'] ?? [])
-        .map((e) => _toStringValue(e))
-        .toList()
-        .cast<String>();
-
-    // Safely parse rubric entries into maps
-    final List<Map<String, dynamic>> rubricList = [];
-    if (json['rubric'] is List) {
-      for (final item in json['rubric']) {
-        if (item is Map) {
-          rubricList.add(Map<String, dynamic>.from(item));
+      final List<Map<String, dynamic>> rubricList = [];
+      if (json['rubric'] is List) {
+        for (final item in json['rubric']) {
+          if (item is Map) {
+            rubricList.add(Map<String, dynamic>.from(item));
+          }
         }
       }
-    }
 
-    // Safely parse mini projects
-    final List<Map<String, String>> miniProjectsList = [];
-    if (json['miniProjects'] is List) {
-      for (final item in json['miniProjects']) {
-        if (item is Map) {
-          miniProjectsList.add(
-            Map<String, String>.from(
-              item.map((k, v) => MapEntry(k.toString(), _toStringValue(v))),
-            ),
-          );
+      final List<Map<String, String>> miniProjectsList = [];
+      if (json['miniProjects'] is List) {
+        for (final item in json['miniProjects']) {
+          if (item is Map) {
+            miniProjectsList.add(
+              Map<String, String>.from(
+                item.map((k, v) => MapEntry(k.toString(), _toStringValue(v))),
+              ),
+            );
+          }
         }
       }
-    }
 
-    return PblProject(
-      title: title,
-      problemStatement: problemStatement,
-      learningObjectives: learningObjectives,
-      milestones: milestones,
-      rubric: rubricList,
-      miniProjects: miniProjectsList,
-    );
+      return PblProject(
+        title: title,
+        problemStatement: problemStatement,
+        learningObjectives: learningObjectives,
+        milestones: milestones,
+        rubric: rubricList,
+        miniProjects: miniProjectsList,
+      );
+    } catch (e) {
+      debugPrint('Project details generation error: $e');
+      return PblProject(
+        title: title,
+        problemStatement: problemStatement,
+        learningObjectives: const [],
+        milestones: const [],
+        rubric: const [],
+        miniProjects: const [],
+      );
+    }
   }
 
-  static String _clean(String text) {
-    return text.replaceAll('```json', '').replaceAll('```', '').trim();
+  /// Extract text from PDF file
+  static Future<String> extractTextFromPdf(File file) async {
+    try {
+      final bytes = await file.readAsBytes();
+      final body = await _postJson(_extractPdfUrl, {
+        'filename': _fileName(file),
+        'contentBase64': base64Encode(bytes),
+      });
+      return _toStringValue(body['text']).trim();
+    } catch (e) {
+      debugPrint('PDF extraction error: $e');
+      return '';
+    }
+  }
+
+  /// Extract text from image
+  static Future<String> extractTextFromImage(File file) async {
+    try {
+      final bytes = await file.readAsBytes();
+      final body = await _postJson(_extractImageUrl, {
+        'filename': _fileName(file),
+        'mimeType': _imageMimeType(file),
+        'contentBase64': base64Encode(bytes),
+      });
+      return _toStringValue(body['text']).trim();
+    } catch (e) {
+      debugPrint('Image extraction error: $e');
+      return '';
+    }
+  }
+
+  /// Extract text from DOC/DOCX file
+  static Future<String> extractTextFromDoc(File file) async {
+    try {
+      final bytes = await file.readAsBytes();
+      final body = await _postJson(_extractDocUrl, {
+        'filename': _fileName(file),
+        'contentBase64': base64Encode(bytes),
+      });
+      return _toStringValue(body['text']).trim();
+    } catch (e) {
+      debugPrint('DOC extraction error: $e');
+      return '';
+    }
+  }
+
+  static Future<Map<String, dynamic>> _postJson(
+    String url,
+    Map<String, dynamic> payload,
+  ) async {
+    final response = await http.post(
+      Uri.parse(url),
+      headers: {'Content-Type': 'application/json'},
+      body: jsonEncode(payload),
+    );
+
+    if (response.statusCode != 200) {
+      throw Exception('API failed with ${response.statusCode}');
+    }
+
+    return Map<String, dynamic>.from(jsonDecode(response.body));
+  }
+
+  static String _fileName(File file) {
+    final path = file.path;
+    final parts = path.split(RegExp(r'[\\/]'));
+    return parts.isNotEmpty ? parts.last : 'file';
+  }
+
+  static String _imageMimeType(File file) {
+    final lower = file.path.toLowerCase();
+    if (lower.endsWith('.png')) return 'image/png';
+    if (lower.endsWith('.webp')) return 'image/webp';
+    if (lower.endsWith('.jpg') || lower.endsWith('.jpeg')) return 'image/jpeg';
+    return 'image/jpeg';
   }
 
   /// Helper to safely convert any value to String
@@ -299,52 +252,5 @@ Syllabus:
     if (value is Map) return value.toString();
     if (value is List) return value.toString();
     return value?.toString() ?? '';
-  }
-
-  /// Extract text from PDF file
-  static Future<String> extractTextFromPdf(File file) async {
-    try {
-      final pdf = sfpdf.PdfDocument(inputBytes: await file.readAsBytes());
-      final String text = sfpdf.PdfTextExtractor(pdf).extractText();
-      pdf.dispose();
-      return text.trim();
-    } catch (e) {
-      debugPrint('PDF extraction error: $e');
-      return '';
-    }
-  }
-
-  /// Extract text from image using Gemini Vision
-  static Future<String> extractTextFromImage(File file) async {
-    try {
-      final bytes = await file.readAsBytes();
-      String mimeType = 'image/jpeg';
-      if (file.path.toLowerCase().endsWith('.png')) mimeType = 'image/png';
-
-      final content = [
-        Content.multi([
-          TextPart('Extract all text from this image.'),
-          DataPart(mimeType, bytes),
-        ]),
-      ];
-
-      final response = await _conceptModel.generateContent(content);
-      return response.text ?? '';
-    } catch (e) {
-      debugPrint('Gemini Image extraction error: $e');
-      return '';
-    }
-  }
-
-  /// Extract text from DOC/DOCX file
-  static Future<String> extractTextFromDoc(File file) async {
-    try {
-      // For DOCX files, we can use docx package or read as archive
-      // For now, returning placeholder - add docx package for full support
-      return 'Document content extraction requires additional setup';
-    } catch (e) {
-      debugPrint('DOC extraction error: $e');
-      return '';
-    }
   }
 }

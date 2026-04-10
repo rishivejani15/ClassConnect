@@ -1,9 +1,10 @@
 import 'dart:convert';
+import 'package:demo/config/groq_env.dart';
 import 'package:http/http.dart' as http;
 
 class GroqService {
-  static const String _apiKey = 'GroqService_API_KEY';
-  static const String _baseUrl = 'https://api.groq.com/openai/v1/chat/completions';
+  static const String _baseUrl =
+      'https://api.groq.com/openai/v1/chat/completions';
 
   /// Generates concept-aligned micro-steps for a mini project.
   /// Returns a list of steps, where each step is a Map with 'title' and 'description'.
@@ -13,7 +14,8 @@ class GroqService {
     required String subject,
   }) async {
     try {
-      final prompt = '''
+      final prompt =
+          '''
       You are an expert educational curriculum designer. 
       Create a step-by-step guide for a student to complete the following project:
       
@@ -38,13 +40,17 @@ class GroqService {
       final response = await http.post(
         Uri.parse(_baseUrl),
         headers: {
-          'Authorization': 'Bearer $_apiKey',
+          'Authorization': 'Bearer ${GroqEnv.apiKey}',
           'Content-Type': 'application/json',
         },
         body: jsonEncode({
           'model': 'llama-3.3-70b-versatile',
           'messages': [
-            {'role': 'system', 'content': 'You are a helpful educational assistant that outputs JSON only.'},
+            {
+              'role': 'system',
+              'content':
+                  'You are a helpful educational assistant that outputs JSON only.',
+            },
             {'role': 'user', 'content': prompt},
           ],
           'temperature': 0.3,
@@ -56,21 +62,31 @@ class GroqService {
         final content = data['choices'][0]['message']['content'];
 
         // Clean up markdown code blocks if present
-        final cleanedContent = content.replaceAll('```json', '').replaceAll('```', '').trim();
+        final cleanedContent = content
+            .replaceAll('```json', '')
+            .replaceAll('```', '')
+            .trim();
 
         final List<dynamic> jsonList = jsonDecode(cleanedContent);
 
-        return jsonList.map((item) => {
-          'title': item['title'].toString(),
-          'description': item['description'].toString(),
-        }).toList();
+        return jsonList
+            .map(
+              (item) => {
+                'title': item['title'].toString(),
+                'description': item['description'].toString(),
+              },
+            )
+            .toList();
       } else {
-        throw Exception('Failed to generate steps: ${response.statusCode} ${response.body}');
+        throw Exception(
+          'Failed to generate steps: ${response.statusCode} ${response.body}',
+        );
       }
     } catch (e) {
       throw Exception('Error calling Groq API: $e');
     }
   }
+
   /// Transcribes audio using Groq's Whisper model.
   static Future<String> _transcribeAudio(String url) async {
     try {
@@ -83,7 +99,7 @@ class GroqService {
         'POST',
         Uri.parse('https://api.groq.com/openai/v1/audio/transcriptions'),
       );
-      request.headers['Authorization'] = 'Bearer $_apiKey';
+      request.headers['Authorization'] = 'Bearer ${GroqEnv.apiKey}';
       request.fields['model'] = 'whisper-large-v3';
       request.files.add(
         http.MultipartFile.fromBytes(
@@ -110,7 +126,8 @@ class GroqService {
   /// Fetches text content from a URL (if text-based).
   static Future<String> _fetchFileContent(String url, String fileName) async {
     final lowerName = fileName.toLowerCase();
-    final isText = lowerName.endsWith('.dart') ||
+    final isText =
+        lowerName.endsWith('.dart') ||
         lowerName.endsWith('.txt') ||
         lowerName.endsWith('.md') ||
         lowerName.endsWith('.js') ||
@@ -118,14 +135,17 @@ class GroqService {
         lowerName.endsWith('.css') ||
         lowerName.endsWith('.json');
 
-    if (!isText) return "Non-text file (Image/PDF/Zip). Evaluate based on filename relevance only.";
+    if (!isText)
+      return "Non-text file (Image/PDF/Zip). Evaluate based on filename relevance only.";
 
     try {
       final response = await http.get(Uri.parse(url));
       if (response.statusCode == 200) {
         // Limit to 2000 chars to save context window
         final body = response.body;
-        return body.length > 2000 ? body.substring(0, 2000) + "...(truncated)" : body;
+        return body.length > 2000
+            ? body.substring(0, 2000) + "...(truncated)"
+            : body;
       }
       return "Failed to download file.";
     } catch (e) {
@@ -155,7 +175,10 @@ class GroqService {
         // File
         if (s['submission']?['fileUrl'] != null) {
           final fName = s['submission']['fileName'] ?? 'unknown';
-          fileContent = await _fetchFileContent(s['submission']['fileUrl'], fName);
+          fileContent = await _fetchFileContent(
+            s['submission']['fileUrl'],
+            fName,
+          );
         }
 
         detailedSubmissions.add({
@@ -167,7 +190,8 @@ class GroqService {
         });
       }
 
-      final prompt = '''
+      final prompt =
+          '''
       You are a strict academic evaluator. Evaluate the following PBL pair submission.
       
       Problem Statement: "$problemStatement"
@@ -201,16 +225,20 @@ class GroqService {
       final response = await http.post(
         Uri.parse(_baseUrl),
         headers: {
-          'Authorization': 'Bearer $_apiKey',
+          'Authorization': 'Bearer ${GroqEnv.apiKey}',
           'Content-Type': 'application/json',
         },
         body: jsonEncode({
           'model': 'llama-3.3-70b-versatile',
           'messages': [
-            {'role': 'system', 'content': 'You are a strict evaluator. Output JSON only.'},
+            {
+              'role': 'system',
+              'content': 'You are a strict evaluator. Output JSON only.',
+            },
             {'role': 'user', 'content': prompt},
           ],
-          'temperature': 0.2, // Lower temperature for more consistent/strict results
+          'temperature':
+              0.2, // Lower temperature for more consistent/strict results
         }),
       );
 
@@ -218,10 +246,15 @@ class GroqService {
         final data = jsonDecode(response.body);
         final content = data['choices'][0]['message']['content'];
 
-        final cleanedContent = content.replaceAll('```json', '').replaceAll('```', '').trim();
+        final cleanedContent = content
+            .replaceAll('```json', '')
+            .replaceAll('```', '')
+            .trim();
         return jsonDecode(cleanedContent);
       } else {
-        throw Exception('Failed to evaluate: ${response.statusCode} ${response.body}');
+        throw Exception(
+          'Failed to evaluate: ${response.statusCode} ${response.body}',
+        );
       }
     } catch (e) {
       throw Exception('Error calling Groq API: $e');

@@ -125,6 +125,15 @@ class ClassAutomationService {
       // Add student to each matching class
       for (var classDoc in matchingClasses.docs) {
         final classId = classDoc.id;
+        final classData = classDoc.data();
+        final enrollmentMode = classData['enrollmentMode'] as String?;
+        final autoAddStudents = classData['autoAddStudents'] as bool?;
+        final shouldAutoEnroll =
+            autoAddStudents ?? (enrollmentMode != 'manual');
+
+        if (!shouldAutoEnroll) {
+          continue;
+        }
 
         // Check if already enrolled
         final alreadyEnrolled = await _firestore
@@ -231,6 +240,15 @@ class ClassAutomationService {
       // 2️⃣ Add student to each matching class
       for (var classDoc in matchingClasses.docs) {
         final classId = classDoc.id;
+        final classData = classDoc.data();
+        final enrollmentMode = classData['enrollmentMode'] as String?;
+        final autoAddStudents = classData['autoAddStudents'] as bool?;
+        final shouldAutoEnroll =
+            autoAddStudents ?? (enrollmentMode != 'manual');
+
+        if (!shouldAutoEnroll) {
+          continue;
+        }
 
         // Check if student is already enrolled
         final alreadyEnrolled = await _firestore

@@ -83,6 +83,7 @@ class _StudentClassDetailScreenState extends State<StudentClassDetailScreen>
 
           final classData = classSnapshot.data!.data() as Map<String, dynamic>;
           final className = classData['class_name'] ?? 'Class';
+          final canStudentPost = classData['studentCanPost'] == true;
 
           return StreamBuilder<DocumentSnapshot>(
             stream: FirebaseFirestore.instance
@@ -168,7 +169,10 @@ class _StudentClassDetailScreenState extends State<StudentClassDetailScreen>
                     child: TabBarView(
                       controller: _tabController,
                       children: [
-                        _PostsTab(classId: widget.classId),
+                        _PostsTab(
+                          classId: widget.classId,
+                          canStudentPost: canStudentPost,
+                        ),
                         _AssignmentsTab(classId: widget.classId),
                         _HomeworkTab(
                           classId: widget.classId,
@@ -215,6 +219,7 @@ class _StudentClassDetailScreenState extends State<StudentClassDetailScreen>
               final classData =
                   classSnapshot.data?.data() as Map<String, dynamic>?;
               final className = classData?['class_name'] ?? 'Class';
+              final pblEnabled = classData?['pblEnabled'] != false;
 
               return Column(
                 children: [
@@ -353,43 +358,45 @@ class _StudentClassDetailScreenState extends State<StudentClassDetailScreen>
                             );
                           },
                         ),
-                        const SizedBox(height: 20),
-                        Padding(
-                          padding: const EdgeInsets.symmetric(horizontal: 8),
-                          child: Text(
-                            "PROJECT-BASED LEARNING",
-                            style: TextStyle(
-                              color: const Color(0xFF0D1B3D).withOpacity(0.5),
-                              fontSize: 11,
-                              fontWeight: FontWeight.bold,
-                              letterSpacing: 1.2,
+                        if (pblEnabled) ...[
+                          const SizedBox(height: 20),
+                          Padding(
+                            padding: const EdgeInsets.symmetric(horizontal: 8),
+                            child: Text(
+                              "PROJECT-BASED LEARNING",
+                              style: TextStyle(
+                                color: const Color(0xFF0D1B3D).withOpacity(0.5),
+                                fontSize: 11,
+                                fontWeight: FontWeight.bold,
+                                letterSpacing: 1.2,
+                              ),
                             ),
                           ),
-                        ),
-                        const SizedBox(height: 12),
-                        _buildModernMenuItem(
-                          context: context,
-                          icon: Icons.rocket_launch,
-                          title: "My PBL Projects",
-                          subtitle: "Active assignments",
-                          iconColor: const Color(0xFF8B5CF6),
-                          onTap: () {
-                            Navigator.pop(context);
-                            _showPblProjects(context, student.uid);
-                          },
-                        ),
-                        const SizedBox(height: 8),
-                        _buildModernMenuItem(
-                          context: context,
-                          icon: Icons.code,
-                          title: "Mini Projects",
-                          subtitle: "Your selections",
-                          iconColor: const Color(0xFF06B6D4),
-                          onTap: () {
-                            Navigator.pop(context);
-                            _showMiniProjects(context, student.uid);
-                          },
-                        ),
+                          const SizedBox(height: 12),
+                          _buildModernMenuItem(
+                            context: context,
+                            icon: Icons.rocket_launch,
+                            title: "My PBL Projects",
+                            subtitle: "Active assignments",
+                            iconColor: const Color(0xFF8B5CF6),
+                            onTap: () {
+                              Navigator.pop(context);
+                              _showPblProjects(context, student.uid);
+                            },
+                          ),
+                          const SizedBox(height: 8),
+                          _buildModernMenuItem(
+                            context: context,
+                            icon: Icons.code,
+                            title: "Mini Projects",
+                            subtitle: "Your selections",
+                            iconColor: const Color(0xFF06B6D4),
+                            onTap: () {
+                              Navigator.pop(context);
+                              _showMiniProjects(context, student.uid);
+                            },
+                          ),
+                        ],
                       ],
                     ),
                   ),
@@ -1053,10 +1060,68 @@ class _ConceptQuizCard extends StatelessWidget {
    ===================== TAB SCREENS ==========================
    ============================================================ */
 
-class _PostsTab extends StatelessWidget {
+class _PostsTab extends StatefulWidget {
   final String classId;
+  final bool canStudentPost;
 
-  const _PostsTab({required this.classId});
+  const _PostsTab({required this.classId, required this.canStudentPost});
+
+  @override
+  State<_PostsTab> createState() => _PostsTabState();
+}
+
+class _PostsTabState extends State<_PostsTab> {
+  final TextEditingController _messageController = TextEditingController();
+  bool _isPosting = false;
+
+  @override
+  void dispose() {
+    _messageController.dispose();
+    super.dispose();
+  }
+
+  Future<void> _sendStudentPost() async {
+    final student = FirebaseAuth.instance.currentUser;
+    final message = _messageController.text.trim();
+
+    if (student == null || message.isEmpty) return;
+
+    setState(() => _isPosting = true);
+    try {
+      final studentDoc = await FirebaseFirestore.instance
+          .collection('students')
+          .doc(student.uid)
+          .get();
+      final studentName =
+          (studentDoc.data()?['name'] as String?) ??
+          student.displayName ??
+          'Student';
+
+      await FirebaseFirestore.instance
+          .collection('classes')
+          .doc(widget.classId)
+          .collection('posts')
+          .add({
+            'type': 'student_post',
+            'message': message,
+            'studentId': student.uid,
+            'studentName': studentName,
+            'publishedAt': FieldValue.serverTimestamp(),
+          });
+
+      _messageController.clear();
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(SnackBar(content: Text('Failed to post: $e')));
+      }
+    } finally {
+      if (mounted) {
+        setState(() => _isPosting = false);
+      }
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -1068,221 +1133,325 @@ class _PostsTab extends StatelessWidget {
 
     return Container(
       color: const Color(0xFFF4F8FF),
-      child: StreamBuilder<QuerySnapshot>(
-        stream: FirebaseFirestore.instance
-            .collection('classes')
-            .doc(classId)
-            .collection('posts')
-            .orderBy('publishedAt', descending: true)
-            .snapshots(),
-        builder: (context, snapshot) {
-          if (!snapshot.hasData) {
-            return const Center(child: CircularProgressIndicator());
-          }
+      child: Column(
+        children: [
+          Expanded(
+            child: StreamBuilder<QuerySnapshot>(
+              stream: FirebaseFirestore.instance
+                  .collection('classes')
+                  .doc(widget.classId)
+                  .collection('posts')
+                  .orderBy('publishedAt', descending: true)
+                  .snapshots(),
+              builder: (context, snapshot) {
+                if (!snapshot.hasData) {
+                  return const Center(child: CircularProgressIndicator());
+                }
 
-          final quizzes = snapshot.data!.docs;
+                final quizzes = snapshot.data!.docs;
 
-          if (quizzes.isEmpty) {
-            return const Center(
-              child: Text(
-                "No quizzes posted yet",
-                style: TextStyle(fontSize: 16, color: Color(0xFF5C6B8C)),
-              ),
-            );
-          }
-
-          return ListView.builder(
-            padding: const EdgeInsets.all(12),
-            itemCount: quizzes.length,
-            itemBuilder: (context, index) {
-              final quizDoc = quizzes[index];
-              final data = quizDoc.data() as Map<String, dynamic>;
-
-              final String postType = data['type'] ?? 'chapter_quiz';
-
-              // 🔹 ANNOUNCEMENT POST
-              if (postType == 'announcement') {
-                final String title = data['title'] ?? 'Announcement';
-                final String content = data['message'] ?? '';
-                final Timestamp publishedAt =
-                    data['publishedAt'] ?? Timestamp.now();
-
-                return Card(
-                  color: Colors.white,
-                  elevation: 2,
-                  margin: const EdgeInsets.only(bottom: 12),
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(14),
-                    side: BorderSide(
-                      color: Colors.orange.withOpacity(0.3),
-                      width: 1.5,
+                if (quizzes.isEmpty) {
+                  return const Center(
+                    child: Text(
+                      "No posts yet",
+                      style: TextStyle(fontSize: 16, color: Color(0xFF5C6B8C)),
                     ),
-                  ),
-                  child: Padding(
-                    padding: const EdgeInsets.all(14),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        /// 🔹 HEADER WITH ANNOUNCEMENT ICON
-                        Row(
-                          children: [
-                            const Icon(
-                              Icons.notifications_active,
-                              color: Colors.orangeAccent,
-                            ),
-                            const SizedBox(width: 10),
-                            Expanded(
-                              child: Text(
-                                title,
+                  );
+                }
+
+                return ListView.builder(
+                  padding: const EdgeInsets.all(12),
+                  itemCount: quizzes.length,
+                  itemBuilder: (context, index) {
+                    final quizDoc = quizzes[index];
+                    final data = quizDoc.data() as Map<String, dynamic>;
+
+                    final String postType = data['type'] ?? 'chapter_quiz';
+
+                    if (postType == 'student_post') {
+                      final String content = data['message'] ?? '';
+                      final String studentName =
+                          data['studentName'] ?? 'Student';
+                      final Timestamp publishedAt =
+                          data['publishedAt'] ?? Timestamp.now();
+
+                      return Card(
+                        color: Colors.white,
+                        elevation: 2,
+                        margin: const EdgeInsets.only(bottom: 12),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(14),
+                          side: BorderSide(
+                            color: const Color(0xFF2E6BFF).withOpacity(0.2),
+                          ),
+                        ),
+                        child: Padding(
+                          padding: const EdgeInsets.all(14),
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Row(
+                                children: [
+                                  const Icon(
+                                    Icons.person,
+                                    color: Color(0xFF2E6BFF),
+                                  ),
+                                  const SizedBox(width: 8),
+                                  Expanded(
+                                    child: Text(
+                                      studentName,
+                                      style: const TextStyle(
+                                        fontWeight: FontWeight.bold,
+                                        color: Color(0xFF0D1B3D),
+                                      ),
+                                    ),
+                                  ),
+                                ],
+                              ),
+                              const SizedBox(height: 8),
+                              Text(
+                                content,
                                 style: const TextStyle(
-                                  fontSize: 16,
-                                  fontWeight: FontWeight.bold,
-                                  color: const Color(0xFF0D1B3D),
+                                  color: Color(0xFF0D1B3D),
                                 ),
+                              ),
+                              const SizedBox(height: 10),
+                              Text(
+                                "Posted: ${publishedAt.toDate().toLocal().toString().split(' ')[0]}",
+                                style: const TextStyle(
+                                  color: Color(0xFF7A89A8),
+                                  fontSize: 12,
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                      );
+                    }
+
+                    // 🔹 ANNOUNCEMENT POST
+                    if (postType == 'announcement') {
+                      final String title = data['title'] ?? 'Announcement';
+                      final String content = data['message'] ?? '';
+                      final Timestamp publishedAt =
+                          data['publishedAt'] ?? Timestamp.now();
+
+                      return Card(
+                        color: Colors.white,
+                        elevation: 2,
+                        margin: const EdgeInsets.only(bottom: 12),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(14),
+                          side: BorderSide(
+                            color: Colors.orange.withOpacity(0.3),
+                            width: 1.5,
+                          ),
+                        ),
+                        child: Padding(
+                          padding: const EdgeInsets.all(14),
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              /// 🔹 HEADER WITH ANNOUNCEMENT ICON
+                              Row(
+                                children: [
+                                  const Icon(
+                                    Icons.notifications_active,
+                                    color: Colors.orangeAccent,
+                                  ),
+                                  const SizedBox(width: 10),
+                                  Expanded(
+                                    child: Text(
+                                      title,
+                                      style: const TextStyle(
+                                        fontSize: 16,
+                                        fontWeight: FontWeight.bold,
+                                        color: const Color(0xFF0D1B3D),
+                                      ),
+                                    ),
+                                  ),
+                                ],
+                              ),
+
+                              const SizedBox(height: 8),
+
+                              /// 🔹 ANNOUNCEMENT CONTENT
+                              Text(
+                                content,
+                                style: const TextStyle(
+                                  color: const Color(0xFF0D1B3D),
+                                  fontSize: 18,
+                                  // height: 1.5,
+                                ),
+                                maxLines: 3,
+                                overflow: TextOverflow.ellipsis,
+                              ),
+
+                              const SizedBox(height: 12),
+
+                              /// 🔹 PUBLISHED DATE
+                              Text(
+                                "Posted: ${publishedAt.toDate().toLocal().toString().split(' ')[0]}",
+                                style: TextStyle(
+                                  color: Color(0xFF7A89A8),
+                                  fontSize: 12,
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                      );
+                    }
+
+                    // 🔹 CHAPTER QUIZ POST
+                    final String chapterName =
+                        data['chapterName'] ?? 'Chapter Quiz';
+
+                    final Timestamp publishedAt =
+                        data['publishedAt'] ?? Timestamp.now();
+
+                    // ⏰ Deadline = 7 days after publish
+                    final DateTime deadline = publishedAt.toDate().add(
+                      const Duration(days: 7),
+                    );
+
+                    final bool isExpired = DateTime.now().isAfter(deadline);
+
+                    return Card(
+                      color: Colors.white,
+                      elevation: 3,
+                      margin: const EdgeInsets.only(bottom: 12),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(14),
+                        side: const BorderSide(color: Color(0x1A2E6BFF)),
+                      ),
+                      child: Padding(
+                        padding: const EdgeInsets.all(14),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            /// 🔹 HEADER
+                            Row(
+                              children: [
+                                const Icon(
+                                  Icons.assignment,
+                                  color: Color(0xFF2E6BFF),
+                                ),
+                                const SizedBox(width: 10),
+                                Expanded(
+                                  child: Text(
+                                    chapterName,
+                                    style: const TextStyle(
+                                      fontSize: 16,
+                                      fontWeight: FontWeight.bold,
+                                      color: const Color(0xFF0D1B3D),
+                                    ),
+                                  ),
+                                ),
+                              ],
+                            ),
+
+                            const SizedBox(height: 8),
+
+                            /// 🔹 DEADLINE
+                            Text(
+                              isExpired
+                                  ? "Deadline passed"
+                                  : "Deadline: ${deadline.toLocal().toString().split(' ')[0]}",
+                              style: TextStyle(
+                                color: isExpired
+                                    ? Colors.redAccent
+                                    : Colors.greenAccent,
+                                fontWeight: FontWeight.w600,
+                              ),
+                            ),
+
+                            const SizedBox(height: 12),
+
+                            /// 🔹 ACTION
+                            SizedBox(
+                              width: double.infinity,
+                              child: ElevatedButton.icon(
+                                icon: Icon(
+                                  isExpired ? Icons.lock : Icons.play_arrow,
+                                  color: Colors.black,
+                                ),
+                                label: Text(
+                                  isExpired ? "Quiz Closed" : "Attempt Quiz",
+                                  style: const TextStyle(color: Colors.black),
+                                ),
+                                style: ElevatedButton.styleFrom(
+                                  backgroundColor: isExpired
+                                      ? Colors.grey.shade300
+                                      : const Color(0xFF2E6BFF),
+                                  shape: RoundedRectangleBorder(
+                                    borderRadius: BorderRadius.circular(10),
+                                  ),
+                                ),
+                                onPressed: isExpired
+                                    ? null
+                                    : () {
+                                        Navigator.push(
+                                          context,
+                                          MaterialPageRoute(
+                                            builder: (_) =>
+                                                StudentQuizAttemptScreen(
+                                                  classId: widget.classId,
+                                                  quizId:
+                                                      quizDoc.id, // chapterId
+                                                  studentId: student.uid,
+                                                  studentName:
+                                                      student.displayName ??
+                                                      "Student",
+                                                ),
+                                          ),
+                                        );
+                                      },
                               ),
                             ),
                           ],
                         ),
-
-                        const SizedBox(height: 8),
-
-                        /// 🔹 ANNOUNCEMENT CONTENT
-                        Text(
-                          content,
-                          style: const TextStyle(
-                            color: const Color(0xFF0D1B3D),
-                            fontSize: 18,
-                            // height: 1.5,
-                          ),
-                          maxLines: 3,
-                          overflow: TextOverflow.ellipsis,
+                      ),
+                    );
+                  },
+                );
+              },
+            ),
+          ),
+          if (widget.canStudentPost)
+            Container(
+              color: Colors.white,
+              padding: const EdgeInsets.fromLTRB(12, 8, 12, 12),
+              child: Row(
+                children: [
+                  Expanded(
+                    child: TextField(
+                      controller: _messageController,
+                      enabled: !_isPosting,
+                      decoration: InputDecoration(
+                        hintText: 'Write a post...',
+                        border: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(12),
                         ),
-
-                        const SizedBox(height: 12),
-
-                        /// 🔹 PUBLISHED DATE
-                        Text(
-                          "Posted: ${publishedAt.toDate().toLocal().toString().split(' ')[0]}",
-                          style: TextStyle(
-                            color: Color(0xFF7A89A8),
-                            fontSize: 12,
-                          ),
-                        ),
-                      ],
+                        isDense: true,
+                      ),
                     ),
                   ),
-                );
-              }
-
-              // 🔹 CHAPTER QUIZ POST
-              final String chapterName = data['chapterName'] ?? 'Chapter Quiz';
-
-              final Timestamp publishedAt =
-                  data['publishedAt'] ?? Timestamp.now();
-
-              // ⏰ Deadline = 7 days after publish
-              final DateTime deadline = publishedAt.toDate().add(
-                const Duration(days: 7),
-              );
-
-              final bool isExpired = DateTime.now().isAfter(deadline);
-
-              return Card(
-                color: Colors.white,
-                elevation: 3,
-                margin: const EdgeInsets.only(bottom: 12),
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(14),
-                  side: const BorderSide(color: Color(0x1A2E6BFF)),
-                ),
-                child: Padding(
-                  padding: const EdgeInsets.all(14),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      /// 🔹 HEADER
-                      Row(
-                        children: [
-                          const Icon(
-                            Icons.assignment,
-                            color: Color(0xFF2E6BFF),
-                          ),
-                          const SizedBox(width: 10),
-                          Expanded(
-                            child: Text(
-                              chapterName,
-                              style: const TextStyle(
-                                fontSize: 16,
-                                fontWeight: FontWeight.bold,
-                                color: const Color(0xFF0D1B3D),
-                              ),
-                            ),
-                          ),
-                        ],
-                      ),
-
-                      const SizedBox(height: 8),
-
-                      /// 🔹 DEADLINE
-                      Text(
-                        isExpired
-                            ? "Deadline passed"
-                            : "Deadline: ${deadline.toLocal().toString().split(' ')[0]}",
-                        style: TextStyle(
-                          color: isExpired
-                              ? Colors.redAccent
-                              : Colors.greenAccent,
-                          fontWeight: FontWeight.w600,
-                        ),
-                      ),
-
-                      const SizedBox(height: 12),
-
-                      /// 🔹 ACTION
-                      SizedBox(
-                        width: double.infinity,
-                        child: ElevatedButton.icon(
-                          icon: Icon(
-                            isExpired ? Icons.lock : Icons.play_arrow,
-                            color: Colors.black,
-                          ),
-                          label: Text(
-                            isExpired ? "Quiz Closed" : "Attempt Quiz",
-                            style: const TextStyle(color: Colors.black),
-                          ),
-                          style: ElevatedButton.styleFrom(
-                            backgroundColor: isExpired
-                                ? Colors.grey.shade300
-                                : const Color(0xFF2E6BFF),
-                            shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(10),
-                            ),
-                          ),
-                          onPressed: isExpired
-                              ? null
-                              : () {
-                                  Navigator.push(
-                                    context,
-                                    MaterialPageRoute(
-                                      builder: (_) => StudentQuizAttemptScreen(
-                                        classId: classId,
-                                        quizId: quizDoc.id, // chapterId
-                                        studentId: student.uid,
-                                        studentName:
-                                            student.displayName ?? "Student",
-                                      ),
-                                    ),
-                                  );
-                                },
-                        ),
-                      ),
-                    ],
+                  const SizedBox(width: 8),
+                  IconButton(
+                    onPressed: _isPosting ? null : _sendStudentPost,
+                    icon: _isPosting
+                        ? const SizedBox(
+                            width: 18,
+                            height: 18,
+                            child: CircularProgressIndicator(strokeWidth: 2),
+                          )
+                        : const Icon(Icons.send_rounded),
                   ),
-                ),
-              );
-            },
-          );
-        },
+                ],
+              ),
+            ),
+        ],
       ),
     );
   }

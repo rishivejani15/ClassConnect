@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'screens/upload_syllabus_screen.dart';
+import 'screens/concept_review_screen.dart';
 import 'screens/pbl_detail_screen.dart';
 import 'screens/pbl_editor_screen.dart';
 import 'screens/class_mini_projects_screen.dart';
@@ -25,6 +25,49 @@ class PblMainScreen extends StatefulWidget {
 class _PblMainScreenState extends State<PblMainScreen> {
   late Stream<QuerySnapshot> _pblStream;
 
+  Future<void> _openConceptReviewFromStoredChapters() async {
+    final chaptersSnapshot = await FirebaseFirestore.instance
+        .collection('classes')
+        .doc(widget.classId)
+        .collection('chapters')
+        .orderBy('order')
+        .get();
+
+    final syllabus = <String, List<String>>{};
+    for (final doc in chaptersSnapshot.docs) {
+      final data = doc.data();
+      final chapterName = (data['title'] ?? data['name'] ?? '').toString();
+      final concepts = List<String>.from(
+        data['concepts'] ?? const <String>[],
+      ).where((value) => value.trim().isNotEmpty).toList();
+
+      if (chapterName.isNotEmpty) {
+        syllabus[chapterName] = concepts;
+      }
+    }
+
+    if (!mounted) return;
+
+    if (syllabus.isEmpty) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text(
+            'No syllabus chapters found for this class. Add syllabus during class creation.',
+          ),
+        ),
+      );
+      return;
+    }
+
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (context) =>
+            ConceptReviewScreen(syllabus: syllabus, classId: widget.classId),
+      ),
+    );
+  }
+
   @override
   void initState() {
     super.initState();
@@ -46,7 +89,7 @@ class _PblMainScreenState extends State<PblMainScreen> {
           style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 20),
         ),
         backgroundColor: const Color(0xFFF4F8FF),
-        foregroundColor: Colors.white,
+        foregroundColor: const Color(0xFF0D1B3D),
         elevation: 0,
         actions: [
           IconButton(
@@ -59,7 +102,7 @@ class _PblMainScreenState extends State<PblMainScreen> {
                 ),
               );
             },
-            icon: const Icon(Icons.list_alt, color: Colors.cyanAccent),
+            icon: const Icon(Icons.list_alt, color: Color(0xFF2E6BFF)),
             tooltip: 'View All Mini Projects',
           ),
         ],
@@ -68,18 +111,68 @@ class _PblMainScreenState extends State<PblMainScreen> {
         stream: _pblStream,
         builder: (context, snapshot) {
           if (snapshot.connectionState == ConnectionState.waiting) {
-            return const Center(child: CircularProgressIndicator());
+            return const Center(
+              child: CircularProgressIndicator(color: Color(0xFF2E6BFF)),
+            );
           }
 
           if (snapshot.hasError) {
-            return Center(child: Text('Error: ${snapshot.error}'));
+            return Center(
+              child: Text(
+                'Error: ${snapshot.error}',
+                style: const TextStyle(color: Color(0xFF0D1B3D)),
+              ),
+            );
           }
 
           final pblDocs = snapshot.data?.docs ?? [];
 
-          // If no PBL exists, show upload syllabus screen
+          // If no PBL exists, ask teacher to use stored chapters and concepts
           if (pblDocs.isEmpty) {
-            return UploadSyllabusScreen(classId: widget.classId);
+            return Center(
+              child: Padding(
+                padding: const EdgeInsets.all(24),
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    const Icon(
+                      Icons.lightbulb_outline_rounded,
+                      size: 54,
+                      color: Color(0xFF2E6BFF),
+                    ),
+                    const SizedBox(height: 16),
+                    const Text(
+                      'No PBL projects yet',
+                      style: TextStyle(
+                        fontSize: 20,
+                        fontWeight: FontWeight.bold,
+                        color: Color(0xFF0D1B3D),
+                      ),
+                    ),
+                    const SizedBox(height: 8),
+                    const Text(
+                      'Generate from the chapters and concepts extracted at class creation.',
+                      textAlign: TextAlign.center,
+                      style: TextStyle(fontSize: 14, color: Color(0xFF5C6B8C)),
+                    ),
+                    const SizedBox(height: 22),
+                    ElevatedButton.icon(
+                      onPressed: _openConceptReviewFromStoredChapters,
+                      icon: const Icon(Icons.auto_awesome, color: Colors.white),
+                      label: const Text('Generate PBL from Stored Chapters'),
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: const Color(0xFF2E6BFF),
+                        foregroundColor: Colors.white,
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 20,
+                          vertical: 14,
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            );
           }
 
           // Show existing PBL problems
@@ -92,20 +185,16 @@ class _PblMainScreenState extends State<PblMainScreen> {
                 Container(
                   width: double.infinity,
                   decoration: BoxDecoration(
-                    gradient: LinearGradient(
-                      colors: [Colors.indigo.shade900, const Color(0xFF152349)],
-                      begin: Alignment.topLeft,
-                      end: Alignment.bottomRight,
-                    ),
+                    color: Colors.white,
                     borderRadius: BorderRadius.circular(16),
                     boxShadow: [
                       BoxShadow(
-                        color: Colors.black.withOpacity(0.3),
+                        color: const Color(0xFF2E6BFF).withOpacity(0.06),
                         blurRadius: 10,
                         offset: const Offset(0, 4),
                       ),
                     ],
-                    border: Border.all(color: Colors.white10),
+                    border: Border.all(color: const Color(0x1A2E6BFF)),
                   ),
                   child: Padding(
                     padding: const EdgeInsets.all(20),
@@ -117,7 +206,7 @@ class _PblMainScreenState extends State<PblMainScreen> {
                           style: const TextStyle(
                             fontSize: 22,
                             fontWeight: FontWeight.bold,
-                            color: Colors.white,
+                            color: Color(0xFF0D1B3D),
                             letterSpacing: 0.5,
                           ),
                         ),
@@ -128,13 +217,13 @@ class _PblMainScreenState extends State<PblMainScreen> {
                             vertical: 4,
                           ),
                           decoration: BoxDecoration(
-                            color: Colors.white.withOpacity(0.1),
+                            color: const Color(0xFF2E6BFF).withOpacity(0.08),
                             borderRadius: BorderRadius.circular(8),
                           ),
                           child: Text(
                             'Class Code: ${widget.classCode}',
                             style: const TextStyle(
-                              color: Colors.white70,
+                              color: Color(0xFF0D1B3D),
                               fontWeight: FontWeight.bold,
                             ),
                           ),
@@ -149,7 +238,7 @@ class _PblMainScreenState extends State<PblMainScreen> {
                   style: TextStyle(
                     fontSize: 14,
                     fontWeight: FontWeight.bold,
-                    color: Colors.white54,
+                    color: Color(0xFF5C6B8C),
                     letterSpacing: 1.2,
                   ),
                 ),
@@ -171,17 +260,9 @@ class _PblMainScreenState extends State<PblMainScreen> {
         },
       ),
       floatingActionButton: FloatingActionButton(
-        onPressed: () {
-          Navigator.push(
-            context,
-            MaterialPageRoute(
-              builder: (context) =>
-                  UploadSyllabusScreen(classId: widget.classId),
-            ),
-          );
-        },
-        backgroundColor: Colors.cyanAccent,
-        foregroundColor: Colors.black,
+        onPressed: _openConceptReviewFromStoredChapters,
+        backgroundColor: const Color(0xFF2E6BFF),
+        foregroundColor: Colors.white,
         tooltip: 'Create New PBL',
         child: const Icon(Icons.add_task, fontWeight: FontWeight.bold),
       ),
@@ -202,12 +283,12 @@ class _PblMainScreenState extends State<PblMainScreen> {
     return Container(
       margin: const EdgeInsets.only(bottom: 16),
       decoration: BoxDecoration(
-        color: const Color(0xFF152349),
+        color: Colors.white,
         borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: Colors.white10),
+        border: Border.all(color: const Color(0x1A2E6BFF)),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.2),
+            color: const Color(0xFF2E6BFF).withOpacity(0.06),
             blurRadius: 8,
             offset: const Offset(0, 4),
           ),
@@ -245,13 +326,13 @@ class _PblMainScreenState extends State<PblMainScreen> {
                         style: const TextStyle(
                           fontSize: 18,
                           fontWeight: FontWeight.bold,
-                          color: Colors.white,
+                          color: Color(0xFF0D1B3D),
                         ),
                       ),
                     ),
                     const Icon(
                       Icons.arrow_forward_ios,
-                      color: Colors.white38,
+                      color: Color(0xFFA5B2C8),
                       size: 16,
                     ),
                   ],
@@ -263,7 +344,7 @@ class _PblMainScreenState extends State<PblMainScreen> {
                   overflow: TextOverflow.ellipsis,
                   style: const TextStyle(
                     fontSize: 14,
-                    color: Colors.white60,
+                    color: Color(0xFF5C6B8C),
                     height: 1.5,
                   ),
                 ),
@@ -287,7 +368,7 @@ class _PblMainScreenState extends State<PblMainScreen> {
                   ],
                 ),
                 const SizedBox(height: 16),
-                const Divider(color: Colors.white10),
+                const Divider(color: Color(0x1A2E6BFF)),
                 const SizedBox(height: 8),
                 Row(
                   mainAxisAlignment: MainAxisAlignment.end,
@@ -306,7 +387,7 @@ class _PblMainScreenState extends State<PblMainScreen> {
                         );
                       },
                       style: TextButton.styleFrom(
-                        foregroundColor: Colors.cyanAccent,
+                        foregroundColor: const Color(0xFF2E6BFF),
                       ),
                       icon: const Icon(Icons.edit, size: 18),
                       label: const Text('Edit'),
@@ -317,7 +398,7 @@ class _PblMainScreenState extends State<PblMainScreen> {
                         _deletePbl(context, pblId);
                       },
                       style: TextButton.styleFrom(
-                        foregroundColor: Colors.redAccent.shade200,
+                        foregroundColor: Colors.redAccent,
                       ),
                       icon: const Icon(Icons.delete, size: 18),
                       label: const Text('Delete'),
@@ -362,18 +443,21 @@ class _PblMainScreenState extends State<PblMainScreen> {
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
-        backgroundColor: const Color(0xFF152349),
-        title: const Text('Delete PBL?', style: TextStyle(color: Colors.white)),
+        backgroundColor: Colors.white,
+        title: const Text(
+          'Delete PBL?',
+          style: TextStyle(color: Color(0xFF0D1B3D)),
+        ),
         content: const Text(
           'This action cannot be undone.',
-          style: TextStyle(color: Colors.white70),
+          style: TextStyle(color: Color(0xFF5C6B8C)),
         ),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context),
             child: const Text(
               'Cancel',
-              style: TextStyle(color: Colors.white54),
+              style: TextStyle(color: Color(0xFF5C6B8C)),
             ),
           ),
           TextButton(

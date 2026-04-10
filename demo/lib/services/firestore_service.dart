@@ -5,7 +5,6 @@ import 'package:demo/models/tag.dart';
 import 'package:demo/models/reaction.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 
-
 /// Service to handle all Firestore operations for community Q&A
 class FirestoreService {
   static final FirestoreService _instance = FirestoreService._internal();
@@ -60,27 +59,26 @@ class FirestoreService {
             .collection('students')
             .doc(userId);
 
-        batch.set(
-          leaderboardRef,
-          {
-            'community_score': FieldValue.increment(points),
-            'studentId': userId,
-            'studentName': studentName,
-            'lastUpdated': FieldValue.serverTimestamp(),
-          },
-          SetOptions(merge: true),
-        );
+        batch.set(leaderboardRef, {
+          'community_score': FieldValue.increment(points),
+          'studentId': userId,
+          'studentName': studentName,
+          'lastUpdated': FieldValue.serverTimestamp(),
+        }, SetOptions(merge: true));
       }
 
       await batch.commit();
-
     } catch (e) {
       print('Error updating user score: $e');
     }
   }
 
   /// Update user PBL Score (for academic achievements like PBL)
-  Future<void> updateStudentPblScore(String userId, int points, String classId) async {
+  Future<void> updateStudentPblScore(
+    String userId,
+    int points,
+    String classId,
+  ) async {
     try {
       // 0. Get User Data
       final userDoc = await _studentsCollection.doc(userId).get();
@@ -96,15 +94,12 @@ class FirestoreService {
           .collection('students')
           .doc(userId);
 
-      await leaderboardRef.set(
-        {
-          'pbl_score': FieldValue.increment(points),
-          'studentId': userId,
-          'studentName': studentName,
-          'lastUpdated': FieldValue.serverTimestamp(),
-        },
-        SetOptions(merge: true),
-      );
+      await leaderboardRef.set({
+        'pbl_score': FieldValue.increment(points),
+        'studentId': userId,
+        'studentName': studentName,
+        'lastUpdated': FieldValue.serverTimestamp(),
+      }, SetOptions(merge: true));
     } catch (e) {
       print('Error updating student PBL Score: $e');
     }
@@ -119,11 +114,11 @@ class FirestoreService {
         .snapshots()
         .map(
           (snapshot) => snapshot.docs.map((doc) {
-        final data = doc.data() as Map<String, dynamic>;
-        data['id'] = doc.id;
-        return Question.fromJson(data);
-      }).toList(),
-    );
+            final data = doc.data() as Map<String, dynamic>;
+            data['id'] = doc.id;
+            return Question.fromJson(data);
+          }).toList(),
+        );
   }
 
   String get currentUserId {
@@ -224,11 +219,11 @@ class FirestoreService {
         .snapshots()
         .map(
           (snapshot) => snapshot.docs.map((doc) {
-        final data = doc.data();
-        data['id'] = doc.id;
-        return Answer.fromJson(data);
-      }).toList(),
-    );
+            final data = doc.data();
+            data['id'] = doc.id;
+            return Answer.fromJson(data);
+          }).toList(),
+        );
   }
 
   /// Add an answer to a question
@@ -269,14 +264,47 @@ class FirestoreService {
     return answer;
   }
 
+  /// Add a system/AI answer without affecting leaderboard score.
+  Future<Answer> addSystemAnswer({
+    required String questionId,
+    required String userId,
+    required String userName,
+    required String userAvatar,
+    required String content,
+  }) async {
+    final answerRef = _communityCollection
+        .doc(questionId)
+        .collection('answers')
+        .doc();
+
+    final answer = Answer(
+      id: answerRef.id,
+      questionId: questionId,
+      userId: userId,
+      userName: userName,
+      userAvatar: userAvatar,
+      content: content,
+      createdAt: DateTime.now(),
+      views: 0,
+    );
+
+    await answerRef.set(answer.toJson());
+
+    await _communityCollection.doc(questionId).update({
+      'answerCount': FieldValue.increment(1),
+    });
+
+    return answer;
+  }
+
   // ============= REACTION OPERATIONS =============
 
   /// Add reaction to a question
   Future<void> addReactionToQuestion(
-      String questionId,
-      String userId,
-      ReactionType type,
-      ) async {
+    String questionId,
+    String userId,
+    ReactionType type,
+  ) async {
     try {
       final reaction = Reaction(
         id: 'r_${DateTime.now().millisecondsSinceEpoch}',
@@ -308,10 +336,10 @@ class FirestoreService {
 
   /// Remove reaction from a question
   Future<void> removeReactionFromQuestion(
-      String questionId,
-      String userId,
-      ReactionType type,
-      ) async {
+    String questionId,
+    String userId,
+    ReactionType type,
+  ) async {
     try {
       final doc = await _communityCollection.doc(questionId).get();
       if (doc.exists) {
@@ -321,7 +349,7 @@ class FirestoreService {
             .toList();
 
         reactions.removeWhere(
-              (r) => r['userId'] == userId && r['type'] == type.name,
+          (r) => r['userId'] == userId && r['type'] == type.name,
         );
 
         await _communityCollection.doc(questionId).update({
@@ -335,11 +363,11 @@ class FirestoreService {
 
   /// Add reaction to an answer
   Future<void> addReactionToAnswer(
-      String questionId,
-      String answerId,
-      String userId,
-      ReactionType type,
-      ) async {
+    String questionId,
+    String answerId,
+    String userId,
+    ReactionType type,
+  ) async {
     try {
       final reaction = Reaction(
         id: 'r_${DateTime.now().millisecondsSinceEpoch}',
@@ -353,8 +381,8 @@ class FirestoreService {
           .collection('answers')
           .doc(answerId)
           .update({
-        'reactions': FieldValue.arrayUnion([reaction.toJson()]),
-      });
+            'reactions': FieldValue.arrayUnion([reaction.toJson()]),
+          });
 
       // +3 points if comment (answer) gets an upvote
       if (type == ReactionType.like) {
@@ -379,11 +407,11 @@ class FirestoreService {
 
   /// Remove reaction from an answer
   Future<void> removeReactionFromAnswer(
-      String questionId,
-      String answerId,
-      String userId,
-      ReactionType type,
-      ) async {
+    String questionId,
+    String answerId,
+    String userId,
+    ReactionType type,
+  ) async {
     try {
       final doc = await _communityCollection
           .doc(questionId)
@@ -398,7 +426,7 @@ class FirestoreService {
             .toList();
 
         reactions.removeWhere(
-              (r) => r['userId'] == userId && r['type'] == type.name,
+          (r) => r['userId'] == userId && r['type'] == type.name,
         );
 
         await _communityCollection

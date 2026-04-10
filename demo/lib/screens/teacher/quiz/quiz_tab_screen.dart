@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'quiz_detail_screen.dart';
-import '../pbl/screens/upload_syllabus_screen.dart';
 
 class QuizTabScreen extends StatelessWidget {
   final String classId;
@@ -22,7 +21,7 @@ class QuizTabScreen extends StatelessWidget {
         builder: (context, snapshot) {
           if (snapshot.connectionState == ConnectionState.waiting) {
             return const Center(
-              child: CircularProgressIndicator(color: Colors.cyanAccent),
+              child: CircularProgressIndicator(color: Color(0xFF2E6BFF)),
             );
           }
 
@@ -57,7 +56,7 @@ class QuizTabScreen extends StatelessWidget {
           Container(
             padding: const EdgeInsets.all(24),
             decoration: BoxDecoration(
-              color: Colors.white.withOpacity(0.05),
+              color: const Color(0xFFEAF3FF),
               shape: BoxShape.circle,
             ),
             child: Icon(
@@ -77,48 +76,15 @@ class QuizTabScreen extends StatelessWidget {
           ),
           const SizedBox(height: 8),
           Text(
-            "Upload a syllabus to automatically generate chapters.",
+            "No syllabus chapters available for this class yet.",
             textAlign: TextAlign.center,
-            style: TextStyle(
-              color: Colors.white.withOpacity(0.5),
-              fontSize: 14,
-            ),
+            style: TextStyle(color: const Color(0xFF5C6B8C), fontSize: 14),
           ),
-          const SizedBox(height: 32),
-          ElevatedButton.icon(
-            onPressed: () {
-              Navigator.push(
-                context,
-                MaterialPageRoute(
-                  builder: (_) => Scaffold(
-                    backgroundColor: const Color(0xFFF4F8FF),
-                    appBar: AppBar(
-                      title: const Text("Upload Syllabus"),
-                      backgroundColor: const Color(0xFFF4F8FF),
-                      elevation: 0,
-                    ),
-                    body: UploadSyllabusScreen(classId: classId),
-                  ),
-                ),
-              );
-            },
-            icon: const Icon(Icons.upload_file, color: Colors.black),
-            label: const Text(
-              "Upload Syllabus",
-              style: TextStyle(
-                fontWeight: FontWeight.bold,
-                color: Colors.black,
-              ),
-            ),
-            style: ElevatedButton.styleFrom(
-              backgroundColor: Colors.cyanAccent,
-              padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(12),
-              ),
-              elevation: 4,
-              shadowColor: Colors.cyanAccent.withOpacity(0.4),
-            ),
+          const SizedBox(height: 6),
+          Text(
+            "Add optional syllabus during class creation to auto-generate chapters and concepts.",
+            textAlign: TextAlign.center,
+            style: TextStyle(color: const Color(0xFF8DA6D8), fontSize: 12),
           ),
         ],
       ),
@@ -162,16 +128,16 @@ class _ChapterCard extends StatelessWidget {
         return Container(
           margin: const EdgeInsets.only(bottom: 16),
           decoration: BoxDecoration(
-            color: const Color(0xFF152349), // Slightly lighter than bg
+            color: Colors.white,
             borderRadius: BorderRadius.circular(16),
             border: Border.all(
               color: isCompleted
                   ? Colors.green.withOpacity(0.3)
-                  : Colors.white.withOpacity(0.08),
+                  : const Color(0x1A2E6BFF),
             ),
             boxShadow: [
               BoxShadow(
-                color: Colors.black.withOpacity(0.2),
+                color: const Color(0xFF2E6BFF).withOpacity(0.06),
                 blurRadius: 8,
                 offset: const Offset(0, 4),
               ),
@@ -183,8 +149,8 @@ class _ChapterCard extends StatelessWidget {
                   Colors.transparent, // Remove expansion tile dividers
             ),
             child: ExpansionTile(
-              iconColor: Colors.cyanAccent,
-              collapsedIconColor: Colors.white54,
+              iconColor: const Color(0xFF2E6BFF),
+              collapsedIconColor: const Color(0xFFA5B2C8),
               tilePadding: const EdgeInsets.symmetric(
                 horizontal: 16,
                 vertical: 8,
@@ -195,21 +161,21 @@ class _ChapterCard extends StatelessWidget {
                 decoration: BoxDecoration(
                   color: isCompleted
                       ? Colors.green.withOpacity(0.2)
-                      : Colors.white.withOpacity(0.05),
+                      : const Color(0xFFEAF3FF),
                   shape: BoxShape.circle,
                 ),
                 child: Icon(
                   isCompleted
                       ? Icons.check_circle_rounded
                       : Icons.radio_button_unchecked,
-                  color: isCompleted ? Colors.greenAccent : Colors.white38,
+                  color: isCompleted ? Colors.green : const Color(0xFFA5B2C8),
                   size: 20,
                 ),
               ),
               title: Text(
                 "Chapter $order",
-                style: TextStyle(
-                  color: Colors.cyanAccent.shade100,
+                style: const TextStyle(
+                  color: Color(0xFF2E6BFF),
                   fontSize: 12,
                   fontWeight: FontWeight.bold,
                   letterSpacing: 1,
@@ -220,7 +186,7 @@ class _ChapterCard extends StatelessWidget {
                 child: Text(
                   chapterName,
                   style: const TextStyle(
-                    color: Colors.white,
+                    color: Color(0xFF0D1B3D),
                     fontSize: 16,
                     fontWeight: FontWeight.w600,
                   ),
@@ -242,7 +208,7 @@ class _ChapterCard extends StatelessWidget {
                       child: const Text(
                         "Published",
                         style: TextStyle(
-                          color: Colors.greenAccent,
+                          color: Colors.green,
                           fontSize: 10,
                           fontWeight: FontWeight.bold,
                           letterSpacing: 0.5,
@@ -251,7 +217,7 @@ class _ChapterCard extends StatelessWidget {
                     )
                   : null, // Let default icon show if not completed
               children: [
-                Divider(color: Colors.white.withOpacity(0.1)),
+                const Divider(color: Color(0x1A2E6BFF)),
                 const SizedBox(height: 12),
 
                 // Concepts List
@@ -263,13 +229,13 @@ class _ChapterCard extends StatelessWidget {
                         Icon(
                           Icons.info_outline,
                           size: 16,
-                          color: Colors.white.withOpacity(0.4),
+                          color: const Color(0xFFA5B2C8),
                         ),
                         const SizedBox(width: 8),
                         Text(
                           "No concepts added yet",
-                          style: TextStyle(
-                            color: Colors.white.withOpacity(0.4),
+                          style: const TextStyle(
+                            color: Color(0xFF8DA6D8),
                             fontStyle: FontStyle.italic,
                           ),
                         ),
@@ -299,7 +265,7 @@ class _ChapterCard extends StatelessWidget {
                             child: Text(
                               concept,
                               style: TextStyle(
-                                color: Colors.white.withOpacity(0.8),
+                                color: const Color(0xFF5C6B8C),
                                 fontSize: 14,
                                 height: 1.4,
                               ),
@@ -335,13 +301,17 @@ class _ChapterCard extends StatelessWidget {
                           ? Icons.visibility_rounded
                           : Icons.edit_note_rounded,
                       size: 18,
-                      color: isCompleted ? Colors.black : Colors.cyanAccent,
+                      color: isCompleted
+                          ? Colors.black
+                          : const Color(0xFF2E6BFF),
                     ),
                     label: Text(
                       isCompleted ? "View Published Quiz" : "Manage Quiz",
                       style: TextStyle(
                         fontWeight: FontWeight.bold,
-                        color: isCompleted ? Colors.black : Colors.cyanAccent,
+                        color: isCompleted
+                            ? Colors.black
+                            : const Color(0xFF2E6BFF),
                       ),
                     ),
                     style: ElevatedButton.styleFrom(
@@ -350,11 +320,11 @@ class _ChapterCard extends StatelessWidget {
                           : Colors.transparent,
                       foregroundColor: isCompleted
                           ? Colors.black
-                          : Colors.cyanAccent,
+                          : const Color(0xFF2E6BFF),
                       padding: const EdgeInsets.symmetric(vertical: 14),
                       side: isCompleted
                           ? null
-                          : const BorderSide(color: Colors.cyanAccent),
+                          : const BorderSide(color: Color(0xFF2E6BFF)),
                       shape: RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(12),
                       ),

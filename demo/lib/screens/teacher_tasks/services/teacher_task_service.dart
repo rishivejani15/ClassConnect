@@ -71,6 +71,49 @@ class TeacherTaskService {
     debugPrint('TeacherTaskService: updated taskId=$taskId status=$status');
   }
 
+  /// Delete a task from Firestore.
+  Future<void> deleteTask(String taskId) async {
+    await _db.collection('teacher_tasks').doc(taskId).delete();
+    debugPrint('TeacherTaskService: deleted taskId=$taskId');
+  }
+
+  /// Update the actual minutes spent on a task.
+  Future<void> updateActualMinutes(String taskId, int minutes) async {
+    await _db.collection('teacher_tasks').doc(taskId).update({
+      'actualMinutes': minutes,
+    });
+    debugPrint(
+        'TeacherTaskService: updated actualMinutes=$minutes for taskId=$taskId');
+  }
+
+  /// Get aggregate task stats for a teacher.
+  Future<Map<String, dynamic>> getTaskStats(String teacherId) async {
+    final snap = await _db
+        .collection('teacher_tasks')
+        .where('teacherId', isEqualTo: teacherId)
+        .where('planningType', isEqualTo: 'manual')
+        .get();
+
+    int total = snap.docs.length;
+    int completed = 0;
+    int totalEstimated = 0;
+    int totalActual = 0;
+
+    for (final doc in snap.docs) {
+      final data = doc.data();
+      if (data['status'] == 'completed') completed++;
+      totalEstimated += (data['estimatedMinutes'] as int?) ?? 0;
+      totalActual += (data['actualMinutes'] as int?) ?? 0;
+    }
+
+    return {
+      'total': total,
+      'completed': completed,
+      'totalEstimated': totalEstimated,
+      'totalActual': totalActual,
+    };
+  }
+
   Future<void> createManualPlannedTask({
     required String plannedForDate, // YYYY-MM-DD
     required String taskType,

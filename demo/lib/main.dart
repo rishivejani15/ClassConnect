@@ -7,6 +7,7 @@ import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:demo/screens/student_home.dart';
 import 'package:demo/screens/teacher_home.dart';
+import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:supabase_flutter/supabase_flutter.dart' hide User;
 import 'package:demo/screens/student/student_report/services/weekly_report_scheduler.dart';
 import 'package:demo/screens/parent_details_screen.dart';
@@ -14,6 +15,7 @@ import 'package:demo/screens/teacher_details_screen.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
+  await dotenv.load(fileName: '.env');
   await Firebase.initializeApp();
   await Supabase.initialize(url: 'SUPABASE_URL', anonKey: 'SUPABASE_KEY');
   WeeklyReportScheduler.initialize();

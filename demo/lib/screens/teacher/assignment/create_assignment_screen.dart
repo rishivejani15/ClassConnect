@@ -18,7 +18,7 @@ class _CreateAssignmentScreenState extends State<CreateAssignmentScreen> {
   final _formKey = GlobalKey<FormState>();
   final TextEditingController _titleController = TextEditingController();
   final TextEditingController _descController = TextEditingController();
-  
+
   PlatformFile? _pickedFile;
   bool _isLoading = false;
 
@@ -54,7 +54,7 @@ class _CreateAssignmentScreenState extends State<CreateAssignmentScreen> {
   /// 🔹 Upload & Post Assignment
   Future<void> _postAssignment() async {
     if (!_formKey.currentState!.validate()) return;
-    
+
     setState(() => _isLoading = true);
 
     try {
@@ -83,20 +83,22 @@ class _CreateAssignmentScreenState extends State<CreateAssignmentScreen> {
 
       // 2. Save to Firestore
       final teacherId = FirebaseAuth.instance.currentUser?.uid;
-      
+
       await FirebaseFirestore.instance
           .collection('classes')
           .doc(widget.classId)
           .collection('assignments')
           .add({
-        'title': _titleController.text.trim(),
-        'description': _descController.text.trim(),
-        'attachmentUrl': attachmentUrl,
-        'attachmentName': attachmentName,
-        'createdAt': FieldValue.serverTimestamp(),
-        'teacherId': teacherId,
-        'deadline': _deadline != null ? Timestamp.fromDate(_deadline!) : null,
-      });
+            'title': _titleController.text.trim(),
+            'description': _descController.text.trim(),
+            'attachmentUrl': attachmentUrl,
+            'attachmentName': attachmentName,
+            'createdAt': FieldValue.serverTimestamp(),
+            'teacherId': teacherId,
+            'deadline': _deadline != null
+                ? Timestamp.fromDate(_deadline!)
+                : null,
+          });
 
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
@@ -120,10 +122,13 @@ class _CreateAssignmentScreenState extends State<CreateAssignmentScreen> {
     return Scaffold(
       backgroundColor: const Color(0xFFF4F8FF),
       appBar: AppBar(
-        title: const Text("Create Assignment", style: TextStyle(color: Colors.white)),
+        title: const Text(
+          "Create Assignment",
+          style: TextStyle(color: Color(0xFF0D1B3D)),
+        ),
         backgroundColor: const Color(0xFFF4F8FF),
         elevation: 0,
-        iconTheme: const IconThemeData(color: Colors.white),
+        iconTheme: const IconThemeData(color: Color(0xFF0D1B3D)),
       ),
       body: SingleChildScrollView(
         padding: const EdgeInsets.all(20),
@@ -133,50 +138,74 @@ class _CreateAssignmentScreenState extends State<CreateAssignmentScreen> {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               // Title
-              const Text("Title", style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: Colors.white)),
+              const Text(
+                "Title",
+                style: TextStyle(
+                  fontSize: 16,
+                  fontWeight: FontWeight.bold,
+                  color: Color(0xFF0D1B3D),
+                ),
+              ),
               const SizedBox(height: 8),
               TextFormField(
                 controller: _titleController,
-                style: const TextStyle(color: Colors.white),
+                style: const TextStyle(color: Color(0xFF0D1B3D)),
                 decoration: InputDecoration(
                   hintText: "Enter assignment title",
-                  hintStyle: const TextStyle(color: Colors.white54),
+                  hintStyle: const TextStyle(color: Color(0xFF8DA6D8)),
                   border: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(10),
-                    borderSide: BorderSide.none,
+                    borderSide: const BorderSide(color: Color(0x1A2E6BFF)),
                   ),
                   filled: true,
-                  fillColor: const Color(0xFF1E2E52),
+                  fillColor: Colors.white,
                 ),
-                validator: (val) => val == null || val.isEmpty ? "Title is required" : null,
+                validator: (val) =>
+                    val == null || val.isEmpty ? "Title is required" : null,
               ),
 
               const SizedBox(height: 20),
 
               // Description
-              const Text("Description", style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: Colors.white)),
+              const Text(
+                "Description",
+                style: TextStyle(
+                  fontSize: 16,
+                  fontWeight: FontWeight.bold,
+                  color: Color(0xFF0D1B3D),
+                ),
+              ),
               const SizedBox(height: 8),
               TextFormField(
                 controller: _descController,
                 maxLines: 5,
-                style: const TextStyle(color: Colors.white),
+                style: const TextStyle(color: Color(0xFF0D1B3D)),
                 decoration: InputDecoration(
                   hintText: "Enter instructions...",
-                  hintStyle: const TextStyle(color: Colors.white54),
+                  hintStyle: const TextStyle(color: Color(0xFF8DA6D8)),
                   border: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(10),
-                    borderSide: BorderSide.none,
+                    borderSide: const BorderSide(color: Color(0x1A2E6BFF)),
                   ),
                   filled: true,
-                  fillColor: const Color(0xFF1E2E52),
+                  fillColor: Colors.white,
                 ),
-                validator: (val) => val == null || val.isEmpty ? "Description is required" : null,
+                validator: (val) => val == null || val.isEmpty
+                    ? "Description is required"
+                    : null,
               ),
 
               const SizedBox(height: 20),
 
               // Deadline
-              const Text("Deadline", style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: Colors.white)),
+              const Text(
+                "Deadline",
+                style: TextStyle(
+                  fontSize: 16,
+                  fontWeight: FontWeight.bold,
+                  color: Color(0xFF0D1B3D),
+                ),
+              ),
               const SizedBox(height: 8),
               InkWell(
                 onTap: _pickDeadline,
@@ -184,19 +213,25 @@ class _CreateAssignmentScreenState extends State<CreateAssignmentScreen> {
                 child: Container(
                   padding: const EdgeInsets.all(16),
                   decoration: BoxDecoration(
-                    color: const Color(0xFF1E2E52),
+                    color: Colors.white,
                     borderRadius: BorderRadius.circular(10),
+                    border: Border.all(color: const Color(0x1A2E6BFF)),
                   ),
                   child: Row(
                     children: [
-                      const Icon(Icons.calendar_today, color: Colors.white54),
+                      const Icon(
+                        Icons.calendar_today,
+                        color: Color(0xFF2E6BFF),
+                      ),
                       const SizedBox(width: 10),
                       Text(
-                        _deadline != null 
-                          ? "${_deadline!.day}/${_deadline!.month}/${_deadline!.year}" 
-                          : "Select Deadline",
+                        _deadline != null
+                            ? "${_deadline!.day}/${_deadline!.month}/${_deadline!.year}"
+                            : "Select Deadline",
                         style: TextStyle(
-                          color: _deadline != null ? Colors.white : Colors.white54,
+                          color: _deadline != null
+                              ? const Color(0xFF0D1B3D)
+                              : const Color(0xFF8DA6D8),
                         ),
                       ),
                     ],
@@ -207,7 +242,14 @@ class _CreateAssignmentScreenState extends State<CreateAssignmentScreen> {
               const SizedBox(height: 20),
 
               // Attachment
-              const Text("Attachment (Optional)", style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: Colors.white)),
+              const Text(
+                "Attachment (Optional)",
+                style: TextStyle(
+                  fontSize: 16,
+                  fontWeight: FontWeight.bold,
+                  color: Color(0xFF0D1B3D),
+                ),
+              ),
               const SizedBox(height: 8),
               InkWell(
                 onTap: _pickFile,
@@ -215,26 +257,34 @@ class _CreateAssignmentScreenState extends State<CreateAssignmentScreen> {
                 child: Container(
                   padding: const EdgeInsets.all(16),
                   decoration: BoxDecoration(
-                    color: const Color(0xFF1E2E52),
+                    color: Colors.white,
                     borderRadius: BorderRadius.circular(10),
+                    border: Border.all(color: const Color(0x1A2E6BFF)),
                   ),
                   child: Row(
                     children: [
-                      const Icon(Icons.attach_file, color: Colors.white54),
+                      const Icon(Icons.attach_file, color: Color(0xFF2E6BFF)),
                       const SizedBox(width: 10),
                       Expanded(
                         child: Text(
-                          _pickedFile != null ? _pickedFile!.name : "Attach PDF or Doc",
+                          _pickedFile != null
+                              ? _pickedFile!.name
+                              : "Attach PDF or Doc",
                           style: TextStyle(
-                            color: _pickedFile != null ? Colors.white : Colors.white54,
+                            color: _pickedFile != null
+                                ? const Color(0xFF0D1B3D)
+                                : const Color(0xFF8DA6D8),
                           ),
                         ),
                       ),
                       if (_pickedFile != null)
                         IconButton(
-                          icon: const Icon(Icons.close, color: Colors.redAccent),
+                          icon: const Icon(
+                            Icons.close,
+                            color: Colors.redAccent,
+                          ),
                           onPressed: () => setState(() => _pickedFile = null),
-                        )
+                        ),
                     ],
                   ),
                 ),
@@ -250,11 +300,20 @@ class _CreateAssignmentScreenState extends State<CreateAssignmentScreen> {
                   onPressed: _isLoading ? null : _postAssignment,
                   style: ElevatedButton.styleFrom(
                     backgroundColor: const Color(0xFF3B82F6),
-                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(12),
+                    ),
                   ),
-                  child: _isLoading 
-                    ? const CircularProgressIndicator(color: Colors.white)
-                    : const Text("Post Assignment", style: TextStyle(fontSize: 16, color: Colors.white, fontWeight: FontWeight.bold)),
+                  child: _isLoading
+                      ? const CircularProgressIndicator(color: Colors.white)
+                      : const Text(
+                          "Post Assignment",
+                          style: TextStyle(
+                            fontSize: 16,
+                            color: Colors.white,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
                 ),
               ),
             ],

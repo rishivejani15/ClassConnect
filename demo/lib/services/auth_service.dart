@@ -185,7 +185,6 @@ class AuthService {
     print("✅ Teacher details are complete!");
     return true;
 
-    return true;
   }
 
   // ---------------- STORE USER DATA ----------------

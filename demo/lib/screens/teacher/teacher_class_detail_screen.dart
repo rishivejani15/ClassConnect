@@ -49,20 +49,20 @@ class _TeacherClassDetailScreenState extends State<TeacherClassDetailScreen>
         builder: (context, snapshot) {
           if (snapshot.connectionState == ConnectionState.waiting) {
             return Container(
-              color: const Color(0xFF0F1C3F),
+              color: const Color(0xFFF4F8FF),
               child: const Center(
-                child: CircularProgressIndicator(color: Colors.white30),
+                child: CircularProgressIndicator(color: Color(0xFF2E6BFF)),
               ),
             );
           }
 
           if (!snapshot.hasData || !snapshot.data!.exists) {
             return Container(
-              color: const Color(0xFF0F1C3F),
+              color: const Color(0xFFF4F8FF),
               child: const Center(
                 child: Text(
                   "Class not found",
-                  style: TextStyle(color: Colors.white),
+                  style: TextStyle(color: Color(0xFF0D1B3D)),
                 ),
               ),
             );
@@ -75,13 +75,13 @@ class _TeacherClassDetailScreenState extends State<TeacherClassDetailScreen>
             children: [
               // Custom AppBar
               Container(
-                color: const Color(0xFF0F1C3F),
+                color: const Color(0xFFF4F8FF),
                 padding: const EdgeInsets.only(top: 30),
                 child: Row(
                   children: [
                     Builder(
                       builder: (context) => IconButton(
-                        icon: const Icon(Icons.menu, color: Colors.white),
+                        icon: const Icon(Icons.menu, color: Color(0xFF0D1B3D)),
                         onPressed: () {
                           Scaffold.of(context).openDrawer();
                         },
@@ -91,7 +91,7 @@ class _TeacherClassDetailScreenState extends State<TeacherClassDetailScreen>
                       child: Text(
                         className,
                         style: const TextStyle(
-                          color: Colors.white,
+                          color: Color(0xFF0D1B3D),
                           fontSize: 20,
                           fontWeight: FontWeight.bold,
                         ),
@@ -101,7 +101,7 @@ class _TeacherClassDetailScreenState extends State<TeacherClassDetailScreen>
                     IconButton(
                       icon: const Icon(
                         Icons.arrow_back_ios_new_rounded,
-                        color: Colors.white,
+                        color: Color(0xFF0D1B3D),
                       ),
                       onPressed: () {
                         Navigator.pop(context);
@@ -113,12 +113,12 @@ class _TeacherClassDetailScreenState extends State<TeacherClassDetailScreen>
 
               // Tab Bar
               Container(
-                color: const Color(0xFF0F1C3F),
+                color: const Color(0xFFF4F8FF),
                 child: TabBar(
                   controller: _tabController,
-                  indicatorColor: Colors.white,
-                  labelColor: Colors.white,
-                  unselectedLabelColor: Colors.white54,
+                  indicatorColor: const Color(0xFF2E6BFF),
+                  labelColor: const Color(0xFF0D1B3D),
+                  unselectedLabelColor: const Color(0xFF5C6B8C),
                   tabs: const [
                     Tab(text: "Posts"),
                     Tab(text: "Assignments"),
@@ -160,6 +160,7 @@ class _TeacherClassDetailScreenState extends State<TeacherClassDetailScreen>
           final classData = classSnapshot.data?.data() as Map<String, dynamic>?;
           final className = classData?['class_name'] ?? 'Class';
           final classCode = classData?['class_code'] ?? '---';
+          final pblEnabled = classData?['pblEnabled'] != false;
 
           return Column(
             children: [
@@ -167,11 +168,11 @@ class _TeacherClassDetailScreenState extends State<TeacherClassDetailScreen>
               Container(
                 width: double.infinity,
                 padding: const EdgeInsets.fromLTRB(24, 60, 24, 32),
-                decoration: const BoxDecoration(
+                decoration: BoxDecoration(
                   gradient: LinearGradient(
                     begin: Alignment.topLeft,
                     end: Alignment.bottomRight,
-                    colors: [Color(0xFF1E3A8A), Color(0xFF3B82F6)],
+                    colors: [const Color(0xFF1E3A8A), const Color(0xFF3B82F6)],
                   ),
                 ),
                 child: Column(
@@ -273,40 +274,42 @@ class _TeacherClassDetailScreenState extends State<TeacherClassDetailScreen>
                         );
                       },
                     ),
-                    const SizedBox(height: 20),
-                    Padding(
-                      padding: const EdgeInsets.symmetric(horizontal: 8),
-                      child: Text(
-                        "PROJECT-BASED LEARNING",
-                        style: TextStyle(
-                          color: Colors.white.withOpacity(0.5),
-                          fontSize: 11,
-                          fontWeight: FontWeight.bold,
-                          letterSpacing: 1.2,
+                    if (pblEnabled) ...[
+                      const SizedBox(height: 20),
+                      Padding(
+                        padding: const EdgeInsets.symmetric(horizontal: 8),
+                        child: Text(
+                          "PROJECT-BASED LEARNING",
+                          style: TextStyle(
+                            color: const Color(0xFF5C6B8C),
+                            fontSize: 11,
+                            fontWeight: FontWeight.bold,
+                            letterSpacing: 1.2,
+                          ),
                         ),
                       ),
-                    ),
-                    const SizedBox(height: 12),
-                    _buildModernMenuItem(
-                      context: context,
-                      icon: Icons.rocket_launch,
-                      title: "PBL Projects",
-                      subtitle: "Manage projects",
-                      iconColor: const Color(0xFF8B5CF6),
-                      onTap: () {
-                        Navigator.pop(context);
-                        Navigator.push(
-                          context,
-                          MaterialPageRoute(
-                            builder: (context) => PblMainScreen(
-                              classId: widget.classId,
-                              className: className,
-                              classCode: classCode,
+                      const SizedBox(height: 12),
+                      _buildModernMenuItem(
+                        context: context,
+                        icon: Icons.rocket_launch,
+                        title: "PBL Projects",
+                        subtitle: "Manage projects",
+                        iconColor: const Color(0xFF8B5CF6),
+                        onTap: () {
+                          Navigator.pop(context);
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (context) => PblMainScreen(
+                                classId: widget.classId,
+                                className: className,
+                                classCode: classCode,
+                              ),
                             ),
-                          ),
-                        );
-                      },
-                    ),
+                          );
+                        },
+                      ),
+                    ],
                   ],
                 ),
               ),
@@ -328,9 +331,9 @@ class _TeacherClassDetailScreenState extends State<TeacherClassDetailScreen>
     return Container(
       margin: const EdgeInsets.symmetric(horizontal: 4),
       decoration: BoxDecoration(
-        color: Colors.white.withOpacity(0.05),
+        color: Colors.white,
         borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: Colors.white.withOpacity(0.1)),
+        border: Border.all(color: const Color(0x1A2E6BFF)),
       ),
       child: ListTile(
         onTap: onTap,
@@ -345,19 +348,16 @@ class _TeacherClassDetailScreenState extends State<TeacherClassDetailScreen>
         title: Text(
           title,
           style: const TextStyle(
-            color: Colors.white,
+            color: Color(0xFF0D1B3D),
             fontWeight: FontWeight.w600,
             fontSize: 15,
           ),
         ),
         subtitle: Text(
           subtitle,
-          style: TextStyle(color: Colors.white.withOpacity(0.6), fontSize: 12),
+          style: const TextStyle(color: Color(0xFF5C6B8C), fontSize: 12),
         ),
-        trailing: Icon(
-          Icons.chevron_right,
-          color: Colors.white.withOpacity(0.3),
-        ),
+        trailing: const Icon(Icons.chevron_right, color: Color(0xFFA5B2C8)),
       ),
     );
   }
@@ -503,7 +503,7 @@ class _PostsTabState extends State<_PostsTab> {
   @override
   Widget build(BuildContext context) {
     return Container(
-      color: const Color(0xFF0F1C3F),
+      color: const Color(0xFFF4F8FF),
       child: Column(
         children: [
           // Posts Feed
@@ -517,7 +517,7 @@ class _PostsTabState extends State<_PostsTab> {
               builder: (context, snapshot) {
                 if (snapshot.connectionState == ConnectionState.waiting) {
                   return const Center(
-                    child: CircularProgressIndicator(color: Colors.white30),
+                    child: CircularProgressIndicator(color: Color(0xFF2E6BFF)),
                   );
                 }
 
@@ -535,7 +535,7 @@ class _PostsTabState extends State<_PostsTab> {
                         Text(
                           'Error loading posts',
                           style: TextStyle(
-                            color: Colors.white.withOpacity(0.6),
+                            color: const Color(0xFF0D1B3D),
                             fontSize: 16,
                           ),
                         ),
@@ -543,7 +543,7 @@ class _PostsTabState extends State<_PostsTab> {
                         Text(
                           '${snapshot.error}',
                           style: TextStyle(
-                            color: Colors.white.withOpacity(0.4),
+                            color: const Color(0xFF5C6B8C),
                             fontSize: 12,
                           ),
                           textAlign: TextAlign.center,
@@ -561,13 +561,13 @@ class _PostsTabState extends State<_PostsTab> {
                         Icon(
                           Icons.chat_bubble_outline,
                           size: 64,
-                          color: Colors.white.withOpacity(0.3),
+                          color: const Color(0xFFA5B2C8),
                         ),
                         const SizedBox(height: 16),
                         Text(
                           'No posts yet',
                           style: TextStyle(
-                            color: Colors.white.withOpacity(0.6),
+                            color: const Color(0xFF0D1B3D),
                             fontSize: 16,
                           ),
                         ),
@@ -575,7 +575,7 @@ class _PostsTabState extends State<_PostsTab> {
                         Text(
                           'Start by posting an announcement below',
                           style: TextStyle(
-                            color: Colors.white.withOpacity(0.4),
+                            color: const Color(0xFF5C6B8C),
                             fontSize: 14,
                           ),
                         ),
@@ -616,10 +616,8 @@ class _PostsTabState extends State<_PostsTab> {
           Container(
             padding: const EdgeInsets.all(16),
             decoration: BoxDecoration(
-              color: const Color(0xFF1E2E52),
-              border: Border(
-                top: BorderSide(color: Colors.white.withOpacity(0.1)),
-              ),
+              color: Colors.white,
+              border: Border(top: const BorderSide(color: Color(0x1A2E6BFF))),
             ),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
@@ -630,9 +628,9 @@ class _PostsTabState extends State<_PostsTab> {
                     margin: const EdgeInsets.only(bottom: 8),
                     padding: const EdgeInsets.all(12),
                     decoration: BoxDecoration(
-                      color: Colors.white.withOpacity(0.05),
+                      color: const Color(0xFFF4F8FF),
                       borderRadius: BorderRadius.circular(8),
-                      border: Border.all(color: Colors.white.withOpacity(0.1)),
+                      border: Border.all(color: const Color(0x1A2E6BFF)),
                     ),
                     child: Row(
                       children: [
@@ -646,7 +644,7 @@ class _PostsTabState extends State<_PostsTab> {
                           child: Text(
                             _attachmentName!,
                             style: const TextStyle(
-                              color: Colors.white,
+                              color: Color(0xFF0D1B3D),
                               fontSize: 13,
                             ),
                             maxLines: 1,
@@ -679,7 +677,7 @@ class _PostsTabState extends State<_PostsTab> {
                       icon: Icon(
                         Icons.attach_file,
                         color: _isPosting
-                            ? Colors.white30
+                            ? const Color(0xFFA5B2C8)
                             : const Color(0xFF3B82F6),
                       ),
                     ),
@@ -690,19 +688,17 @@ class _PostsTabState extends State<_PostsTab> {
                       child: TextField(
                         controller: _messageController,
                         enabled: !_isPosting,
-                        style: const TextStyle(color: Colors.white),
+                        style: const TextStyle(color: Color(0xFF0D1B3D)),
                         maxLines: null,
                         decoration: InputDecoration(
                           hintText: 'Write a post...',
-                          hintStyle: TextStyle(
-                            color: Colors.white.withOpacity(0.4),
-                          ),
+                          hintStyle: const TextStyle(color: Color(0xFF8DA6D8)),
                           border: OutlineInputBorder(
                             borderRadius: BorderRadius.circular(24),
                             borderSide: BorderSide.none,
                           ),
                           filled: true,
-                          fillColor: const Color(0xFF0F1C3F),
+                          fillColor: Colors.white,
                           contentPadding: const EdgeInsets.symmetric(
                             horizontal: 16,
                             vertical: 10,
@@ -753,9 +749,16 @@ class _PostsTabState extends State<_PostsTab> {
       margin: const EdgeInsets.only(bottom: 16),
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: const Color(0xFF1E2E52),
+        color: Colors.white,
         borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: Colors.white.withOpacity(0.1)),
+        border: Border.all(color: const Color(0x1A2E6BFF)),
+        boxShadow: [
+          BoxShadow(
+            color: const Color(0xFF2E6BFF).withOpacity(0.06),
+            blurRadius: 8,
+            offset: const Offset(0, 4),
+          ),
+        ],
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -783,7 +786,7 @@ class _PostsTabState extends State<_PostsTab> {
                     const Text(
                       'Teacher',
                       style: TextStyle(
-                        color: Colors.white,
+                        color: Color(0xFF0D1B3D),
                         fontWeight: FontWeight.bold,
                         fontSize: 15,
                       ),
@@ -792,7 +795,7 @@ class _PostsTabState extends State<_PostsTab> {
                       Text(
                         _formatTimestamp(publishedAt),
                         style: TextStyle(
-                          color: Colors.white.withOpacity(0.5),
+                          color: const Color(0xFF5C6B8C),
                           fontSize: 12,
                         ),
                       ),
@@ -808,7 +811,7 @@ class _PostsTabState extends State<_PostsTab> {
             Text(
               message,
               style: const TextStyle(
-                color: Colors.white,
+                color: Color(0xFF0D1B3D),
                 fontSize: 15,
                 height: 1.4,
               ),
@@ -828,9 +831,9 @@ class _PostsTabState extends State<_PostsTab> {
               child: Container(
                 padding: const EdgeInsets.all(12),
                 decoration: BoxDecoration(
-                  color: Colors.white.withOpacity(0.05),
+                  color: const Color(0xFFF4F8FF),
                   borderRadius: BorderRadius.circular(8),
-                  border: Border.all(color: Colors.white.withOpacity(0.1)),
+                  border: Border.all(color: const Color(0x1A2E6BFF)),
                 ),
                 child: Row(
                   children: [
@@ -844,14 +847,18 @@ class _PostsTabState extends State<_PostsTab> {
                       child: Text(
                         attachmentName,
                         style: const TextStyle(
-                          color: Colors.white,
+                          color: Color(0xFF0D1B3D),
                           fontSize: 14,
                         ),
                         maxLines: 1,
                         overflow: TextOverflow.ellipsis,
                       ),
                     ),
-                    const Icon(Icons.download, color: Colors.white54, size: 20),
+                    const Icon(
+                      Icons.download,
+                      color: Color(0xFFA5B2C8),
+                      size: 20,
+                    ),
                   ],
                 ),
               ),
@@ -905,7 +912,7 @@ class _AssignmentsTab extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      color: const Color(0xFF0F1C3F),
+      color: const Color(0xFFF4F8FF),
       child: Column(
         children: [
           // Create Assignment Button
@@ -952,7 +959,7 @@ class _AssignmentsTab extends StatelessWidget {
               builder: (context, snapshot) {
                 if (snapshot.connectionState == ConnectionState.waiting) {
                   return const Center(
-                    child: CircularProgressIndicator(color: Colors.white30),
+                    child: CircularProgressIndicator(color: Color(0xFF2E6BFF)),
                   );
                 }
 
@@ -972,7 +979,7 @@ class _AssignmentsTab extends StatelessWidget {
                           Text(
                             "Error loading assignments",
                             style: TextStyle(
-                              color: Colors.white.withOpacity(0.6),
+                              color: const Color(0xFF0D1B3D),
                               fontSize: 16,
                             ),
                           ),
@@ -980,7 +987,7 @@ class _AssignmentsTab extends StatelessWidget {
                           Text(
                             "${snapshot.error}",
                             style: TextStyle(
-                              color: Colors.white.withOpacity(0.4),
+                              color: const Color(0xFF5C6B8C),
                               fontSize: 12,
                             ),
                             textAlign: TextAlign.center,
@@ -999,13 +1006,13 @@ class _AssignmentsTab extends StatelessWidget {
                         Icon(
                           Icons.assignment_outlined,
                           size: 64,
-                          color: Colors.white.withOpacity(0.3),
+                          color: const Color(0xFF2E6BFF).withOpacity(0.2),
                         ),
                         const SizedBox(height: 16),
                         Text(
                           "No assignments yet",
                           style: TextStyle(
-                            color: Colors.white.withOpacity(0.6),
+                            color: const Color(0xFF0D1B3D),
                             fontSize: 16,
                           ),
                         ),
@@ -1013,7 +1020,7 @@ class _AssignmentsTab extends StatelessWidget {
                         Text(
                           "Create your first assignment above",
                           style: TextStyle(
-                            color: Colors.white.withOpacity(0.4),
+                            color: const Color(0xFF5C6B8C),
                             fontSize: 14,
                           ),
                         ),
@@ -1044,18 +1051,23 @@ class _AssignmentsTab extends StatelessWidget {
                       key: ValueKey('assignment_${doc.id}'),
                       margin: const EdgeInsets.only(bottom: 12),
                       decoration: BoxDecoration(
-                        color: const Color(0xFF1E2E52),
+                        color: Colors.white,
                         borderRadius: BorderRadius.circular(12),
-                        border: Border.all(
-                          color: Colors.white.withOpacity(0.1),
-                        ),
+                        border: Border.all(color: const Color(0x1A2E6BFF)),
+                        boxShadow: [
+                          BoxShadow(
+                            color: const Color(0xFF2E6BFF).withOpacity(0.06),
+                            blurRadius: 8,
+                            offset: const Offset(0, 4),
+                          ),
+                        ],
                       ),
                       child: ListTile(
                         contentPadding: const EdgeInsets.all(16),
                         leading: Container(
                           padding: const EdgeInsets.all(10),
                           decoration: BoxDecoration(
-                            color: const Color(0xFF3B82F6).withOpacity(0.2),
+                            color: const Color(0xFF2E6BFF).withOpacity(0.08),
                             borderRadius: BorderRadius.circular(8),
                           ),
                           child: const Icon(
@@ -1066,7 +1078,7 @@ class _AssignmentsTab extends StatelessWidget {
                         title: Text(
                           data['title'] ?? 'Assignment',
                           style: const TextStyle(
-                            color: Colors.white,
+                            color: Color(0xFF0D1B3D),
                             fontWeight: FontWeight.bold,
                             fontSize: 16,
                           ),
@@ -1080,7 +1092,7 @@ class _AssignmentsTab extends StatelessWidget {
                               maxLines: 2,
                               overflow: TextOverflow.ellipsis,
                               style: TextStyle(
-                                color: Colors.white.withOpacity(0.6),
+                                color: const Color(0xFF5C6B8C),
                                 fontSize: 13,
                               ),
                             ),
@@ -1091,13 +1103,13 @@ class _AssignmentsTab extends StatelessWidget {
                                   Icon(
                                     Icons.calendar_today,
                                     size: 12,
-                                    color: Colors.white.withOpacity(0.5),
+                                    color: const Color(0xFFA5B2C8),
                                   ),
                                   const SizedBox(width: 4),
                                   Text(
                                     'Due: ${_formatDate(data['dueDate'])}',
                                     style: TextStyle(
-                                      color: Colors.white.withOpacity(0.5),
+                                      color: const Color(0xFF5C6B8C),
                                       fontSize: 12,
                                     ),
                                   ),
@@ -1107,7 +1119,7 @@ class _AssignmentsTab extends StatelessWidget {
                         ),
                         trailing: Icon(
                           Icons.chevron_right,
-                          color: Colors.white.withOpacity(0.3),
+                          color: const Color(0xFFA5B2C8),
                         ),
                       ),
                     );
@@ -1179,7 +1191,7 @@ class _DetailsTab extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      color: const Color(0xFF0F1C3F),
+      color: const Color(0xFFF4F8FF),
       child: SingleChildScrollView(
         padding: const EdgeInsets.all(20),
         child: Column(
@@ -1196,7 +1208,7 @@ class _DetailsTab extends StatelessWidget {
               style: TextStyle(
                 fontSize: 18,
                 fontWeight: FontWeight.bold,
-                color: Colors.white,
+                color: Color(0xFF0D1B3D),
               ),
             ),
             const SizedBox(height: 12),
@@ -1204,15 +1216,15 @@ class _DetailsTab extends StatelessWidget {
               width: double.infinity,
               padding: const EdgeInsets.all(16),
               decoration: BoxDecoration(
-                color: const Color(0xFF1E2E52),
+                color: Colors.white,
                 borderRadius: BorderRadius.circular(16),
-                border: Border.all(color: Colors.white.withOpacity(0.1)),
+                border: Border.all(color: const Color(0x1A2E6BFF)),
               ),
               child: Text(
                 classData['description'] ?? "No description provided",
                 style: const TextStyle(
                   fontSize: 15,
-                  color: Colors.white70,
+                  color: Color(0xFF5C6B8C),
                   height: 1.5,
                 ),
               ),
@@ -1229,7 +1241,7 @@ class _DetailsTab extends StatelessWidget {
                   style: TextStyle(
                     fontSize: 18,
                     fontWeight: FontWeight.bold,
-                    color: Colors.white,
+                    color: Color(0xFF0D1B3D),
                   ),
                 ),
                 Container(
@@ -1238,13 +1250,13 @@ class _DetailsTab extends StatelessWidget {
                     vertical: 6,
                   ),
                   decoration: BoxDecoration(
-                    color: Colors.white.withOpacity(0.1),
+                    color: const Color(0xFF2E6BFF).withOpacity(0.08),
                     borderRadius: BorderRadius.circular(20),
                   ),
                   child: Text(
                     "${classData['student_count'] ?? 0} Joined",
                     style: const TextStyle(
-                      color: Colors.white,
+                      color: Color(0xFF0D1B3D),
                       fontWeight: FontWeight.w600,
                     ),
                   ),
@@ -1263,7 +1275,7 @@ class _DetailsTab extends StatelessWidget {
               width: double.infinity,
               padding: const EdgeInsets.symmetric(vertical: 16),
               decoration: BoxDecoration(
-                color: Colors.red.withOpacity(0.1),
+                color: Colors.red.withOpacity(0.06),
                 borderRadius: BorderRadius.circular(12),
                 border: Border.all(color: Colors.red.withOpacity(0.3)),
               ),
@@ -1278,7 +1290,7 @@ class _DetailsTab extends StatelessWidget {
                   const Text(
                     "Danger Zone",
                     style: TextStyle(
-                      color: Colors.white,
+                      color: Color(0xFF0D1B3D),
                       fontSize: 16,
                       fontWeight: FontWeight.bold,
                     ),
@@ -1329,7 +1341,7 @@ class _DetailsTab extends StatelessWidget {
     showDialog(
       context: context,
       builder: (dialogContext) => AlertDialog(
-        backgroundColor: const Color(0xFF1E2E52),
+        backgroundColor: Colors.white,
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
         title: Row(
           children: [
@@ -1343,7 +1355,7 @@ class _DetailsTab extends StatelessWidget {
               child: Text(
                 'Delete Class',
                 style: TextStyle(
-                  color: Colors.white,
+                  color: Color(0xFF0D1B3D),
                   fontWeight: FontWeight.bold,
                 ),
               ),
@@ -1357,7 +1369,7 @@ class _DetailsTab extends StatelessWidget {
             children: [
               Text(
                 'Are you sure you want to permanently delete "$className"?',
-                style: const TextStyle(color: Colors.white70, fontSize: 15),
+                style: const TextStyle(color: Color(0xFF5C6B8C), fontSize: 15),
               ),
               const SizedBox(height: 16),
               Container(
@@ -1380,7 +1392,7 @@ class _DetailsTab extends StatelessWidget {
               const Text(
                 'To confirm, please enter the class code:',
                 style: TextStyle(
-                  color: Colors.white,
+                  color: Color(0xFF0D1B3D),
                   fontWeight: FontWeight.w600,
                 ),
               ),
@@ -1391,18 +1403,22 @@ class _DetailsTab extends StatelessWidget {
                   vertical: 10,
                 ),
                 decoration: BoxDecoration(
-                  color: Colors.white.withOpacity(0.1),
+                  color: const Color(0xFFF4F8FF),
                   borderRadius: BorderRadius.circular(8),
-                  border: Border.all(color: Colors.white.withOpacity(0.2)),
+                  border: Border.all(color: const Color(0x1A2E6BFF)),
                 ),
                 child: Row(
                   children: [
-                    const Icon(Icons.qr_code, color: Colors.white54, size: 20),
+                    const Icon(
+                      Icons.qr_code,
+                      color: Color(0xFF2E6BFF),
+                      size: 20,
+                    ),
                     const SizedBox(width: 8),
                     Text(
                       classCode,
                       style: const TextStyle(
-                        color: Colors.white,
+                        color: Color(0xFF0D1B3D),
                         fontSize: 18,
                         fontWeight: FontWeight.bold,
                         letterSpacing: 2,
@@ -1415,26 +1431,22 @@ class _DetailsTab extends StatelessWidget {
               TextField(
                 controller: codeController,
                 style: const TextStyle(
-                  color: Colors.white,
+                  color: Color(0xFF0D1B3D),
                   fontSize: 16,
                   letterSpacing: 2,
                 ),
                 decoration: InputDecoration(
                   hintText: 'Enter class code',
-                  hintStyle: TextStyle(color: Colors.white.withOpacity(0.4)),
+                  hintStyle: TextStyle(color: const Color(0xFF8DA6D8)),
                   filled: true,
-                  fillColor: const Color(0xFF0F1C3F),
+                  fillColor: Colors.white,
                   border: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(10),
-                    borderSide: BorderSide(
-                      color: Colors.white.withOpacity(0.2),
-                    ),
+                    borderSide: const BorderSide(color: Color(0x1A2E6BFF)),
                   ),
                   enabledBorder: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(10),
-                    borderSide: BorderSide(
-                      color: Colors.white.withOpacity(0.2),
-                    ),
+                    borderSide: const BorderSide(color: Color(0x1A2E6BFF)),
                   ),
                   focusedBorder: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(10),
@@ -1453,7 +1465,7 @@ class _DetailsTab extends StatelessWidget {
             },
             child: const Text(
               'Cancel',
-              style: TextStyle(color: Colors.white70),
+              style: TextStyle(color: Color(0xFF5C6B8C)),
             ),
           ),
           ElevatedButton(
@@ -1461,7 +1473,7 @@ class _DetailsTab extends StatelessWidget {
               if (codeController.text.trim() == classCode) {
                 codeController.dispose();
                 Navigator.pop(dialogContext);
-                await _deleteClass(context);
+                Future<void>.microtask(() => _deleteClass(context));
               } else {
                 ScaffoldMessenger.of(context).showSnackBar(
                   const SnackBar(
@@ -1489,12 +1501,15 @@ class _DetailsTab extends StatelessWidget {
 
   Future<void> _deleteClass(BuildContext context) async {
     try {
+      if (!context.mounted) return;
+
       // Show loading indicator
       showDialog(
         context: context,
         barrierDismissible: false,
-        builder: (context) =>
-            const Center(child: CircularProgressIndicator(color: Colors.white)),
+        builder: (context) => const Center(
+          child: CircularProgressIndicator(color: Color(0xFF2E6BFF)),
+        ),
       );
 
       // Delete the class document
@@ -1532,7 +1547,10 @@ class _DetailsTab extends StatelessWidget {
       }
 
       if (context.mounted) {
-        Navigator.pop(context); // Close loading dialog
+        Navigator.of(
+          context,
+          rootNavigator: true,
+        ).pop(); // Close loading dialog
         Navigator.pop(context); // Go back to previous screen
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(
@@ -1543,7 +1561,12 @@ class _DetailsTab extends StatelessWidget {
       }
     } catch (e) {
       if (context.mounted) {
-        Navigator.pop(context); // Close loading dialog
+        if (Navigator.of(context, rootNavigator: true).canPop()) {
+          Navigator.of(
+            context,
+            rootNavigator: true,
+          ).pop(); // Close loading dialog
+        }
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
             content: Text('Error deleting class: $e'),
@@ -1559,15 +1582,11 @@ class _DetailsTab extends StatelessWidget {
       width: double.infinity,
       padding: const EdgeInsets.all(24),
       decoration: BoxDecoration(
-        gradient: const LinearGradient(
-          colors: [Color(0xFF1E3A8A), Color(0xFF3B82F6)],
-          begin: Alignment.topLeft,
-          end: Alignment.bottomRight,
-        ),
+        color: Colors.white,
         borderRadius: BorderRadius.circular(20),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.3),
+            color: const Color(0xFF2E6BFF).withOpacity(0.06),
             blurRadius: 15,
             offset: const Offset(0, 8),
           ),
@@ -1581,34 +1600,31 @@ class _DetailsTab extends StatelessWidget {
             style: const TextStyle(
               fontSize: 26,
               fontWeight: FontWeight.bold,
-              color: Colors.white,
+              color: Color(0xFF0D1B3D),
             ),
           ),
           const SizedBox(height: 8),
           Text(
             data['subject'] ?? 'Subject',
-            style: TextStyle(
-              fontSize: 16,
-              color: Colors.white.withOpacity(0.8),
-            ),
+            style: TextStyle(fontSize: 16, color: const Color(0xFF5C6B8C)),
           ),
           const SizedBox(height: 20),
           Container(
             padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
             decoration: BoxDecoration(
-              color: Colors.black.withOpacity(0.2),
+              color: const Color(0xFF2E6BFF).withOpacity(0.08),
               borderRadius: BorderRadius.circular(12),
-              border: Border.all(color: Colors.white.withOpacity(0.1)),
+              border: Border.all(color: const Color(0x1A2E6BFF)),
             ),
             child: Row(
               mainAxisSize: MainAxisSize.min,
               children: [
-                const Icon(Icons.qr_code, color: Colors.white, size: 20),
+                const Icon(Icons.qr_code, color: Color(0xFF2E6BFF), size: 20),
                 const SizedBox(width: 10),
                 Text(
                   "Code: ${data['class_code']}",
                   style: const TextStyle(
-                    color: Colors.white,
+                    color: Color(0xFF0D1B3D),
                     fontWeight: FontWeight.bold,
                     letterSpacing: 1,
                   ),
@@ -1637,12 +1653,12 @@ class _DetailsTab extends StatelessWidget {
                   Icon(
                     Icons.person_off_outlined,
                     size: 40,
-                    color: Colors.white24,
+                    color: const Color(0xFFA5B2C8),
                   ),
                   const SizedBox(height: 10),
                   const Text(
                     "No students joined yet",
-                    style: TextStyle(color: Colors.white54),
+                    style: TextStyle(color: Color(0xFF5C6B8C)),
                   ),
                 ],
               ),
@@ -1678,12 +1694,12 @@ class _DetailsTab extends StatelessWidget {
                   key: ValueKey('student_$studentId'),
                   margin: const EdgeInsets.only(bottom: 12),
                   decoration: BoxDecoration(
-                    color: const Color(0xFF1E2E52),
+                    color: Colors.white,
                     borderRadius: BorderRadius.circular(12),
-                    border: Border.all(color: Colors.white.withOpacity(0.1)),
+                    border: Border.all(color: const Color(0x1A2E6BFF)),
                     boxShadow: [
                       BoxShadow(
-                        color: Colors.black.withOpacity(0.2),
+                        color: const Color(0xFF2E6BFF).withOpacity(0.06),
                         blurRadius: 8,
                         offset: const Offset(0, 4),
                       ),
@@ -1712,7 +1728,9 @@ class _DetailsTab extends StatelessWidget {
                                       height: 48,
                                       alignment: Alignment.center,
                                       decoration: BoxDecoration(
-                                        color: Colors.white.withOpacity(0.1),
+                                        color: const Color(
+                                          0xFF2E6BFF,
+                                        ).withOpacity(0.08),
                                         shape: BoxShape.circle,
                                       ),
                                       child: Text(
@@ -1720,7 +1738,7 @@ class _DetailsTab extends StatelessWidget {
                                             ? name[0].toUpperCase()
                                             : '?',
                                         style: const TextStyle(
-                                          color: Colors.white,
+                                          color: Color(0xFF0D1B3D),
                                           fontWeight: FontWeight.bold,
                                           fontSize: 18,
                                         ),
@@ -1733,13 +1751,15 @@ class _DetailsTab extends StatelessWidget {
                               height: 48,
                               alignment: Alignment.center,
                               decoration: BoxDecoration(
-                                color: Colors.white.withOpacity(0.1),
+                                color: const Color(
+                                  0xFF2E6BFF,
+                                ).withOpacity(0.08),
                                 shape: BoxShape.circle,
                               ),
                               child: Text(
                                 name.isNotEmpty ? name[0].toUpperCase() : '?',
                                 style: const TextStyle(
-                                  color: Colors.white,
+                                  color: Color(0xFF0D1B3D),
                                   fontWeight: FontWeight.bold,
                                   fontSize: 18,
                                 ),
@@ -1751,13 +1771,13 @@ class _DetailsTab extends StatelessWidget {
                       style: const TextStyle(
                         fontWeight: FontWeight.w600,
                         fontSize: 16,
-                        color: Colors.white,
+                        color: Color(0xFF0D1B3D),
                       ),
                     ),
                     subtitle: Text(
                       studentId,
                       style: const TextStyle(
-                        color: Colors.white38,
+                        color: Color(0xFF5C6B8C),
                         fontSize: 13,
                       ),
                     ),
