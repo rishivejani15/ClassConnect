@@ -11,7 +11,7 @@ class QuizTabScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: const Color(0xFF0F1C3F), // Deep Blue Background
+      backgroundColor: const Color(0xFFF4F8FF), // Deep Blue Background
       body: StreamBuilder<QuerySnapshot>(
         stream: FirebaseFirestore.instance
             .collection('classes')
@@ -91,10 +91,10 @@ class QuizTabScreen extends StatelessWidget {
                 context,
                 MaterialPageRoute(
                   builder: (_) => Scaffold(
-                    backgroundColor: const Color(0xFF0F1C3F),
+                    backgroundColor: const Color(0xFFF4F8FF),
                     appBar: AppBar(
                       title: const Text("Upload Syllabus"),
-                      backgroundColor: const Color(0xFF0F1C3F),
+                      backgroundColor: const Color(0xFFF4F8FF),
                       elevation: 0,
                     ),
                     body: UploadSyllabusScreen(classId: classId),

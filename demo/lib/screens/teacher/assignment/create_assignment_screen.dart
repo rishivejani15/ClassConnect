@@ -118,10 +118,10 @@ class _CreateAssignmentScreenState extends State<CreateAssignmentScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: const Color(0xFF0F1C3F),
+      backgroundColor: const Color(0xFFF4F8FF),
       appBar: AppBar(
         title: const Text("Create Assignment", style: TextStyle(color: Colors.white)),
-        backgroundColor: const Color(0xFF0F1C3F),
+        backgroundColor: const Color(0xFFF4F8FF),
         elevation: 0,
         iconTheme: const IconThemeData(color: Colors.white),
       ),

@@ -39,7 +39,7 @@ class _TeacherClassDetailScreenState extends State<TeacherClassDetailScreen>
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: const Color(0xFF0F1C3F),
+      backgroundColor: const Color(0xFFF4F8FF),
       drawer: _buildDrawer(context),
       body: StreamBuilder<DocumentSnapshot>(
         stream: FirebaseFirestore.instance
@@ -150,7 +150,7 @@ class _TeacherClassDetailScreenState extends State<TeacherClassDetailScreen>
   /// 🔹 SIDE NAVIGATION DRAWER
   Widget _buildDrawer(BuildContext context) {
     return Drawer(
-      backgroundColor: const Color(0xFF0F1C3F),
+      backgroundColor: const Color(0xFFF4F8FF),
       child: StreamBuilder<DocumentSnapshot>(
         stream: FirebaseFirestore.instance
             .collection('classes')

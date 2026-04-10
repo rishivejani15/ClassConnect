@@ -133,7 +133,7 @@ class _StudentActivityScreenState extends State<StudentActivityScreen> {
                   .snapshots()
                   .listen(
                     (s) => _handleSnapshot(classId, 'post', s),
-                    onError: (e) => print('Posts listener error: $e'),
+                    onError: (e) => debugPrint('Posts listener error: $e'),
                   );
             }
             if (!_updateSubscriptions.containsKey(classId)) {
@@ -171,7 +171,7 @@ class _StudentActivityScreenState extends State<StudentActivityScreen> {
                   .snapshots()
                   .listen(
                     (s) => _handleSnapshot(classId, 'pbl', s),
-                    onError: (e) => print('PBL listener error: $e'),
+                    onError: (e) => debugPrint('PBL listener error: $e'),
                   );
             }
           }
@@ -217,16 +217,22 @@ class _StudentActivityScreenState extends State<StudentActivityScreen> {
 
       if (type == 'resource') {
         final url = (data['url'] ?? '').toString();
-        if (title.isEmpty)
+        if (title.isEmpty) {
           title = (data['description'] ?? 'New resource').toString();
-        if (message.isEmpty) message = url;
+        }
+        if (message.isEmpty) {
+          message = url;
+        }
       } else if (type == 'post') {
         // Posts typically have description as content
-        if (title.isEmpty) title = 'Post';
-        if (message.isEmpty)
+        if (title.isEmpty) {
+          title = 'Post';
+        }
+        if (message.isEmpty) {
           message =
               (data['description'] ?? data['body'] ?? data['content'] ?? '')
                   .toString();
+        }
 
         // Classify certain posts as assignments to keep routing empty
         final subtype = (data['type'] ?? '').toString();
@@ -261,20 +267,12 @@ class _StudentActivityScreenState extends State<StudentActivityScreen> {
         final studentAssignments =
             (data['studentAssignments'] as List?) ?? const [];
 
-        print(
-          'DEBUG: Checking PBL ${doc.id}, studentAssignments count: ${studentAssignments.length}',
-        );
-
         for (final assignment in studentAssignments) {
           if (assignment is Map<String, dynamic>) {
             final students = (assignment['students'] as List?) ?? const [];
-            print('DEBUG: Assignment has ${students.length} students');
             for (final student in students) {
               if (student is Map<String, dynamic>) {
                 final studentUid = student['uid'];
-                print(
-                  'DEBUG: Comparing student uid: $studentUid with current: $currentUserId',
-                );
                 if (studentUid == currentUserId) {
                   isAssigned = true;
                   break;
@@ -284,8 +282,6 @@ class _StudentActivityScreenState extends State<StudentActivityScreen> {
             if (isAssigned) break;
           }
         }
-
-        print('DEBUG: PBL ${doc.id} isAssigned: $isAssigned');
 
         // Skip if not assigned
         if (!isAssigned) {
@@ -360,33 +356,43 @@ class _StudentActivityScreenState extends State<StudentActivityScreen> {
   String _alertKey(String classId, String type, String docId) =>
       '$classId|$type|$docId';
 
-  Color _chipBg(String type) {
+  Color _typeTint(String type) {
     switch (type) {
       case 'announcement':
-        return Colors.orange.shade100;
+        return const Color(0xFFFF8B3D);
       case 'resource':
-        return Colors.green.shade100;
+        return const Color(0xFF1FB58E);
+      case 'assignment':
+        return const Color(0xFF2E6BFF);
+      case 'post':
+      case 'update':
+        return const Color(0xFF00A3FF);
       case 'pbl':
-        return Colors.purple.shade100;
+        return const Color(0xFF8B5CF6);
       case 'miniproject':
-        return Colors.blue.shade100;
+        return const Color(0xFF14B8A6);
       default:
-        return Colors.blue.shade100;
+        return const Color(0xFF2E6BFF);
     }
   }
 
-  Color _chipFg(String type) {
+  IconData _typeIcon(String type) {
     switch (type) {
       case 'announcement':
-        return Colors.orange.shade900;
+        return Icons.campaign_rounded;
       case 'resource':
-        return Colors.green.shade900;
+        return Icons.folder_special_rounded;
+      case 'assignment':
+        return Icons.assignment_turned_in_rounded;
+      case 'post':
+      case 'update':
+        return Icons.dynamic_feed_rounded;
       case 'pbl':
-        return Colors.purple.shade900;
+        return Icons.lightbulb_rounded;
       case 'miniproject':
-        return Colors.blue.shade900;
+        return Icons.extension_rounded;
       default:
-        return Colors.blue.shade900;
+        return Icons.notifications_active_rounded;
     }
   }
 
@@ -413,128 +419,434 @@ class _StudentActivityScreenState extends State<StudentActivityScreen> {
 
   @override
   Widget build(BuildContext context) {
-    if (_loading) {
-      return const Center(child: CircularProgressIndicator());
-    }
-
-    if (_sortedAlerts.isEmpty) {
-      return const Center(
-        child: Text(
-          'No alerts yet. You will see class updates and announcements here.',
-          textAlign: TextAlign.center,
-          style: TextStyle(color: Colors.white70, fontSize: 14),
-        ),
-      );
-    }
-
-    return ListView.builder(
-      padding: const EdgeInsets.all(16),
-      itemCount: _sortedAlerts.length,
-      itemBuilder: (context, index) {
-        final alert = _sortedAlerts[index];
-        final className = _classNames[alert.classId] ?? 'Class';
-
-        return InkWell(
-          onTap: () => _navigateToAlert(context, alert, className),
-          borderRadius: BorderRadius.circular(16),
-          child: Container(
-            margin: const EdgeInsets.only(bottom: 12),
-            padding: const EdgeInsets.all(14),
-            height: 120,
-            decoration: BoxDecoration(
-              color: const Color(0xFF1E1E1E),
-              borderRadius: BorderRadius.circular(16),
-              border: Border.all(color: Colors.white, width: 1),
-              boxShadow: [
-                BoxShadow(
-                  color: Colors.black.withOpacity(0.4),
-                  blurRadius: 12,
-                  offset: const Offset(0, 4),
-                  spreadRadius: 0,
-                ),
-                BoxShadow(
-                  color: Colors.black.withOpacity(0.2),
-                  blurRadius: 6,
-                  offset: const Offset(0, 2),
-                  spreadRadius: -2,
-                ),
-              ],
-            ),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                Row(
-                  children: [
-                    Container(
-                      padding: const EdgeInsets.symmetric(
-                        horizontal: 8,
-                        vertical: 4,
-                      ),
-                      decoration: BoxDecoration(
-                        color: _chipBg(alert.type),
-                        borderRadius: BorderRadius.circular(8),
-                      ),
-                      child: Text(
-                        _typeLabel(alert.type),
-                        style: TextStyle(
-                          color: _chipFg(alert.type),
-                          fontWeight: FontWeight.w700,
-                          fontSize: 12,
-                        ),
-                      ),
-                    ),
-                    const SizedBox(width: 8),
-                    Expanded(
-                      child: Text(
-                        className,
-                        style: const TextStyle(
-                          fontWeight: FontWeight.w700,
-                          fontSize: 14,
-                          color: Colors.white,
-                        ),
-                        overflow: TextOverflow.ellipsis,
-                      ),
-                    ),
-                    const SizedBox(width: 8),
-                    Text(
-                      _formatTimeAgo(alert.createdAt),
-                      style: const TextStyle(color: Colors.grey, fontSize: 12),
-                    ),
+    return Scaffold(
+      body: Stack(
+        children: [
+          const Positioned.fill(
+            child: DecoratedBox(
+              decoration: BoxDecoration(
+                gradient: LinearGradient(
+                  begin: Alignment.topLeft,
+                  end: Alignment.bottomRight,
+                  colors: [
+                    Color(0xFFF7FAFF),
+                    Color(0xFFEAF3FF),
+                    Color(0xFFFDFEFF),
                   ],
                 ),
-                const SizedBox(height: 6),
-                Flexible(
-                  child: Text(
-                    alert.title,
-                    maxLines: 1,
-                    overflow: TextOverflow.ellipsis,
-                    style: const TextStyle(
-                      fontSize: 15,
-                      fontWeight: FontWeight.bold,
-                      color: Colors.white,
-                    ),
-                  ),
-                ),
-                if (alert.message.isNotEmpty) ...[
-                  const SizedBox(height: 2),
-                  Flexible(
-                    child: Text(
-                      alert.message,
-                      maxLines: 2,
-                      overflow: TextOverflow.ellipsis,
-                      style: const TextStyle(
-                        fontSize: 13,
-                        color: Colors.white70,
-                      ),
-                    ),
-                  ),
-                ],
-              ],
+              ),
             ),
+          ),
+          Positioned(
+            top: -80,
+            right: -60,
+            child: _SoftBlob(
+              color: const Color(0xFF7CCBFF).withValues(alpha: 0.20),
+              size: 220,
+            ),
+          ),
+          Positioned(
+            top: 110,
+            left: -70,
+            child: _SoftBlob(
+              color: const Color(0xFF7EE7C4).withValues(alpha: 0.18),
+              size: 180,
+            ),
+          ),
+          SafeArea(
+            child: _loading
+                ? _buildLoadingState()
+                : AnimatedSwitcher(
+                    duration: const Duration(milliseconds: 300),
+                    switchInCurve: Curves.easeOutCubic,
+                    switchOutCurve: Curves.easeInCubic,
+                    child: _sortedAlerts.isEmpty
+                        ? _buildEmptyState()
+                        : _buildContent(),
+                  ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildLoadingState() {
+    return Center(
+      child: Container(
+        width: 220,
+        padding: const EdgeInsets.all(24),
+        decoration: BoxDecoration(
+          color: Colors.white.withValues(alpha: 0.82),
+          borderRadius: BorderRadius.circular(24),
+          border: Border.all(
+            color: const Color(0xFF2E6BFF).withValues(alpha: 0.10),
+          ),
+          boxShadow: [
+            BoxShadow(
+              color: const Color(0xFF2E6BFF).withValues(alpha: 0.08),
+              blurRadius: 24,
+              offset: const Offset(0, 12),
+            ),
+          ],
+        ),
+        child: const Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            SizedBox(
+              width: 36,
+              height: 36,
+              child: CircularProgressIndicator(strokeWidth: 3),
+            ),
+            SizedBox(height: 16),
+            Text(
+              'Loading your class activity',
+              textAlign: TextAlign.center,
+              style: TextStyle(
+                color: Color(0xFF0D1B3D),
+                fontWeight: FontWeight.w700,
+              ),
+            ),
+            SizedBox(height: 6),
+            Text(
+              'Pulling the latest updates from your classes.',
+              textAlign: TextAlign.center,
+              style: TextStyle(color: Color(0xFF5C6B8C), fontSize: 12),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildEmptyState() {
+    return Center(
+      child: Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 24),
+        child: Container(
+          padding: const EdgeInsets.all(24),
+          decoration: BoxDecoration(
+            color: Colors.white.withValues(alpha: 0.9),
+            borderRadius: BorderRadius.circular(28),
+            border: Border.all(
+              color: const Color(0xFF2E6BFF).withValues(alpha: 0.08),
+            ),
+            boxShadow: [
+              BoxShadow(
+                color: const Color(0xFF2E6BFF).withValues(alpha: 0.08),
+                blurRadius: 24,
+                offset: const Offset(0, 12),
+              ),
+            ],
+          ),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Container(
+                width: 72,
+                height: 72,
+                decoration: BoxDecoration(
+                  gradient: const LinearGradient(
+                    colors: [Color(0xFF2E6BFF), Color(0xFF00D9FF)],
+                  ),
+                  borderRadius: BorderRadius.circular(24),
+                ),
+                child: const Icon(
+                  Icons.auto_graph_rounded,
+                  color: Colors.white,
+                  size: 34,
+                ),
+              ),
+              const SizedBox(height: 18),
+              const Text(
+                'No activity yet',
+                style: TextStyle(
+                  color: Color(0xFF0D1B3D),
+                  fontSize: 20,
+                  fontWeight: FontWeight.w800,
+                ),
+              ),
+              const SizedBox(height: 8),
+              const Text(
+                'When your teachers post updates, resources, or assignments, they will appear here in real time.',
+                textAlign: TextAlign.center,
+                style: TextStyle(color: Color(0xFF5C6B8C), height: 1.45),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildContent() {
+    return ListView(
+      key: const ValueKey('activity-content'),
+      padding: const EdgeInsets.fromLTRB(20, 18, 20, 24),
+      children: [
+        _buildStatsRow(),
+        const SizedBox(height: 20),
+        Row(
+          children: [
+            const Expanded(
+              child: Text(
+                'Latest Activity',
+                style: TextStyle(
+                  color: Color(0xFF0D1B3D),
+                  fontSize: 18,
+                  fontWeight: FontWeight.w800,
+                ),
+              ),
+            ),
+            Text(
+              '${_sortedAlerts.length} items',
+              style: const TextStyle(color: Color(0xFF5C6B8C), fontSize: 12),
+            ),
+          ],
+        ),
+        const SizedBox(height: 12),
+        ...List.generate(
+          _sortedAlerts.length,
+          (index) => _buildAlertCard(_sortedAlerts[index], index),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildStatsRow() {
+    final totalClasses = _classNames.length;
+    final announcements = _sortedAlerts
+        .where((item) => item.type == 'announcement')
+        .length;
+    final resources = _sortedAlerts
+        .where((item) => item.type == 'resource')
+        .length;
+    final projects = _sortedAlerts
+        .where((item) => item.type == 'pbl' || item.type == 'miniproject')
+        .length;
+
+    return Row(
+      children: [
+        Expanded(
+          child: _buildStatTile(
+            'Classes',
+            totalClasses.toString(),
+            Icons.class_rounded,
+            const Color(0xFF2E6BFF),
+          ),
+        ),
+        const SizedBox(width: 10),
+        Expanded(
+          child: _buildStatTile(
+            'Alerts',
+            _sortedAlerts.length.toString(),
+            Icons.notifications_active_rounded,
+            const Color(0xFF00A693),
+          ),
+        ),
+        const SizedBox(width: 10),
+        Expanded(
+          child: _buildStatTile(
+            'Updates',
+            (announcements + resources + projects).toString(),
+            Icons.auto_awesome_rounded,
+            const Color(0xFFFF8B3D),
+          ),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildStatTile(String label, String value, IconData icon, Color tint) {
+    return Container(
+      padding: const EdgeInsets.all(14),
+      decoration: BoxDecoration(
+        color: Colors.white.withValues(alpha: 0.92),
+        borderRadius: BorderRadius.circular(22),
+        border: Border.all(color: tint.withValues(alpha: 0.12)),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Container(
+            padding: const EdgeInsets.all(8),
+            decoration: BoxDecoration(
+              color: tint.withValues(alpha: 0.12),
+              borderRadius: BorderRadius.circular(12),
+            ),
+            child: Icon(icon, color: tint, size: 18),
+          ),
+          const SizedBox(height: 14),
+          Text(
+            value,
+            style: const TextStyle(
+              color: Color(0xFF0D1B3D),
+              fontSize: 22,
+              fontWeight: FontWeight.w800,
+            ),
+          ),
+          const SizedBox(height: 4),
+          Text(
+            label,
+            style: const TextStyle(color: Color(0xFF5C6B8C), fontSize: 12),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildAlertCard(_StudentAlert alert, int index) {
+    final className = _classNames[alert.classId] ?? 'Class';
+    final tint = _typeTint(alert.type);
+
+    return TweenAnimationBuilder<double>(
+      tween: Tween(begin: 0, end: 1),
+      duration: Duration(milliseconds: 300 + (index * 70)),
+      curve: Curves.easeOutCubic,
+      builder: (context, value, child) {
+        return Opacity(
+          opacity: value,
+          child: Transform.translate(
+            offset: Offset(0, 18 * (1 - value)),
+            child: child,
           ),
         );
       },
+      child: Padding(
+        padding: const EdgeInsets.only(bottom: 12),
+        child: Material(
+          color: Colors.transparent,
+          child: InkWell(
+            onTap: () => _navigateToAlert(context, alert, className),
+            borderRadius: BorderRadius.circular(24),
+            child: Container(
+              padding: const EdgeInsets.all(16),
+              decoration: BoxDecoration(
+                color: Colors.white.withValues(alpha: 0.95),
+                borderRadius: BorderRadius.circular(24),
+                border: Border.all(color: tint.withValues(alpha: 0.12)),
+                boxShadow: [
+                  BoxShadow(
+                    color: tint.withValues(alpha: 0.10),
+                    blurRadius: 18,
+                    offset: const Offset(0, 10),
+                  ),
+                ],
+              ),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Row(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Container(
+                        width: 42,
+                        height: 42,
+                        decoration: BoxDecoration(
+                          gradient: LinearGradient(
+                            colors: [tint, tint.withValues(alpha: 0.70)],
+                            begin: Alignment.topLeft,
+                            end: Alignment.bottomRight,
+                          ),
+                          borderRadius: BorderRadius.circular(14),
+                        ),
+                        child: Icon(
+                          _typeIcon(alert.type),
+                          color: Colors.white,
+                          size: 20,
+                        ),
+                      ),
+                      const SizedBox(width: 12),
+                      Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Row(
+                              children: [
+                                Container(
+                                  padding: const EdgeInsets.symmetric(
+                                    horizontal: 10,
+                                    vertical: 5,
+                                  ),
+                                  decoration: BoxDecoration(
+                                    color: tint.withValues(alpha: 0.12),
+                                    borderRadius: BorderRadius.circular(999),
+                                  ),
+                                  child: Text(
+                                    _typeLabel(alert.type),
+                                    style: TextStyle(
+                                      color: tint,
+                                      fontSize: 11,
+                                      fontWeight: FontWeight.w700,
+                                    ),
+                                  ),
+                                ),
+                                const Spacer(),
+                                Text(
+                                  _formatTimeAgo(alert.createdAt),
+                                  style: const TextStyle(
+                                    color: Color(0xFF7B88A6),
+                                    fontSize: 12,
+                                  ),
+                                ),
+                              ],
+                            ),
+                            const SizedBox(height: 10),
+                            Text(
+                              alert.title,
+                              maxLines: 2,
+                              overflow: TextOverflow.ellipsis,
+                              style: const TextStyle(
+                                color: Color(0xFF0D1B3D),
+                                fontSize: 16,
+                                fontWeight: FontWeight.w800,
+                                height: 1.2,
+                              ),
+                            ),
+                            const SizedBox(height: 6),
+                            Text(
+                              className,
+                              style: const TextStyle(
+                                color: Color(0xFF49607D),
+                                fontWeight: FontWeight.w600,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ],
+                  ),
+                  if (alert.message.isNotEmpty) ...[
+                    const SizedBox(height: 12),
+                    Text(
+                      alert.message,
+                      maxLines: 3,
+                      overflow: TextOverflow.ellipsis,
+                      style: const TextStyle(
+                        color: Color(0xFF51637F),
+                        height: 1.45,
+                      ),
+                    ),
+                  ],
+                  const SizedBox(height: 14),
+                  Row(
+                    children: [
+                      Text(
+                        'Open details',
+                        style: TextStyle(
+                          color: tint,
+                          fontWeight: FontWeight.w700,
+                        ),
+                      ),
+                      const Spacer(),
+                      Icon(Icons.arrow_forward_rounded, color: tint, size: 18),
+                    ],
+                  ),
+                ],
+              ),
+            ),
+          ),
+        ),
+      ),
     );
   }
 
@@ -543,11 +855,13 @@ class _StudentActivityScreenState extends State<StudentActivityScreen> {
     _StudentAlert alert,
     String className,
   ) async {
-    print('DEBUG: Navigating to alert type: ${alert.type}, id: ${alert.id}');
+    debugPrint(
+      'DEBUG: Navigating to alert type: ${alert.type}, id: ${alert.id}',
+    );
 
     switch (alert.type) {
       case 'resource':
-        print('DEBUG: Navigating to Resources');
+        debugPrint('DEBUG: Navigating to Resources');
         Navigator.push(
           context,
           MaterialPageRoute(
@@ -560,10 +874,10 @@ class _StudentActivityScreenState extends State<StudentActivityScreen> {
         break;
       case 'assignment':
         // Keep assignment routing empty for now
-        print('DEBUG: Assignment routing kept empty');
+        debugPrint('DEBUG: Assignment routing kept empty');
         return;
       case 'post':
-        print('DEBUG: Navigating to Class Detail (Post)');
+        debugPrint('DEBUG: Navigating to Class Detail (Post)');
         Navigator.push(
           context,
           MaterialPageRoute(
@@ -573,7 +887,7 @@ class _StudentActivityScreenState extends State<StudentActivityScreen> {
         );
         break;
       case 'pbl':
-        print('DEBUG: Navigating to PBL Selection');
+        debugPrint('DEBUG: Navigating to PBL Selection');
         // Fetch full PBL data before navigating
         try {
           final pblDoc = await _firestore
@@ -622,10 +936,14 @@ class _StudentActivityScreenState extends State<StudentActivityScreen> {
         }
         break;
       case 'miniproject':
-        print('DEBUG: Navigating to Mini Projects (Assigned PBL Selection)');
+        debugPrint(
+          'DEBUG: Navigating to Mini Projects (Assigned PBL Selection)',
+        );
         final assignedPblId = _assignedPblIdByClass[alert.classId];
         if (assignedPblId == null) {
-          print('DEBUG: No assigned PBL id found for class ${alert.classId}');
+          debugPrint(
+            'DEBUG: No assigned PBL id found for class ${alert.classId}',
+          );
           return;
         }
         try {
@@ -663,7 +981,7 @@ class _StudentActivityScreenState extends State<StudentActivityScreen> {
       case 'announcement':
       case 'update':
       default:
-        print('DEBUG: Navigating to Class Detail (default)');
+        debugPrint('DEBUG: Navigating to Class Detail (default)');
         Navigator.push(
           context,
           MaterialPageRoute(
@@ -707,6 +1025,27 @@ class _StudentActivityScreenState extends State<StudentActivityScreen> {
     final minute = dt.minute.toString().padLeft(2, '0');
     final ampm = dt.hour >= 12 ? 'PM' : 'AM';
     return '$m $day, $year $hour:$minute $ampm';
+  }
+}
+
+class _SoftBlob extends StatelessWidget {
+  const _SoftBlob({required this.color, required this.size});
+
+  final Color color;
+  final double size;
+
+  @override
+  Widget build(BuildContext context) {
+    return AnimatedScale(
+      scale: 1,
+      duration: const Duration(milliseconds: 900),
+      curve: Curves.easeOut,
+      child: Container(
+        width: size,
+        height: size,
+        decoration: BoxDecoration(shape: BoxShape.circle, color: color),
+      ),
+    );
   }
 }
 

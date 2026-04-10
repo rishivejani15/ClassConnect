@@ -150,9 +150,9 @@ class _StudentMiniProjectDetailScreenState
         });
       }
     } catch (e) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text("Error picking file: $e")),
-      );
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(SnackBar(content: Text("Error picking file: $e")));
     }
   }
 
@@ -172,25 +172,26 @@ class _StudentMiniProjectDetailScreenState
 
       final supabase = Supabase.instance.client;
       final uniqueName = '${DateTime.now().millisecondsSinceEpoch}_$fileName';
-      final storagePath = 'mini_projects/${widget.classId}/${widget.pblId}/${widget.studentId}/$uniqueName';
+      final storagePath =
+          'mini_projects/${widget.classId}/${widget.pblId}/${widget.studentId}/$uniqueName';
 
       // Upload
       if (fileBytes != null) {
-        await supabase.storage.from('PBL - PROJECTS').uploadBinary(
-          storagePath,
-          fileBytes,
-        );
+        await supabase.storage
+            .from('PBL - PROJECTS')
+            .uploadBinary(storagePath, fileBytes);
       } else if (_selectedFile!.path != null) {
-        await supabase.storage.from('PBL - PROJECTS').upload(
-          storagePath,
-          File(_selectedFile!.path!),
-        );
+        await supabase.storage
+            .from('PBL - PROJECTS')
+            .upload(storagePath, File(_selectedFile!.path!));
       } else {
         throw Exception("Cannot read file data");
       }
 
       // Get Public URL
-      final publicUrl = supabase.storage.from('PBL - PROJECTS').getPublicUrl(storagePath);
+      final publicUrl = supabase.storage
+          .from('PBL - PROJECTS')
+          .getPublicUrl(storagePath);
 
       // Update Firestore
       await FirebaseFirestore.instance
@@ -201,11 +202,11 @@ class _StudentMiniProjectDetailScreenState
           .collection('selections')
           .doc(widget.studentId)
           .update({
-        'submitted': true,
-        'submissionUrl': publicUrl,
-        'fileName': fileName,
-        'submittedAt': FieldValue.serverTimestamp(),
-      });
+            'submitted': true,
+            'submissionUrl': publicUrl,
+            'fileName': fileName,
+            'submittedAt': FieldValue.serverTimestamp(),
+          });
 
       if (mounted) {
         setState(() {
@@ -216,17 +217,22 @@ class _StudentMiniProjectDetailScreenState
         });
 
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text("Project Submitted Successfully! 🚀"), backgroundColor: Colors.green),
+          const SnackBar(
+            content: Text("Project Submitted Successfully! 🚀"),
+            backgroundColor: Colors.green,
+          ),
         );
       }
-
     } catch (e) {
       if (mounted) {
         setState(() {
           _isUploading = false;
         });
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text("Upload Failed: $e"), backgroundColor: Colors.red),
+          SnackBar(
+            content: Text("Upload Failed: $e"),
+            backgroundColor: Colors.red,
+          ),
         );
       }
     }
@@ -239,12 +245,19 @@ class _StudentMiniProjectDetailScreenState
     final progress = total == 0 ? 0.0 : completed / total;
 
     return Scaffold(
-      backgroundColor: const Color(0xFF0F1C3F),
+      backgroundColor: const Color(0xFFF4F8FF),
       appBar: AppBar(
-        title: const Text('Project Guidelines',style: TextStyle(color: Colors.white),),
-        backgroundColor: const Color(0xFF0F1C3F),
+        foregroundColor: const Color(0xFF0D1B3D),
+        title: const Text(
+          'Project Guidelines',
+          style: TextStyle(color: Color(0xFF0D1B3D)),
+        ),
+        backgroundColor: const Color(0xFFF4F8FF),
         leading: IconButton(
-          icon: const Icon(Icons.arrow_back_ios_new_rounded, color: Colors.white),
+          icon: const Icon(
+            Icons.arrow_back_ios_new_rounded,
+            color: Color(0xFF0D1B3D),
+          ),
           onPressed: () {
             Navigator.pop(context);
           },
@@ -254,303 +267,367 @@ class _StudentMiniProjectDetailScreenState
       ),
       body: _isLoading
           ? const Center(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            CircularProgressIndicator(color: Colors.cyan),
-            SizedBox(height: 16),
-            Text(
-              "Generating personalized guidelines...",
-              style: TextStyle(color: Colors.white70),
-            ),
-          ],
-        ),
-      )
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  CircularProgressIndicator(color: Colors.cyan),
+                  SizedBox(height: 16),
+                  Text(
+                    "Generating personalized guidelines...",
+                    style: TextStyle(color: Color(0xFF5C6B8C)),
+                  ),
+                ],
+              ),
+            )
           : _error != null
           ? Center(
-        child: Padding(
-          padding: const EdgeInsets.all(24.0),
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              const Icon(Icons.error_outline,
-                  color: Colors.redAccent, size: 48),
-              const SizedBox(height: 16),
-              Text(
-                _error!,
-                textAlign: TextAlign.center,
-                style: const TextStyle(color: Colors.white70),
+              child: Padding(
+                padding: const EdgeInsets.all(24.0),
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    const Icon(
+                      Icons.error_outline,
+                      color: Colors.redAccent,
+                      size: 48,
+                    ),
+                    const SizedBox(height: 16),
+                    Text(
+                      _error!,
+                      textAlign: TextAlign.center,
+                      style: const TextStyle(color: Color(0xFF5C6B8C)),
+                    ),
+                    const SizedBox(height: 24),
+                    OutlinedButton(
+                      onPressed: _loadOrGenerateSteps,
+                      child: const Text('Retry'),
+                    ),
+                  ],
+                ),
               ),
-              const SizedBox(height: 24),
-              OutlinedButton(
-                onPressed: _loadOrGenerateSteps,
-                child: const Text('Retry'),
-              ),
-            ],
-          ),
-        ),
-      )
+            )
           : Column(
-        children: [
-          // Header Info
-          Container(
-            width: double.infinity,
-            padding: const EdgeInsets.all(20),
-            color: Colors.indigo.shade900.withOpacity(0.3),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Row(
-                  children: [
-                    Expanded(
-                      child: Text(
-                        widget.selectionData['title'],
-                        style: const TextStyle(
-                          fontSize: 22,
-                          fontWeight: FontWeight.bold,
-                          color: Colors.white,
-                        ),
-                      ),
-                    ),
-                    if (_isSubmitted)
-                      Container(
-                        padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
-                        decoration: BoxDecoration(
-                          color: Colors.green.withOpacity(0.2),
-                          borderRadius: BorderRadius.circular(20),
-                          border: Border.all(color: Colors.green),
-                        ),
-                        child: const Row(
-                          children: [
-                            Icon(Icons.check_circle, size: 16, color: Colors.greenAccent),
-                            SizedBox(width: 4),
-                            Text(
-                              "SUBMITTED",
-                              style: TextStyle(color: Colors.greenAccent, fontWeight: FontWeight.bold, fontSize: 12),
-                            ),
-                          ],
-                        ),
-                      ),
-                  ],
-                ),
-                const SizedBox(height: 8),
-                Text(
-                  widget.selectionData['description'] ?? '',
-                  style: const TextStyle(
-                      fontSize: 14, color: Colors.white70),
-                ),
-                const SizedBox(height: 20),
-
-                // Progress Bar
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    Text(
-                      "Progress: ${completed}/${total} Steps",
-                      style: const TextStyle(
-                          color: Colors.cyanAccent,
-                          fontWeight: FontWeight.bold),
-                    ),
-                    Text(
-                      "${(progress * 100).toInt()}%",
-                      style: const TextStyle(color: Colors.white60),
-                    ),
-                  ],
-                ),
-                const SizedBox(height: 8),
-                LinearProgressIndicator(
-                  value: progress,
-                  backgroundColor: Colors.white10,
-                  color: Colors.cyanAccent,
-                  minHeight: 8,
-                  borderRadius: BorderRadius.circular(4),
-                ),
-              ],
-            ),
-          ),
-
-          // Steps List
-          Expanded(
-            child: ListView.builder(
-              padding: const EdgeInsets.all(16),
-              itemCount: _steps.length,
-              itemBuilder: (context, index) {
-                final step = _steps[index];
-                final isDone = step['completed'] == true;
-
-                return Container(
-                  margin: const EdgeInsets.only(bottom: 16),
-                  decoration: BoxDecoration(
-                    color: isDone
-                        ? Colors.green.withOpacity(0.1)
-                        : Colors.white.withOpacity(0.05),
-                    borderRadius: BorderRadius.circular(12),
-                    border: Border.all(
-                      color: isDone
-                          ? Colors.green.withOpacity(0.5)
-                          : Colors.white10,
-                    ),
-                  ),
-                  child: Theme(
-                    data: Theme.of(context).copyWith(
-                      unselectedWidgetColor: Colors.white54,
-                    ),
-                    child: CheckboxListTile(
-                      contentPadding: const EdgeInsets.symmetric(
-                          horizontal: 16, vertical: 8),
-                      value: isDone,
-                      onChanged: (val) => _toggleStep(index),
-                      activeColor: Colors.green,
-                      checkColor: Colors.white,
-                      title: Text(
-                        "Step ${index + 1}: ${step['title']}",
-                        style: TextStyle(
-                          fontSize: 16,
-                          fontWeight: FontWeight.bold,
-                          color: isDone ? Colors.green.shade200 : Colors.white,
-                          decoration: isDone
-                              ? TextDecoration.lineThrough
-                              : null,
-                        ),
-                      ),
-                      subtitle: Padding(
-                        padding: const EdgeInsets.only(top: 8.0),
-                        child: Text(
-                          step['description'],
-                          style: TextStyle(
-                            fontSize: 14,
-                            color: isDone
-                                ? Colors.white30
-                                : Colors.white70,
-                          ),
-                        ),
-                      ),
-                      controlAffinity: ListTileControlAffinity.leading,
-                    ),
-                  ),
-                );
-              },
-            ),
-          ),
-
-          // Bottom Action (Submit)
-          Container(
-            padding: const EdgeInsets.all(16),
-            decoration: const BoxDecoration(
-              color: Color(0xFF0F1C3F),
-              border: Border(top: BorderSide(color: Colors.white12)),
-            ),
-            child: SafeArea(
-              child: Column(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  if (_isSubmitted) ...[
-                    Container(
-                      padding: const EdgeInsets.all(16),
-                      decoration: BoxDecoration(
-                        color: Colors.green.withOpacity(0.1),
-                        borderRadius: BorderRadius.circular(12),
-                        border: Border.all(color: Colors.green.withOpacity(0.3)),
-                      ),
-                      child: Row(
-                        mainAxisAlignment: MainAxisAlignment.center,
+                // Header Info
+                Container(
+                  width: double.infinity,
+                  padding: const EdgeInsets.all(20),
+                  color: Colors.indigo.shade900.withOpacity(0.3),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Row(
                         children: [
-                          const Icon(Icons.check_circle_outline, color: Colors.green, size: 28),
-                          const SizedBox(width: 12),
-                          const Text(
-                            "Project Submitted",
-                            style: TextStyle(
-                              color: Colors.green,
-                              fontSize: 18,
+                          Expanded(
+                            child: Text(
+                              widget.selectionData['title'],
+                              style: const TextStyle(
+                                fontSize: 22,
+                                fontWeight: FontWeight.bold,
+                                color: const Color(0xFF0D1B3D),
+                              ),
+                            ),
+                          ),
+                          if (_isSubmitted)
+                            Container(
+                              padding: const EdgeInsets.symmetric(
+                                horizontal: 10,
+                                vertical: 5,
+                              ),
+                              decoration: BoxDecoration(
+                                color: Colors.green.withOpacity(0.2),
+                                borderRadius: BorderRadius.circular(20),
+                                border: Border.all(color: Colors.green),
+                              ),
+                              child: const Row(
+                                children: [
+                                  Icon(
+                                    Icons.check_circle,
+                                    size: 16,
+                                    color: Colors.greenAccent,
+                                  ),
+                                  SizedBox(width: 4),
+                                  Text(
+                                    "SUBMITTED",
+                                    style: TextStyle(
+                                      color: Colors.greenAccent,
+                                      fontWeight: FontWeight.bold,
+                                      fontSize: 12,
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ),
+                        ],
+                      ),
+                      const SizedBox(height: 8),
+                      Text(
+                        widget.selectionData['description'] ?? '',
+                        style: const TextStyle(
+                          fontSize: 14,
+                          color: Color(0xFF5C6B8C),
+                        ),
+                      ),
+                      const SizedBox(height: 20),
+
+                      // Progress Bar
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          Text(
+                            "Progress: ${completed}/${total} Steps",
+                            style: const TextStyle(
+                              color: Colors.cyanAccent,
                               fontWeight: FontWeight.bold,
                             ),
                           ),
+                          Text(
+                            "${(progress * 100).toInt()}%",
+                            style: const TextStyle(color: Colors.white60),
+                          ),
                         ],
                       ),
-                    ),
-                  ] else ...[
-                    // File Selection
-                    if (_selectedFile != null)
-                      Container(
-                        margin: const EdgeInsets.only(bottom: 12),
-                        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-                        decoration: BoxDecoration(
-                          color: Colors.indigo.shade900.withOpacity(0.5),
-                          borderRadius: BorderRadius.circular(12),
-                          border: Border.all(color: Colors.indigo.shade300),
-                        ),
-                        child: Row(
-                          children: [
-                            const Icon(Icons.description, color: Colors.white70),
-                            const SizedBox(width: 12),
-                            Expanded(
-                              child: Text(
-                                _selectedFile!.name,
-                                style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
-                                overflow: TextOverflow.ellipsis,
-                              ),
-                            ),
-                            IconButton(
-                              icon: const Icon(Icons.close, color: Colors.redAccent),
-                              onPressed: () => setState(() => _selectedFile = null),
-                              padding: EdgeInsets.zero,
-                              constraints: const BoxConstraints(),
-                            ),
-                          ],
-                        ),
+                      const SizedBox(height: 8),
+                      LinearProgressIndicator(
+                        value: progress,
+                        backgroundColor: Color(0x142E6BFF),
+                        color: Colors.cyanAccent,
+                        minHeight: 8,
+                        borderRadius: BorderRadius.circular(4),
                       ),
+                    ],
+                  ),
+                ),
 
-                    // Buttons
-                    Row(
+                // Steps List
+                Expanded(
+                  child: ListView.builder(
+                    padding: const EdgeInsets.all(16),
+                    itemCount: _steps.length,
+                    itemBuilder: (context, index) {
+                      final step = _steps[index];
+                      final isDone = step['completed'] == true;
+
+                      return Container(
+                        margin: const EdgeInsets.only(bottom: 16),
+                        decoration: BoxDecoration(
+                          color: isDone
+                              ? Colors.green.withOpacity(0.1)
+                              : const Color(0xFF0D1B3D).withOpacity(0.05),
+                          borderRadius: BorderRadius.circular(12),
+                          border: Border.all(
+                            color: isDone
+                                ? Colors.green.withOpacity(0.5)
+                                : Color(0x142E6BFF),
+                          ),
+                        ),
+                        child: Theme(
+                          data: Theme.of(
+                            context,
+                          ).copyWith(unselectedWidgetColor: Color(0xFF7A89A8)),
+                          child: CheckboxListTile(
+                            contentPadding: const EdgeInsets.symmetric(
+                              horizontal: 16,
+                              vertical: 8,
+                            ),
+                            value: isDone,
+                            onChanged: (val) => _toggleStep(index),
+                            activeColor: Colors.green,
+                            checkColor: const Color(0xFF0D1B3D),
+                            title: Text(
+                              "Step ${index + 1}: ${step['title']}",
+                              style: TextStyle(
+                                fontSize: 16,
+                                fontWeight: FontWeight.bold,
+                                color: isDone
+                                    ? Colors.green.shade200
+                                    : const Color(0xFF0D1B3D),
+                                decoration: isDone
+                                    ? TextDecoration.lineThrough
+                                    : null,
+                              ),
+                            ),
+                            subtitle: Padding(
+                              padding: const EdgeInsets.only(top: 8.0),
+                              child: Text(
+                                step['description'],
+                                style: TextStyle(
+                                  fontSize: 14,
+                                  color: isDone
+                                      ? Color(0xFFA5B2C8)
+                                      : Color(0xFF5C6B8C),
+                                ),
+                              ),
+                            ),
+                            controlAffinity: ListTileControlAffinity.leading,
+                          ),
+                        ),
+                      );
+                    },
+                  ),
+                ),
+
+                // Bottom Action (Submit)
+                Container(
+                  padding: const EdgeInsets.all(16),
+                  decoration: const BoxDecoration(
+                    color: const Color(0xFFF4F8FF),
+                    border: Border(top: BorderSide(color: Color(0x1A2E6BFF))),
+                  ),
+                  child: SafeArea(
+                    child: Column(
+                      mainAxisSize: MainAxisSize.min,
                       children: [
-                        if (_selectedFile == null)
-                          Expanded(
-                            child: OutlinedButton.icon(
-                              onPressed: _pickFile,
-                              icon: const Icon(Icons.attach_file),
-                              label: const Text("Attach File"),
-                              style: OutlinedButton.styleFrom(
-                                foregroundColor: Colors.white,
-                                side: const BorderSide(color: Colors.white54),
-                                padding: const EdgeInsets.symmetric(vertical: 16),
-                                shape: RoundedRectangleBorder(
-                                  borderRadius: BorderRadius.circular(12),
-                                ),
+                        if (_isSubmitted) ...[
+                          Container(
+                            padding: const EdgeInsets.all(16),
+                            decoration: BoxDecoration(
+                              color: Colors.green.withOpacity(0.1),
+                              borderRadius: BorderRadius.circular(12),
+                              border: Border.all(
+                                color: Colors.green.withOpacity(0.3),
                               ),
                             ),
-                          ),
-                        if (_selectedFile != null) ...[
-                          const SizedBox(width: 12),
-                          Expanded(
-                            child: ElevatedButton.icon(
-                              onPressed: _isUploading ? null : _submitMiniProject,
-                              icon: _isUploading
-                                  ? const SizedBox(width: 20, height: 20, child: CircularProgressIndicator(strokeWidth: 2, color: Colors.black))
-                                  : const Icon(Icons.cloud_upload_rounded),
-                              label: Text(
-                                _isUploading ? "Uploading..." : "Submit Work",
-                                style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
-                              ),
-                              style: ElevatedButton.styleFrom(
-                                backgroundColor: Colors.cyan,
-                                foregroundColor: Colors.black,
-                                padding: const EdgeInsets.symmetric(vertical: 16),
-                                shape: RoundedRectangleBorder(
-                                  borderRadius: BorderRadius.circular(12),
+                            child: Row(
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              children: [
+                                const Icon(
+                                  Icons.check_circle_outline,
+                                  color: Colors.green,
+                                  size: 28,
                                 ),
-                              ),
+                                const SizedBox(width: 12),
+                                const Text(
+                                  "Project Submitted",
+                                  style: TextStyle(
+                                    color: Colors.green,
+                                    fontSize: 18,
+                                    fontWeight: FontWeight.bold,
+                                  ),
+                                ),
+                              ],
                             ),
                           ),
-                        ]
+                        ] else ...[
+                          // File Selection
+                          if (_selectedFile != null)
+                            Container(
+                              margin: const EdgeInsets.only(bottom: 12),
+                              padding: const EdgeInsets.symmetric(
+                                horizontal: 16,
+                                vertical: 12,
+                              ),
+                              decoration: BoxDecoration(
+                                color: Colors.indigo.shade900.withOpacity(0.5),
+                                borderRadius: BorderRadius.circular(12),
+                                border: Border.all(
+                                  color: Colors.indigo.shade300,
+                                ),
+                              ),
+                              child: Row(
+                                children: [
+                                  const Icon(
+                                    Icons.description,
+                                    color: Color(0xFF5C6B8C),
+                                  ),
+                                  const SizedBox(width: 12),
+                                  Expanded(
+                                    child: Text(
+                                      _selectedFile!.name,
+                                      style: const TextStyle(
+                                        color: const Color(0xFF0D1B3D),
+                                        fontWeight: FontWeight.bold,
+                                      ),
+                                      overflow: TextOverflow.ellipsis,
+                                    ),
+                                  ),
+                                  IconButton(
+                                    icon: const Icon(
+                                      Icons.close,
+                                      color: Colors.redAccent,
+                                    ),
+                                    onPressed: () =>
+                                        setState(() => _selectedFile = null),
+                                    padding: EdgeInsets.zero,
+                                    constraints: const BoxConstraints(),
+                                  ),
+                                ],
+                              ),
+                            ),
+
+                          // Buttons
+                          Row(
+                            children: [
+                              if (_selectedFile == null)
+                                Expanded(
+                                  child: OutlinedButton.icon(
+                                    onPressed: _pickFile,
+                                    icon: const Icon(Icons.attach_file),
+                                    label: const Text("Attach File"),
+                                    style: OutlinedButton.styleFrom(
+                                      foregroundColor: const Color(0xFF0D1B3D),
+                                      side: const BorderSide(
+                                        color: Color(0xFF7A89A8),
+                                      ),
+                                      padding: const EdgeInsets.symmetric(
+                                        vertical: 16,
+                                      ),
+                                      shape: RoundedRectangleBorder(
+                                        borderRadius: BorderRadius.circular(12),
+                                      ),
+                                    ),
+                                  ),
+                                ),
+                              if (_selectedFile != null) ...[
+                                const SizedBox(width: 12),
+                                Expanded(
+                                  child: ElevatedButton.icon(
+                                    onPressed: _isUploading
+                                        ? null
+                                        : _submitMiniProject,
+                                    icon: _isUploading
+                                        ? const SizedBox(
+                                            width: 20,
+                                            height: 20,
+                                            child: CircularProgressIndicator(
+                                              strokeWidth: 2,
+                                              color: Colors.black,
+                                            ),
+                                          )
+                                        : const Icon(
+                                            Icons.cloud_upload_rounded,
+                                          ),
+                                    label: Text(
+                                      _isUploading
+                                          ? "Uploading..."
+                                          : "Submit Work",
+                                      style: const TextStyle(
+                                        fontSize: 16,
+                                        fontWeight: FontWeight.bold,
+                                      ),
+                                    ),
+                                    style: ElevatedButton.styleFrom(
+                                      backgroundColor: Colors.cyan,
+                                      foregroundColor: Colors.black,
+                                      padding: const EdgeInsets.symmetric(
+                                        vertical: 16,
+                                      ),
+                                      shape: RoundedRectangleBorder(
+                                        borderRadius: BorderRadius.circular(12),
+                                      ),
+                                    ),
+                                  ),
+                                ),
+                              ],
+                            ],
+                          ),
+                        ],
                       ],
                     ),
-                  ]
-                ],
-              ),
+                  ),
+                ),
+              ],
             ),
-          ),
-        ],
-      ),
     );
   }
 }

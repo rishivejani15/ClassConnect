@@ -24,13 +24,11 @@ class DiagnosticQuizService {
     }
 
     // ✅ Convert Firestore concept maps → List<String>
-    final conceptNames =
-    concepts.map((c) => c['name'].toString()).toList();
+    final conceptNames = concepts.map((c) => c['name'].toString()).toList();
 
     print("🧠 Concepts sent to Gemini: $conceptNames");
 
-    final questions =
-    await GeminiDiagnosticQuizService.generateDiagnosticQuiz(
+    final questions = await GeminiDiagnosticQuizService.generateDiagnosticQuiz(
       concepts: conceptNames,
     );
 

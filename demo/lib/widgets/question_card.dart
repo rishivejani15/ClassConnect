@@ -21,11 +21,11 @@ class QuestionCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Card(
-      color: const Color(0xFF1E1E1E),
+      color: Colors.white,
       margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(16),
-        side: BorderSide(color: Colors.white),
+        side: const BorderSide(color: Color(0x1A2E6BFF)),
       ),
       child: InkWell(
         onTap: onTap,
@@ -41,7 +41,7 @@ class QuestionCard extends StatelessWidget {
                 overflow: TextOverflow.ellipsis,
                 style: Theme.of(context).textTheme.titleMedium?.copyWith(
                   fontWeight: FontWeight.bold,
-                  color: Colors.white,
+                  color: const Color(0xFF0D1B3D),
                 ),
               ),
               const SizedBox(height: 8),
@@ -53,7 +53,7 @@ class QuestionCard extends StatelessWidget {
                 overflow: TextOverflow.ellipsis,
                 style: Theme.of(
                   context,
-                ).textTheme.bodySmall?.copyWith(color: Colors.white70),
+                ).textTheme.bodySmall?.copyWith(color: const Color(0xFF5C6B8C)),
               ),
               const SizedBox(height: 12),
 
@@ -84,14 +84,14 @@ class QuestionCard extends StatelessWidget {
                               Text(
                                 question.userName,
                                 style: Theme.of(context).textTheme.labelMedium
-                                    ?.copyWith(color: Colors.white),
+                                    ?.copyWith(color: const Color(0xFF0D1B3D)),
                               ),
                               Text(
                                 DateFormat(
                                   'MMM d, yyyy',
                                 ).format(question.createdAt),
                                 style: Theme.of(context).textTheme.labelSmall
-                                    ?.copyWith(color: Colors.white54),
+                                    ?.copyWith(color: const Color(0xFF7A89A8)),
                               ),
                             ],
                           ),
@@ -110,14 +110,12 @@ class QuestionCard extends StatelessWidget {
                           icon: Icons.chat_bubble_outline,
                           count: question.answerCount,
                           label: 'answers',
-                       
                         ),
                         const SizedBox(height: 4),
                         _StatItem(
                           icon: Icons.visibility_outlined,
                           count: question.views,
                           label: 'views',
-                       
                         ),
                       ],
                     ),
@@ -128,7 +126,7 @@ class QuestionCard extends StatelessWidget {
               // Reactions row
               if (onReaction != null) ...[
                 const SizedBox(height: 12),
-                const Divider(color: Colors.white24),
+                const Divider(color: Color(0x1A2E6BFF)),
                 const SizedBox(height: 8),
                 Row(
                   children: [
@@ -136,7 +134,7 @@ class QuestionCard extends StatelessWidget {
                       icon: Icons.thumb_up_outlined,
                       count: question.likeCount,
                       label: 'Like',
-               
+
                       onPressed: () => onReaction!(ReactionType.like),
                     ),
                     const SizedBox(width: 12),
@@ -144,7 +142,7 @@ class QuestionCard extends StatelessWidget {
                       icon: Icons.favorite_outline,
                       count: question.heartCount,
                       label: 'Heart',
-       
+
                       onPressed: () => onReaction!(ReactionType.heart),
                     ),
                   ],
@@ -179,7 +177,7 @@ class _StatItem extends StatelessWidget {
           '$count $label',
           style: Theme.of(
             context,
-          ).textTheme.labelSmall?.copyWith(color: Colors.grey[400]),
+          ).textTheme.labelSmall?.copyWith(color: const Color(0xFF7A89A8)),
         ),
       ],
     );
@@ -207,12 +205,14 @@ class _ReactionButton extends StatelessWidget {
         padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
         child: Row(
           children: [
-            Icon(icon, size: 16, color: Colors.grey[400]),
+            Icon(icon, size: 16, color: const Color(0xFF7A89A8)),
             const SizedBox(width: 4),
-            Text(count > 0 ? '$count' : label,
-                style: Theme.of(
-                  context,
-                ).textTheme.labelSmall?.copyWith(color: Colors.grey[400])),
+            Text(
+              count > 0 ? '$count' : label,
+              style: Theme.of(
+                context,
+              ).textTheme.labelSmall?.copyWith(color: const Color(0xFF7A89A8)),
+            ),
           ],
         ),
       ),

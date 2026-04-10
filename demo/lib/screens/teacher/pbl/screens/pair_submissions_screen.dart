@@ -515,13 +515,13 @@ class _PairSubmissionsScreenState extends State<PairSubmissionsScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: const Color(0xFF0F1C3F), // Dark Navy background
+      backgroundColor: const Color(0xFFF4F8FF), // Dark Navy background
       appBar: AppBar(
         title: Text(
           'Pair ${widget.pairNumber} Dashboard',
           style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 18),
         ),
-        backgroundColor: const Color(0xFF0F1C3F),
+        backgroundColor: const Color(0xFFF4F8FF),
         foregroundColor: Colors.white,
         elevation: 0,
         actions: [],

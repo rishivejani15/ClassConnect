@@ -32,10 +32,10 @@ class StudentResourcesScreen extends StatelessWidget {
     return Scaffold(
       appBar: AppBar(
         title: Text('$className Resources'),
-        backgroundColor: const Color(0xFF1A2856),
-        foregroundColor: Colors.white,
+        backgroundColor: const Color(0xFFF4F8FF),
+        foregroundColor: const Color(0xFF0D1B3D),
       ),
-      backgroundColor: const Color(0xFF1A2856), // Matching the dark theme
+      backgroundColor: const Color(0xFFF4F8FF),
       body: StreamBuilder<QuerySnapshot>(
         stream: FirebaseFirestore.instance
             .collection('classes')
@@ -52,7 +52,7 @@ class StudentResourcesScreen extends StatelessWidget {
             return Center(
               child: Text(
                 'Error: ${snapshot.error}',
-                style: const TextStyle(color: Colors.white70),
+                style: const TextStyle(color: Color(0xFF5C6B8C)),
               ),
             );
           }
@@ -64,14 +64,11 @@ class StudentResourcesScreen extends StatelessWidget {
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  Icon(Icons.link_off, size: 64, color: Colors.white30),
+                  Icon(Icons.link_off, size: 64, color: Color(0xFF9CA9C2)),
                   const SizedBox(height: 16),
                   const Text(
                     'No resources shared yet.',
-                    style: TextStyle(
-                      color: Colors.white70,
-                      fontSize: 16,
-                    ),
+                    style: TextStyle(color: Color(0xFF5C6B8C), fontSize: 16),
                   ),
                 ],
               ),
@@ -91,13 +88,13 @@ class StudentResourcesScreen extends StatelessWidget {
                 shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(12),
                 ),
-                color: Colors.white.withOpacity(0.05),
+                color: Colors.white,
                 child: ListTile(
                   contentPadding: const EdgeInsets.all(12),
                   leading: Container(
                     padding: const EdgeInsets.all(8),
                     decoration: BoxDecoration(
-                      color: Colors.cyan.withOpacity(0.2),
+                      color: Colors.cyan.withValues(alpha: 0.2),
                       borderRadius: BorderRadius.circular(8),
                     ),
                     child: const Icon(Icons.link, color: Colors.cyan),
@@ -105,7 +102,7 @@ class StudentResourcesScreen extends StatelessWidget {
                   title: Text(
                     description.isNotEmpty ? description : url,
                     style: const TextStyle(
-                      color: Colors.white,
+                      color: Color(0xFF0D1B3D),
                       fontWeight: FontWeight.bold,
                     ),
                   ),
@@ -113,7 +110,7 @@ class StudentResourcesScreen extends StatelessWidget {
                     url,
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,
-                    style: TextStyle(color: Colors.white.withOpacity(0.6)),
+                    style: const TextStyle(color: Color(0xFF5C6B8C)),
                   ),
                   onTap: () => _launchUrl(context, url),
                   trailing: const Icon(

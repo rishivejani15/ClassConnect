@@ -222,9 +222,9 @@ class _StudentQuizAttemptScreenState extends State<StudentQuizAttemptScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: const Color(0xFF0F1C3F),
+      backgroundColor: const Color(0xFFF4F8FF),
       appBar: AppBar(
-        backgroundColor: const Color(0xFF0F1C3F),
+        backgroundColor: const Color(0xFFF4F8FF),
         elevation: 0,
         title: const Text(
           "Chapter Quiz",

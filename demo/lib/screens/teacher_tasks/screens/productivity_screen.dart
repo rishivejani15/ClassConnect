@@ -42,7 +42,7 @@ class ProductivityScreen extends StatelessWidget {
           style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
         ),
         elevation: 0,
-        backgroundColor: const Color(0xFF0F1C3F), // Matching your theme
+        backgroundColor: const Color(0xFFF4F8FF), // Matching your theme
         centerTitle: true,
         // This replaces the default back arrow
         leading: IconButton(

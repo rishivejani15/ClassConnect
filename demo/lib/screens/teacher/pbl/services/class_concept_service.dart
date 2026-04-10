@@ -14,10 +14,12 @@ class ClassConceptService {
     final user = _auth.currentUser;
     if (user == null) throw Exception("User not logged in");
 
-    final conceptsRef =
-        _firestore.collection('classes').doc(classId).collection('concepts');
+    final conceptsRef = _firestore
+        .collection('classes')
+        .doc(classId)
+        .collection('concepts');
     // ... existing logic ...
-    // Note: I am not removing this to avoid breaking legacy calls immediately, 
+    // Note: I am not removing this to avoid breaking legacy calls immediately,
     // but the new flow uses saveSyllabusChapters.
   }
 
@@ -30,8 +32,10 @@ class ClassConceptService {
     final user = _auth.currentUser;
     if (user == null) throw Exception("User not logged in");
 
-    final chaptersRef =
-        _firestore.collection('classes').doc(classId).collection('chapters');
+    final chaptersRef = _firestore
+        .collection('classes')
+        .doc(classId)
+        .collection('chapters');
 
     final batch = _firestore.batch();
     int order = 0;

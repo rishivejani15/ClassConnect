@@ -1,4 +1,9 @@
 import 'package:demo/services/class_automation_service.dart';
+import 'package:demo/theme/app_colors.dart';
+import 'package:demo/widgets/ui/cc_button.dart';
+import 'package:demo/widgets/ui/cc_card.dart';
+import 'package:demo/widgets/ui/cc_section_header.dart';
+import 'package:demo/widgets/ui/cc_text_field.dart';
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'student_home.dart';
@@ -6,7 +11,7 @@ import 'student_home.dart';
 class ParentDetailsScreen extends StatefulWidget {
   final String uid;
 
-  const ParentDetailsScreen({required this.uid});
+  const ParentDetailsScreen({required this.uid, super.key});
 
   @override
   State<ParentDetailsScreen> createState() => _ParentDetailsScreenState();
@@ -36,35 +41,12 @@ class _ParentDetailsScreenState extends State<ParentDetailsScreen> {
     super.dispose();
   }
 
-  InputDecoration _buildInputDecoration(String label, IconData icon) {
-    return InputDecoration(
-      labelText: label,
-      labelStyle: TextStyle(color: Colors.white.withOpacity(0.6)),
-      prefixIcon: Icon(icon, color: const Color(0xFF3B82F6)),
-      filled: true,
-      fillColor: const Color(0xFF1E2E52),
-      border: OutlineInputBorder(
-        borderRadius: BorderRadius.circular(12),
-        borderSide: BorderSide.none,
-      ),
-      enabledBorder: OutlineInputBorder(
-        borderRadius: BorderRadius.circular(12),
-        borderSide: BorderSide(color: Colors.white.withOpacity(0.1)),
-      ),
-      focusedBorder: OutlineInputBorder(
-        borderRadius: BorderRadius.circular(12),
-        borderSide: const BorderSide(color: Color(0xFF3B82F6), width: 2),
-      ),
-      contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
-    );
-  }
-
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: const Color(0xFF0F1C3F),
+      backgroundColor: AppColors.background,
       appBar: AppBar(
-        backgroundColor: const Color(0xFF0F1C3F),
+        backgroundColor: AppColors.background,
         elevation: 0,
         title: const Text(
           "Complete Your Profile",
@@ -88,58 +70,21 @@ class _ParentDetailsScreenState extends State<ParentDetailsScreen> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            // Header Card
-            Container(
-              width: double.infinity,
-              padding: const EdgeInsets.all(20),
-              decoration: BoxDecoration(
-                gradient: const LinearGradient(
-                  colors: [Color(0xFF1E3A8A), Color(0xFF3B82F6)],
-                  begin: Alignment.topLeft,
-                  end: Alignment.bottomRight,
-                ),
-                borderRadius: BorderRadius.circular(16),
-                boxShadow: [
-                  BoxShadow(
-                    color: Colors.black.withOpacity(0.3),
-                    blurRadius: 12,
-                    offset: const Offset(0, 6),
-                  ),
-                ],
-              ),
+            CcCard(
+              glass: true,
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Container(
-                    padding: const EdgeInsets.all(12),
-                    decoration: BoxDecoration(
-                      color: Colors.white.withOpacity(0.2),
-                      borderRadius: BorderRadius.circular(12),
-                      border: Border.all(color: Colors.white.withOpacity(0.2)),
-                    ),
-                    child: const Icon(
-                      Icons.info_outline,
-                      color: Colors.white,
-                      size: 28,
-                    ),
-                  ),
-                  const SizedBox(height: 12),
-                  const Text(
-                    'Parent & Student Information',
-                    style: TextStyle(
-                      color: Colors.white,
-                      fontSize: 20,
-                      fontWeight: FontWeight.bold,
-                    ),
+                  const CcSectionHeader(
+                    title: 'Parent & Student Information',
+                    subtitle:
+                        'Provide contact and academic details to continue.',
                   ),
                   const SizedBox(height: 8),
-                  Text(
-                    'Please provide your parent contact details and student information to continue',
-                    style: TextStyle(
-                      color: Colors.white.withOpacity(0.85),
-                      fontSize: 14,
-                      height: 1.4,
-                    ),
+                  Icon(
+                    Icons.info_outline,
+                    color: Theme.of(context).colorScheme.secondary,
+                    size: 24,
                   ),
                 ],
               ),
@@ -147,150 +92,82 @@ class _ParentDetailsScreenState extends State<ParentDetailsScreen> {
 
             const SizedBox(height: 32),
 
-            // Parent Information Section
-            Text(
-              'Parent Information',
-              style: TextStyle(
-                color: Colors.white,
-                fontSize: 16,
-                fontWeight: FontWeight.bold,
-                letterSpacing: 0.5,
-              ),
+            const CcSectionHeader(
+              title: 'Parent Information',
+              subtitle: 'These details are used for weekly updates.',
             ),
             const SizedBox(height: 12),
 
-            // Parent Email
-            TextField(
+            CcTextField(
               controller: parentEmailController,
               keyboardType: TextInputType.emailAddress,
-              style: const TextStyle(color: Colors.white),
-              decoration: _buildInputDecoration(
-                'Parent Email',
-                Icons.email_outlined,
-              ),
+              label: 'Parent Email',
+              icon: Icons.email_outlined,
             ),
             const SizedBox(height: 16),
 
-            // Parent Phone
-            TextField(
+            CcTextField(
               controller: parentPhoneController,
               keyboardType: TextInputType.phone,
-              style: const TextStyle(color: Colors.white),
-              decoration: _buildInputDecoration(
-                'Parent Phone Number',
-                Icons.phone_outlined,
-              ),
+              label: 'Parent Phone Number',
+              icon: Icons.phone_outlined,
             ),
 
             const SizedBox(height: 32),
 
-            // Student Information Section
-            Text(
-              'Student Information',
-              style: TextStyle(
-                color: Colors.white,
-                fontSize: 16,
-                fontWeight: FontWeight.bold,
-                letterSpacing: 0.5,
-              ),
+            const CcSectionHeader(
+              title: 'Student Information',
+              subtitle: 'Academic details drive class mapping and enrollment.',
             ),
             const SizedBox(height: 12),
 
-            // Roll Number
-            TextField(
+            CcTextField(
               controller: rollNoController,
-              style: const TextStyle(color: Colors.white),
-              decoration: _buildInputDecoration(
-                'Student Roll Number',
-                Icons.badge_outlined,
-              ),
+              label: 'Student Roll Number',
+              icon: Icons.badge_outlined,
             ),
             const SizedBox(height: 16),
 
-            // Semester
-            TextField(
+            CcTextField(
               controller: semController,
               keyboardType: TextInputType.number,
-              style: const TextStyle(color: Colors.white),
-              decoration: _buildInputDecoration(
-                'Semester (-1 for School)',
-                Icons.school_outlined,
-              ),
+              label: 'Semester (-1 for School)',
+              icon: Icons.school_outlined,
             ),
             const SizedBox(height: 16),
 
-            // Class / Division
-            TextField(
+            CcTextField(
               controller: classController,
-              style: const TextStyle(color: Colors.white),
-              decoration: _buildInputDecoration(
-                'Class / Division',
-                Icons.class_outlined,
-              ),
+              label: 'Class / Division',
+              icon: Icons.class_outlined,
             ),
             const SizedBox(height: 16),
 
-            // Department
-            TextField(
+            CcTextField(
               controller: departmentController,
-              style: const TextStyle(color: Colors.white),
-              decoration: _buildInputDecoration(
-                'Department Name',
-                Icons.business_center_outlined,
-              ),
+              label: 'Department Name',
+              icon: Icons.business_center_outlined,
             ),
             const SizedBox(height: 16),
 
-            // College / School Name
-            TextField(
+            CcTextField(
               controller: collegeSchoolController,
-              style: const TextStyle(color: Colors.white),
-              decoration: _buildInputDecoration(
-                'College / School Name',
-                Icons.account_balance_outlined,
-              ),
+              label: 'College / School Name',
+              icon: Icons.account_balance_outlined,
             ),
 
             const SizedBox(height: 40),
 
-            // Continue Button
-            SizedBox(
-              width: double.infinity,
-              child: ElevatedButton.icon(
-                onPressed: _isLoading ? null : _handleContinue,
-                icon: _isLoading
-                    ? const SizedBox(
-                        width: 20,
-                        height: 20,
-                        child: CircularProgressIndicator(
-                          strokeWidth: 2,
-                          valueColor: AlwaysStoppedAnimation<Color>(
-                            Colors.white,
-                          ),
-                        ),
-                      )
-                    : const Icon(
-                        Icons.arrow_forward_rounded,
-                        color: Colors.white,
-                      ),
-                label: Text(
-                  _isLoading ? 'Saving...' : 'Continue',
-                  style: const TextStyle(
-                    color: Colors.white,
-                    fontWeight: FontWeight.bold,
-                    fontSize: 16,
-                  ),
-                ),
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: const Color(0xFF3B82F6),
-                  padding: const EdgeInsets.symmetric(vertical: 16),
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(12),
-                  ),
-                  elevation: 8,
-                  shadowColor: const Color(0xFF3B82F6).withOpacity(0.5),
-                ),
-              ),
+            CcButton(
+              label: _isLoading ? 'Saving...' : 'Continue',
+              isLoading: _isLoading,
+              icon: _isLoading
+                  ? null
+                  : const Icon(
+                      Icons.arrow_forward_rounded,
+                      color: Colors.white,
+                    ),
+              onPressed: _handleContinue,
             ),
           ],
         ),
@@ -359,9 +236,10 @@ class _ParentDetailsScreenState extends State<ParentDetailsScreen> {
         collegeSchoolName: collegeSchoolController.text.trim(),
         studentType: studentType,
       );
+      if (!mounted) return;
       Navigator.pushReplacement(
         context,
-        MaterialPageRoute(builder: (_) => StudentHome()),
+        MaterialPageRoute(builder: (_) => const StudentHome()),
       );
     } catch (e) {
       setState(() => _isLoading = false);

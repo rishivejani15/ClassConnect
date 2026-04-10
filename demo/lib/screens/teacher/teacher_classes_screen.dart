@@ -6,6 +6,7 @@ import 'package:demo/screens/teacher/quiz/quiz_tab_screen.dart';
 import 'package:demo/screens/teacher/resources/teacher_resources_screen.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'assignment/create_assignment_screen.dart';
+import 'package:demo/widgets/ui/cc_decorated_background.dart';
 
 class TeacherClassesPage extends StatefulWidget {
   const TeacherClassesPage({super.key});
@@ -43,42 +44,44 @@ class _TeacherClassesPageState extends State<TeacherClassesPage> {
 
   @override
   Widget build(BuildContext context) {
-    return StreamBuilder<List<Map<String, dynamic>>>(
-      stream: _fetchClasses(),
-      builder: (context, snapshot) {
-        if (snapshot.connectionState == ConnectionState.waiting) {
-          return const Center(
-            child: CircularProgressIndicator(color: Color(0xFF00D9FF)),
-          );
-        }
+    return CcDecoratedBackground(
+      child: StreamBuilder<List<Map<String, dynamic>>>(
+        stream: _fetchClasses(),
+        builder: (context, snapshot) {
+          if (snapshot.connectionState == ConnectionState.waiting) {
+            return const Center(
+              child: CircularProgressIndicator(color: Color(0xFF00D9FF)),
+            );
+          }
 
-        if (snapshot.hasError) {
-          return Center(
-            child: Text(
-              snapshot.error.toString(),
-              style: const TextStyle(color: Colors.white),
-            ),
-          );
-        }
+          if (snapshot.hasError) {
+            return Center(
+              child: Text(
+                snapshot.error.toString(),
+                style: const TextStyle(color: Color(0xFF0D1B3D)),
+              ),
+            );
+          }
 
-        if (!snapshot.hasData || snapshot.data!.isEmpty) {
-          return const Center(
-            child: Text(
-              "📘 Your created classes will appear here",
-              style: TextStyle(color: Colors.white70, fontSize: 16),
-              textAlign: TextAlign.center,
-            ),
-          );
-        }
+          if (!snapshot.hasData || snapshot.data!.isEmpty) {
+            return const Center(
+              child: Text(
+                "📘 Your created classes will appear here",
+                style: TextStyle(color: Color(0xFF5C6B8C), fontSize: 16),
+                textAlign: TextAlign.center,
+              ),
+            );
+          }
 
-        return ListView.builder(
-          padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 24),
-          itemCount: snapshot.data!.length,
-          itemBuilder: (context, index) {
-            return _buildModernClassCard(snapshot.data![index]);
-          },
-        );
-      },
+          return ListView.builder(
+            padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 24),
+            itemCount: snapshot.data!.length,
+            itemBuilder: (context, index) {
+              return _buildModernClassCard(snapshot.data![index]);
+            },
+          );
+        },
+      ),
     );
   }
 
@@ -96,12 +99,12 @@ class _TeacherClassesPageState extends State<TeacherClassesPage> {
       child: Container(
         margin: const EdgeInsets.only(bottom: 20),
         decoration: BoxDecoration(
-          color: const Color(0xFF1E1E1E),
+          color: Colors.white,
           borderRadius: BorderRadius.circular(20),
-          border: Border.all(color: Colors.white),
+          border: Border.all(color: const Color(0x1A2E6BFF)),
           boxShadow: [
             BoxShadow(
-              color: const Color(0xFF00D9FF).withOpacity(0.05),
+              color: const Color(0xFF2E6BFF).withValues(alpha: 0.10),
               blurRadius: 15,
               offset: const Offset(0, 8),
             ),
@@ -143,7 +146,7 @@ class _TeacherClassesPageState extends State<TeacherClassesPage> {
                             classData['name']?.toUpperCase() ??
                                 'UNTITLED CLASS',
                             style: const TextStyle(
-                              color: Colors.white,
+                              color: Color(0xFF0D1B3D),
                               fontSize: 18,
                               fontWeight: FontWeight.bold,
                               letterSpacing: 0.5,
@@ -170,7 +173,7 @@ class _TeacherClassesPageState extends State<TeacherClassesPage> {
                     PopupMenuButton<String>(
                       icon: const Icon(
                         Icons.more_vert_rounded,
-                        color: Colors.white54,
+                        color: Color(0xFF7A89A8),
                       ),
                       onSelected: (value) => _handleAction(value, classData),
                       itemBuilder: (_) => const [
@@ -202,16 +205,16 @@ class _TeacherClassesPageState extends State<TeacherClassesPage> {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
       decoration: BoxDecoration(
-        color: Colors.white.withOpacity(0.05),
+        color: const Color(0xFFEAF3FF),
         borderRadius: BorderRadius.circular(6),
       ),
       child: Row(
         children: [
-          Icon(icon, size: 14, color: Colors.white38),
+          Icon(icon, size: 14, color: const Color(0xFF5C6B8C)),
           const SizedBox(width: 4),
           Text(
             label,
-            style: const TextStyle(color: Colors.white60, fontSize: 12),
+            style: const TextStyle(color: Color(0xFF4A5A7A), fontSize: 12),
           ),
         ],
       ),

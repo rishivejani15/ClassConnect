@@ -1,6 +1,6 @@
-import 'package:demo/screens/home_screen.dart';
 import 'package:demo/screens/login_screen.dart';
 import 'package:demo/screens/register_screen.dart';
+import 'package:demo/theme/app_theme.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
@@ -15,10 +15,7 @@ import 'package:demo/screens/teacher_details_screen.dart';
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await Firebase.initializeApp();
-  await Supabase.initialize(
-    url: 'SUPABASE_URL',
-    anonKey: 'SUPABASE_KEY',
-  );
+  await Supabase.initialize(url: 'SUPABASE_URL', anonKey: 'SUPABASE_KEY');
   WeeklyReportScheduler.initialize();
   runApp(const MyApp());
 }
@@ -31,23 +28,16 @@ class MyApp extends StatelessWidget {
     return MaterialApp(
       debugShowCheckedModeBanner: false,
       title: 'ClassConnect',
-      theme: ThemeData(
-        primarySwatch: Colors.blue,
-        scaffoldBackgroundColor: const Color(0xFF0F1C3F),
-        pageTransitionsTheme: const PageTransitionsTheme(
-          builders: {
-            TargetPlatform.android: OpenUpwardsPageTransitionsBuilder(),
-            TargetPlatform.iOS: CupertinoPageTransitionsBuilder(),
-          },
-        ),
-      ),
+      theme: AppTheme.light,
+      darkTheme: AppTheme.dark,
+      themeMode: ThemeMode.light,
 
       // 1. The Home is the entry point logic
       home: const AuthWrapper(),
 
       // 2. Add this routes table so Navigator knows where to find '/register'
       routes: {
-        '/register': (context) => RegisterScreen(),
+        '/register': (context) => const RegisterScreen(),
         '/login': (context) => LoginScreen(),
       },
     );
@@ -66,7 +56,7 @@ class AuthWrapper extends StatelessWidget {
         // 1. If the connection is still being established, show a spinner
         if (snapshot.connectionState == ConnectionState.waiting) {
           return const Scaffold(
-            backgroundColor: Color(0xFF0F1C3F),
+            backgroundColor: Color(0xFFF4F8FF),
             body: Center(
               child: CircularProgressIndicator(color: Colors.white30),
             ),
@@ -98,7 +88,7 @@ class RoleRouter extends StatelessWidget {
         // 🔄 Loading student doc
         if (studentSnapshot.connectionState == ConnectionState.waiting) {
           return const Scaffold(
-            backgroundColor: Color(0xFF0F1C3F),
+            backgroundColor: Color(0xFFF4F8FF),
             body: Center(
               child: CircularProgressIndicator(color: Colors.white30),
             ),
@@ -142,10 +132,8 @@ class RoleRouter extends StatelessWidget {
               studentClass.trim().isNotEmpty;
 
           if (hasParentDetails && hasStudentDetails) {
-            print("🎓 Routing to StudentHome");
             return const StudentHome();
           } else {
-            print("🧑‍👩‍🧒 Routing to ParentDetailsScreen");
             return ParentDetailsScreen(uid: uid);
           }
         }
@@ -159,7 +147,7 @@ class RoleRouter extends StatelessWidget {
           builder: (context, teacherSnapshot) {
             if (teacherSnapshot.connectionState == ConnectionState.waiting) {
               return const Scaffold(
-                backgroundColor: Color(0xFF0F1C3F),
+                backgroundColor: Color(0xFFF4F8FF),
                 body: Center(
                   child: CircularProgressIndicator(color: Colors.white30),
                 ),
@@ -187,10 +175,8 @@ class RoleRouter extends StatelessWidget {
                   teacherDepartment.trim().isNotEmpty;
 
               if (hasTeacherDetails) {
-                print("👨‍🏫 Routing to TeacherHome");
                 return const TeacherHome();
               } else {
-                print("📋 Routing to TeacherDetailsScreen");
                 return TeacherDetailsScreen(uid: uid);
               }
             }

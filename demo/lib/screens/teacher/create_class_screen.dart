@@ -1,25 +1,29 @@
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
-import 'dart:math';
 import 'package:flutter/services.dart';
 import 'package:demo/services/class_service.dart';
 import 'package:share_plus/share_plus.dart';
+import 'package:demo/widgets/ui/cc_button.dart';
+import 'package:demo/widgets/ui/cc_card.dart';
+import 'package:demo/widgets/ui/cc_dialog.dart';
+import 'package:demo/widgets/ui/cc_section_header.dart';
+import 'package:demo/widgets/ui/cc_text_field.dart';
 
 class CreateClassPage extends StatefulWidget {
   const CreateClassPage({super.key});
 
   @override
-  _CreateClassPageState createState() => _CreateClassPageState();
+  State<CreateClassPage> createState() => _CreateClassPageState();
 }
 
 class _CreateClassPageState extends State<CreateClassPage> {
   final _formKey = GlobalKey<FormState>();
-  TextEditingController _classNameController = TextEditingController();
-  TextEditingController _subjectController = TextEditingController();
-  TextEditingController _descriptionController = TextEditingController();
-  TextEditingController _semesterController = TextEditingController();
-  TextEditingController _divisionController = TextEditingController();
+  final TextEditingController _classNameController = TextEditingController();
+  final TextEditingController _subjectController = TextEditingController();
+  final TextEditingController _descriptionController = TextEditingController();
+  final TextEditingController _semesterController = TextEditingController();
+  final TextEditingController _divisionController = TextEditingController();
   final ClassService _classService = ClassService();
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
   final FirebaseAuth _auth = FirebaseAuth.instance;
@@ -48,12 +52,9 @@ class _CreateClassPageState extends State<CreateClassPage> {
           _collegeName = teacherDoc.data()?['collegeName'] ?? '';
           _teacherDepartment = teacherDoc.data()?['teacherDepartment'] ?? '';
         });
-        print(
-          '📚 Teacher details loaded - College: $_collegeName, Department: $_teacherDepartment',
-        );
       }
     } catch (e) {
-      print('Error fetching teacher details: $e');
+      debugPrint('Error fetching teacher details: $e');
     }
   }
 
@@ -101,8 +102,10 @@ class _CreateClassPageState extends State<CreateClassPage> {
         studentType: targetStudentType,
       );
 
+      if (!mounted) return;
       _showClassCodeDialog(classCode);
     } catch (e) {
+      if (!mounted) return;
       ScaffoldMessenger.of(
         context,
       ).showSnackBar(SnackBar(content: Text(e.toString())));
@@ -110,121 +113,81 @@ class _CreateClassPageState extends State<CreateClassPage> {
   }
 
   void _showClassCodeDialog(String classCode) {
-    showDialog(
+    showCcDialog(
       context: context,
-      barrierDismissible: false, // user must tap Close
-      builder: (dialogContext) {
-        return AlertDialog(
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(16),
+      barrierDismissible: false,
+      title: 'Class Created!',
+      content: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Text(
+            'Share this class code with students:',
+            textAlign: TextAlign.center,
+            style: TextStyle(
+              color: Theme.of(context).colorScheme.onSurfaceVariant,
+            ),
           ),
-          backgroundColor: const Color(0xFF1E2E52),
-          title: const Text(
-            "🎉 Class Created!",
-            style: TextStyle(fontWeight: FontWeight.bold, color: Colors.white),
-          ),
-          content: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Text(
-                "Share this class code with students:",
-                textAlign: TextAlign.center,
-                style: TextStyle(color: Colors.white.withOpacity(0.8)),
-              ),
-
-              const SizedBox(height: 16),
-
-              Container(
-                padding: const EdgeInsets.symmetric(
-                  horizontal: 20,
-                  vertical: 12,
-                ),
-                decoration: BoxDecoration(
-                  color: const Color(0xFF0F1C3F),
-                  borderRadius: BorderRadius.circular(12),
-                  border: Border.all(color: Colors.white.withOpacity(0.2)),
-                ),
-                child: Text(
-                  classCode,
-                  style: const TextStyle(
-                    fontSize: 22,
-                    fontWeight: FontWeight.bold,
-                    letterSpacing: 2,
-                    color: Color(0xFF3B82F6),
-                  ),
-                ),
-              ),
-
-              const SizedBox(height: 20),
-
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                children: [
-                  ElevatedButton.icon(
-                    onPressed: () {
-                      Clipboard.setData(ClipboardData(text: classCode));
-                      ScaffoldMessenger.of(context).showSnackBar(
-                        const SnackBar(
-                          content: Text("Class code copied!"),
-                          duration: Duration(seconds: 2),
-                          backgroundColor: Colors.green,
-                        ),
-                      );
-                    },
-                    icon: const Icon(Icons.copy),
-                    label: const Text("Copy"),
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: const Color(0xFF3B82F6),
-                    ),
-                  ),
-
-                  ElevatedButton.icon(
-                    onPressed: () {
-                      SharePlus.instance.share(
-                        ShareParams(
-                          text: 'Join my class using this code: $classCode',
-                        ),
-                      );
-                    },
-                    icon: const Icon(Icons.share),
-                    label: const Text("Share"),
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: const Color(0xFF00D9FF),
-                    ),
-                  ),
-                ],
-              ),
-            ],
-          ),
-          actions: [
-            SizedBox(
-              width: double.infinity,
-              child: ElevatedButton(
-                onPressed: () {
-                  // Close dialog
-                  Navigator.pop(dialogContext);
-                  // Close create class screen and return to class list
-                  Navigator.pop(context);
-                },
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: const Color(0xFF3B82F6),
-                  padding: const EdgeInsets.symmetric(vertical: 12),
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(8),
-                  ),
-                ),
-                child: const Text(
-                  "Done",
-                  style: TextStyle(
-                    color: Colors.white,
-                    fontWeight: FontWeight.bold,
-                  ),
+          const SizedBox(height: 16),
+          CcCard(
+            child: Center(
+              child: Text(
+                classCode,
+                style: const TextStyle(
+                  fontSize: 22,
+                  fontWeight: FontWeight.bold,
+                  letterSpacing: 2,
+                  color: Color(0xFF3B82F6),
                 ),
               ),
             ),
-          ],
-        );
-      },
+          ),
+          const SizedBox(height: 16),
+          Row(
+            children: [
+              Expanded(
+                child: CcButton(
+                  label: 'Copy',
+                  icon: const Icon(Icons.copy_rounded, size: 18),
+                  onPressed: () {
+                    Clipboard.setData(ClipboardData(text: classCode));
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      const SnackBar(
+                        content: Text('Class code copied!'),
+                        duration: Duration(seconds: 2),
+                        backgroundColor: Colors.green,
+                      ),
+                    );
+                  },
+                ),
+              ),
+              const SizedBox(width: 10),
+              Expanded(
+                child: CcButton(
+                  label: 'Share',
+                  variant: CcButtonVariant.secondary,
+                  icon: const Icon(Icons.share_rounded, size: 18),
+                  onPressed: () {
+                    SharePlus.instance.share(
+                      ShareParams(
+                        text: 'Join my class using this code: $classCode',
+                      ),
+                    );
+                  },
+                ),
+              ),
+            ],
+          ),
+        ],
+      ),
+      actions: [
+        TextButton(
+          onPressed: () {
+            Navigator.pop(context);
+            Navigator.pop(context);
+          },
+          child: const Text('Done'),
+        ),
+      ],
     );
   }
 
@@ -241,13 +204,13 @@ class _CreateClassPageState extends State<CreateClassPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: const Color(0xFF0F1C3F),
+      backgroundColor: const Color(0xFFF4F8FF),
       appBar: AppBar(
         title: const Text(
           'Create New Class',
           style: TextStyle(color: Colors.white),
         ),
-        backgroundColor: const Color(0xFF0F1C3F),
+        backgroundColor: const Color(0xFFF4F8FF),
         elevation: 0,
         leading: IconButton(
           icon: const Icon(
@@ -277,24 +240,13 @@ class _CreateClassPageState extends State<CreateClassPage> {
               const SizedBox(height: 20),
 
               // 📚 Teacher Info Display (Read-only)
-              Container(
-                padding: const EdgeInsets.all(16),
-                decoration: BoxDecoration(
-                  color: Colors.white.withOpacity(0.05),
-                  borderRadius: BorderRadius.circular(12),
-                  border: Border.all(color: Colors.white.withOpacity(0.1)),
-                ),
+              CcCard(
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    const Text(
-                      'Your Information',
-                      style: TextStyle(
-                        color: Colors.white70,
-                        fontSize: 12,
-                        fontWeight: FontWeight.bold,
-                        letterSpacing: 0.5,
-                      ),
+                    const CcSectionHeader(
+                      title: 'Your Information',
+                      subtitle: 'Auto-loaded from your teacher profile',
                     ),
                     const SizedBox(height: 12),
                     Row(
@@ -344,20 +296,10 @@ class _CreateClassPageState extends State<CreateClassPage> {
 
               const SizedBox(height: 24),
 
-              TextFormField(
+              CcTextField(
                 controller: _classNameController,
-                style: const TextStyle(color: Colors.white),
-                decoration: InputDecoration(
-                  labelText: 'Class Name',
-                  labelStyle: const TextStyle(color: Colors.white54),
-                  filled: true,
-                  fillColor: Colors.white.withOpacity(0.1),
-                  border: const OutlineInputBorder(),
-                  contentPadding: const EdgeInsets.symmetric(
-                    horizontal: 16,
-                    vertical: 12,
-                  ),
-                ),
+                label: 'Class Name',
+                icon: Icons.class_rounded,
                 validator: (value) {
                   if (value == null || value.isEmpty) {
                     return 'Please enter the class name';
@@ -366,20 +308,10 @@ class _CreateClassPageState extends State<CreateClassPage> {
                 },
               ),
               const SizedBox(height: 20),
-              TextFormField(
+              CcTextField(
                 controller: _subjectController,
-                style: const TextStyle(color: Colors.white),
-                decoration: InputDecoration(
-                  labelText: 'Subject',
-                  labelStyle: const TextStyle(color: Colors.white54),
-                  filled: true,
-                  fillColor: Colors.white.withOpacity(0.1),
-                  border: const OutlineInputBorder(),
-                  contentPadding: const EdgeInsets.symmetric(
-                    horizontal: 16,
-                    vertical: 12,
-                  ),
-                ),
+                label: 'Subject',
+                icon: Icons.book_rounded,
                 validator: (value) {
                   if (value == null || value.isEmpty) {
                     return 'Please enter the subject';
@@ -388,38 +320,18 @@ class _CreateClassPageState extends State<CreateClassPage> {
                 },
               ),
               const SizedBox(height: 20),
-              TextFormField(
+              CcTextField(
                 controller: _descriptionController,
-                style: const TextStyle(color: Colors.white),
-                decoration: InputDecoration(
-                  labelText: 'Description',
-                  labelStyle: const TextStyle(color: Colors.white54),
-                  filled: true,
-                  fillColor: Colors.white.withOpacity(0.1),
-                  border: const OutlineInputBorder(),
-                  contentPadding: const EdgeInsets.symmetric(
-                    horizontal: 16,
-                    vertical: 12,
-                  ),
-                ),
+                label: 'Description',
+                icon: Icons.description_rounded,
                 maxLines: 3,
               ),
               const SizedBox(height: 20),
-              TextFormField(
+              CcTextField(
                 controller: _semesterController,
                 keyboardType: TextInputType.number,
-                style: const TextStyle(color: Colors.white),
-                decoration: InputDecoration(
-                  labelText: 'Semester (-1 for School)',
-                  labelStyle: const TextStyle(color: Colors.white54),
-                  filled: true,
-                  fillColor: Colors.white.withOpacity(0.1),
-                  border: const OutlineInputBorder(),
-                  contentPadding: const EdgeInsets.symmetric(
-                    horizontal: 16,
-                    vertical: 12,
-                  ),
-                ),
+                label: 'Semester (-1 for School)',
+                icon: Icons.school_rounded,
                 validator: (value) {
                   if (value == null || value.isEmpty) {
                     return 'Please enter the semester';
@@ -432,20 +344,10 @@ class _CreateClassPageState extends State<CreateClassPage> {
                 },
               ),
               const SizedBox(height: 20),
-              TextFormField(
+              CcTextField(
                 controller: _divisionController,
-                style: const TextStyle(color: Colors.white),
-                decoration: InputDecoration(
-                  labelText: 'Division / Section',
-                  labelStyle: const TextStyle(color: Colors.white54),
-                  filled: true,
-                  fillColor: Colors.white.withOpacity(0.1),
-                  border: const OutlineInputBorder(),
-                  contentPadding: const EdgeInsets.symmetric(
-                    horizontal: 16,
-                    vertical: 12,
-                  ),
-                ),
+                label: 'Division / Section',
+                icon: Icons.groups_rounded,
                 validator: (value) {
                   if (value == null || value.isEmpty) {
                     return 'Please enter the division';
@@ -456,28 +358,10 @@ class _CreateClassPageState extends State<CreateClassPage> {
               const SizedBox(height: 30),
               SizedBox(
                 width: double.infinity,
-                child: ElevatedButton(
+                child: CcButton(
+                  label: 'Create Class',
+                  icon: const Icon(Icons.auto_awesome_rounded, size: 18),
                   onPressed: _createClass,
-                  style: ElevatedButton.styleFrom(
-                    padding: const EdgeInsets.symmetric(
-                      horizontal: 24,
-                      vertical: 16,
-                    ),
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(12),
-                    ),
-                    backgroundColor: const Color(0xFF3B82F6),
-                    elevation: 8,
-                    shadowColor: const Color(0xFF3B82F6).withOpacity(0.5),
-                  ),
-                  child: const Text(
-                    "Create Class",
-                    style: TextStyle(
-                      fontSize: 16,
-                      fontWeight: FontWeight.bold,
-                      color: Colors.white,
-                    ),
-                  ),
                 ),
               ),
               const SizedBox(height: 20),

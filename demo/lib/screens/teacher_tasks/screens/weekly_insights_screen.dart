@@ -32,9 +32,9 @@ class WeeklyInsightsScreen extends StatelessWidget {
           ..sort((a, b) => a.key.compareTo(b.key));
 
     return Scaffold(
-      backgroundColor: const Color(0xFF0F1C3F),
+      backgroundColor: const Color(0xFFF4F8FF),
       appBar: AppBar(
-        backgroundColor: const Color(0xFF0F1C3F),
+        backgroundColor: const Color(0xFFF4F8FF),
         elevation: 0,
         centerTitle: true,
         // This replaces the default back arrow

@@ -17,15 +17,18 @@ class StudentAttendanceScreen extends StatelessWidget {
     final attendanceService = AttendanceService();
 
     return Scaffold(
-      backgroundColor: Color(0xFF0F1C3F),
+      backgroundColor: const Color(0xFFF4F8FF),
       appBar: AppBar(
-        backgroundColor: Color(0xFF0F1C3F),
+        backgroundColor: const Color(0xFFF4F8FF),
         title: const Text(
           'My Attendance',
-          style: TextStyle(color: Colors.white),
+          style: TextStyle(color: Color(0xFF0D1B3D)),
         ),
         leading: IconButton(
-          icon: Icon(Icons.arrow_back_ios_new_rounded, color: Colors.white),
+          icon: const Icon(
+            Icons.arrow_back_ios_new_rounded,
+            color: Color(0xFF0D1B3D),
+          ),
           onPressed: () => Navigator.of(context).pop(),
         ),
         centerTitle: true,

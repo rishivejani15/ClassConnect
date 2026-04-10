@@ -1,7 +1,10 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:fl_chart/fl_chart.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:demo/widgets/ui/cc_decorated_background.dart';
 
 class TeacherDashboardPage extends StatefulWidget {
   const TeacherDashboardPage({super.key});
@@ -13,6 +16,7 @@ class TeacherDashboardPage extends StatefulWidget {
 class _TeacherDashboardPageState extends State<TeacherDashboardPage> {
   final TextEditingController _searchController = TextEditingController();
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
+  Timer? _refreshTimer;
 
   bool _isLoading = true;
 
@@ -40,6 +44,18 @@ class _TeacherDashboardPageState extends State<TeacherDashboardPage> {
     super.initState();
     _filteredStudents = [];
     _loadDashboardData();
+    _refreshTimer = Timer.periodic(const Duration(seconds: 45), (_) {
+      if (mounted) {
+        _loadDashboardData();
+      }
+    });
+  }
+
+  @override
+  void dispose() {
+    _refreshTimer?.cancel();
+    _searchController.dispose();
+    super.dispose();
   }
 
   Future<void> _loadDashboardData() async {
@@ -388,16 +404,9 @@ class _TeacherDashboardPageState extends State<TeacherDashboardPage> {
 
     if (_isLoading) {
       return Scaffold(
-        body: Container(
-          decoration: BoxDecoration(
-            gradient: LinearGradient(
-              begin: Alignment.topLeft,
-              end: Alignment.bottomRight,
-              colors: [const Color(0xFF0F1C3F), const Color(0xFF0F1C3F)],
-            ),
-          ),
+        body: const CcDecoratedBackground(
           child: const Center(
-            child: CircularProgressIndicator(color: Color(0xFF00D9FF)),
+            child: CircularProgressIndicator(color: Color(0xFF2E6BFF)),
           ),
         ),
       );
@@ -407,22 +416,20 @@ class _TeacherDashboardPageState extends State<TeacherDashboardPage> {
     final avgAssignments = _calculateAverage('assignments');
 
     return Scaffold(
-      body: Container(
-        decoration: BoxDecoration(
-          gradient: LinearGradient(
-            begin: Alignment.topLeft,
-            end: Alignment.bottomRight,
-            colors: [const Color(0xFF0F1C3F), const Color(0xFF0F1C3F)],
-          ),
-        ),
+      backgroundColor: const Color(0xFFF4F8FF),
+      body: CcDecoratedBackground(
         child: LayoutBuilder(
           builder: (context, constraints) {
             final isMobile = constraints.maxWidth < 900;
-            return SingleChildScrollView(
-              padding: const EdgeInsets.all(20),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
+            return RefreshIndicator(
+              color: const Color(0xFF2E6BFF),
+              onRefresh: _loadDashboardData,
+              child: SingleChildScrollView(
+                physics: const AlwaysScrollableScrollPhysics(),
+                padding: const EdgeInsets.all(20),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
                   _buildHeader(user?.displayName ?? 'Teacher'),
                   const SizedBox(height: 30),
 
@@ -547,10 +554,11 @@ class _TeacherDashboardPageState extends State<TeacherDashboardPage> {
                     const SizedBox(height: 30),
                   ],
 
-                  _sectionTitle('XP vs Performance'),
-                  _buildGlassCard(child: _xpVsPerformance()),
-                  const SizedBox(height: 40),
-                ],
+                    _sectionTitle('XP vs Performance'),
+                    _buildGlassCard(child: _xpVsPerformance()),
+                    const SizedBox(height: 40),
+                  ],
+                ),
               ),
             );
           },
@@ -648,7 +656,7 @@ class _TeacherDashboardPageState extends State<TeacherDashboardPage> {
               textAlign: TextAlign.center,
               maxLines: 2,
               overflow: TextOverflow.ellipsis,
-              style: const TextStyle(fontSize: 8, color: Colors.white70),
+              style: const TextStyle(fontSize: 8, color: Color(0xFF5C6B8C)),
             ),
           ),
         ],
@@ -679,13 +687,13 @@ class _TeacherDashboardPageState extends State<TeacherDashboardPage> {
                   style: const TextStyle(
                     fontSize: 12,
                     fontWeight: FontWeight.w600,
-                    color: Colors.white,
+                    color: Color(0xFF0D1B3D),
                   ),
                 ),
                 const SizedBox(height: 4),
                 Text(
                   '${concept['count']} students struggling',
-                  style: const TextStyle(fontSize: 10, color: Colors.white70),
+                  style: const TextStyle(fontSize: 10, color: Color(0xFF5C6B8C)),
                 ),
               ],
             ),
@@ -698,7 +706,7 @@ class _TeacherDashboardPageState extends State<TeacherDashboardPage> {
   Widget _buildTaskWorkloadChart() {
     if (_taskWorkload.isEmpty) {
       return const Center(
-        child: Text('No task data', style: TextStyle(color: Colors.white70)),
+        child: Text('No task data', style: TextStyle(color: Color(0xFF5C6B8C))),
       );
     }
 
@@ -714,7 +722,7 @@ class _TeacherDashboardPageState extends State<TeacherDashboardPage> {
                 if (value.toInt() < titles.length) {
                   return Text(
                     titles[value.toInt()],
-                    style: const TextStyle(color: Colors.white70, fontSize: 11),
+                    style: const TextStyle(color: Color(0xFF5C6B8C), fontSize: 11),
                   );
                 }
                 return const SizedBox.shrink();
@@ -727,7 +735,7 @@ class _TeacherDashboardPageState extends State<TeacherDashboardPage> {
               getTitlesWidget: (value, meta) {
                 return Text(
                   '${value.toInt()}',
-                  style: const TextStyle(color: Colors.white70, fontSize: 10),
+                  style: const TextStyle(color: Color(0xFF5C6B8C), fontSize: 10),
                 );
               },
             ),
@@ -762,9 +770,9 @@ class _TeacherDashboardPageState extends State<TeacherDashboardPage> {
           child: Container(
             padding: const EdgeInsets.all(12),
             decoration: BoxDecoration(
-              color: Colors.white.withOpacity(0.1),
+              color: Colors.white,
               borderRadius: BorderRadius.circular(10),
-              border: Border.all(color: Colors.white.withOpacity(0.2)),
+              border: Border.all(color: const Color(0x1A2E6BFF)),
             ),
             child: Row(
               children: [
@@ -777,7 +785,7 @@ class _TeacherDashboardPageState extends State<TeacherDashboardPage> {
                         style: const TextStyle(
                           fontSize: 12,
                           fontWeight: FontWeight.w600,
-                          color: Colors.white,
+                          color: Color(0xFF0D1B3D),
                         ),
                         maxLines: 1,
                         overflow: TextOverflow.ellipsis,
@@ -786,7 +794,7 @@ class _TeacherDashboardPageState extends State<TeacherDashboardPage> {
                         'by ${item['userName']}',
                         style: const TextStyle(
                           fontSize: 10,
-                          color: Colors.white70,
+                          color: Color(0xFF5C6B8C),
                         ),
                       ),
                     ],
@@ -794,7 +802,7 @@ class _TeacherDashboardPageState extends State<TeacherDashboardPage> {
                 ),
                 Text(
                   '👁 ${item['views']} | 💬 ${item['answers']}',
-                  style: const TextStyle(fontSize: 10, color: Colors.white70),
+                  style: const TextStyle(fontSize: 10, color: Color(0xFF5C6B8C)),
                 ),
               ],
             ),
@@ -807,23 +815,23 @@ class _TeacherDashboardPageState extends State<TeacherDashboardPage> {
   Widget _buildSearchBar() {
     return Container(
       decoration: BoxDecoration(
-        color: Colors.white.withOpacity(0.12),
+        color: Colors.white,
         borderRadius: BorderRadius.circular(14),
-        border: Border.all(color: Colors.white.withOpacity(0.25)),
+        border: Border.all(color: const Color(0x1A2E6BFF)),
       ),
       padding: const EdgeInsets.symmetric(horizontal: 16),
       child: TextField(
         controller: _searchController,
         onChanged: _filterStudents,
-        style: const TextStyle(color: Colors.white),
+        style: const TextStyle(color: Color(0xFF0D1B3D)),
         decoration: InputDecoration(
-          icon: const Icon(Icons.search, color: Colors.white70),
+          icon: const Icon(Icons.search, color: Color(0xFF5C6B8C)),
           hintText: 'Search student by name...',
-          hintStyle: const TextStyle(color: Colors.white54),
+          hintStyle: const TextStyle(color: Color(0xFF7A89A8)),
           border: InputBorder.none,
           suffixIcon: _searchController.text.isNotEmpty
               ? IconButton(
-                  icon: const Icon(Icons.clear, color: Colors.white70),
+                  icon: const Icon(Icons.clear, color: Color(0xFF5C6B8C)),
                   onPressed: () {
                     _searchController.clear();
                     _filterStudents('');
@@ -844,7 +852,7 @@ class _TeacherDashboardPageState extends State<TeacherDashboardPage> {
           style: TextStyle(
             fontSize: 14,
             fontWeight: FontWeight.w500,
-            color: Colors.white70,
+            color: Color(0xFF5C6B8C),
           ),
         ),
         const SizedBox(height: 8),
@@ -853,7 +861,7 @@ class _TeacherDashboardPageState extends State<TeacherDashboardPage> {
           style: const TextStyle(
             fontSize: 32,
             fontWeight: FontWeight.w800,
-            color: Color(0xFF00D9FF),
+            color: Color(0xFF0D1B3D),
           ),
         ),
       ],
@@ -868,7 +876,7 @@ class _TeacherDashboardPageState extends State<TeacherDashboardPage> {
         style: const TextStyle(
           fontSize: 18,
           fontWeight: FontWeight.w700,
-          color: Color(0xFF00D9FF),
+          color: Color(0xFF2E6BFF),
         ),
       ),
     );
@@ -877,14 +885,14 @@ class _TeacherDashboardPageState extends State<TeacherDashboardPage> {
   Widget _buildGlassCard({required Widget child}) {
     return Container(
       decoration: BoxDecoration(
-        color: Colors.white.withOpacity(0.1),
+        color: Colors.white,
         borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: Colors.white.withOpacity(0.2), width: 1.5),
+        border: Border.all(color: const Color(0x1A2E6BFF), width: 1.2),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.2),
-            blurRadius: 20,
-            offset: const Offset(0, 8),
+            color: const Color(0xFF2E6BFF).withValues(alpha: 0.10),
+            blurRadius: 14,
+            offset: const Offset(0, 6),
           ),
         ],
       ),
@@ -986,7 +994,7 @@ class _TeacherDashboardPageState extends State<TeacherDashboardPage> {
                   return Text(
                     titles[value.toInt()],
                     style: const TextStyle(
-                      color: Colors.white70,
+                      color: Color(0xFF5C6B8C),
                       fontSize: 12,
                       fontWeight: FontWeight.w500,
                     ),
@@ -1002,7 +1010,7 @@ class _TeacherDashboardPageState extends State<TeacherDashboardPage> {
               getTitlesWidget: (value, meta) {
                 return Text(
                   '${value.toInt()}',
-                  style: const TextStyle(color: Colors.white70, fontSize: 10),
+                  style: const TextStyle(color: Color(0xFF5C6B8C), fontSize: 10),
                 );
               },
             ),
@@ -1039,7 +1047,7 @@ class _TeacherDashboardPageState extends State<TeacherDashboardPage> {
   Widget _studentTrendChart() {
     if (_filteredStudents.isEmpty) {
       return const Center(
-        child: Text('No student data', style: TextStyle(color: Colors.white70)),
+        child: Text('No student data', style: TextStyle(color: Color(0xFF5C6B8C))),
       );
     }
 
@@ -1056,7 +1064,7 @@ class _TeacherDashboardPageState extends State<TeacherDashboardPage> {
           drawVerticalLine: false,
           horizontalInterval: 20,
           getDrawingHorizontalLine: (value) =>
-              FlLine(color: Colors.white.withOpacity(0.1), strokeWidth: 1),
+              FlLine(color: const Color(0x1A2E6BFF), strokeWidth: 1),
         ),
         titlesData: FlTitlesData(
           bottomTitles: AxisTitles(
@@ -1064,7 +1072,7 @@ class _TeacherDashboardPageState extends State<TeacherDashboardPage> {
               showTitles: true,
               getTitlesWidget: (value, meta) => Text(
                 'S${(value + 1).toInt()}',
-                style: const TextStyle(color: Colors.white70, fontSize: 10),
+                style: const TextStyle(color: Color(0xFF5C6B8C), fontSize: 10),
               ),
             ),
           ),
@@ -1073,7 +1081,7 @@ class _TeacherDashboardPageState extends State<TeacherDashboardPage> {
               showTitles: true,
               getTitlesWidget: (value, meta) => Text(
                 '${value.toInt()}',
-                style: const TextStyle(color: Colors.white70, fontSize: 10),
+                style: const TextStyle(color: Color(0xFF5C6B8C), fontSize: 10),
               ),
             ),
           ),
@@ -1127,12 +1135,12 @@ class _TeacherDashboardPageState extends State<TeacherDashboardPage> {
                 style: const TextStyle(
                   fontSize: 24,
                   fontWeight: FontWeight.w800,
-                  color: Colors.white,
+                  color: Color(0xFF0D1B3D),
                 ),
               ),
               const Text(
                 'Present',
-                style: TextStyle(fontSize: 12, color: Colors.white70),
+                style: TextStyle(fontSize: 12, color: Color(0xFF5C6B8C)),
               ),
             ],
           ),
@@ -1164,12 +1172,12 @@ class _TeacherDashboardPageState extends State<TeacherDashboardPage> {
                 style: const TextStyle(
                   fontSize: 24,
                   fontWeight: FontWeight.w800,
-                  color: Colors.white,
+                  color: Color(0xFF0D1B3D),
                 ),
               ),
               const Text(
                 'Completed',
-                style: TextStyle(fontSize: 12, color: Colors.white70),
+                style: TextStyle(fontSize: 12, color: Color(0xFF5C6B8C)),
               ),
             ],
           ),
@@ -1182,7 +1190,7 @@ class _TeacherDashboardPageState extends State<TeacherDashboardPage> {
     final topThree = _getTopPerformers();
     if (topThree.isEmpty) {
       return const Center(
-        child: Text('No student data', style: TextStyle(color: Colors.white70)),
+        child: Text('No student data', style: TextStyle(color: Color(0xFF5C6B8C))),
       );
     }
 
@@ -1234,14 +1242,14 @@ class _TeacherDashboardPageState extends State<TeacherDashboardPage> {
                         style: const TextStyle(
                           fontSize: 14,
                           fontWeight: FontWeight.w600,
-                          color: Colors.white,
+                          color: Color(0xFF0D1B3D),
                         ),
                       ),
                       Text(
                         'XP: ${(student['xp'] as double).toInt()} | Community: ${(student['community_score'] as double).toInt()} | PBL: ${(student['pbl_score'] as double).toInt()}',
                         style: const TextStyle(
                           fontSize: 12,
-                          color: Colors.white70,
+                          color: Color(0xFF5C6B8C),
                         ),
                       ),
                     ],
@@ -1259,7 +1267,7 @@ class _TeacherDashboardPageState extends State<TeacherDashboardPage> {
   Widget _performanceDistributionChart() {
     if (_filteredStudents.isEmpty) {
       return const Center(
-        child: Text('No student data', style: TextStyle(color: Colors.white70)),
+        child: Text('No student data', style: TextStyle(color: Color(0xFF5C6B8C))),
       );
     }
 
@@ -1294,7 +1302,7 @@ class _TeacherDashboardPageState extends State<TeacherDashboardPage> {
                 if (value.toInt() < ranges.length) {
                   return Text(
                     ranges[value.toInt()],
-                    style: const TextStyle(color: Colors.white70, fontSize: 10),
+                    style: const TextStyle(color: Color(0xFF5C6B8C), fontSize: 10),
                   );
                 }
                 return const SizedBox.shrink();
@@ -1306,7 +1314,7 @@ class _TeacherDashboardPageState extends State<TeacherDashboardPage> {
               showTitles: true,
               getTitlesWidget: (value, meta) => Text(
                 '${value.toInt()}',
-                style: const TextStyle(color: Colors.white70, fontSize: 10),
+                style: const TextStyle(color: Color(0xFF5C6B8C), fontSize: 10),
               ),
             ),
           ),
@@ -1384,7 +1392,7 @@ class _TeacherDashboardPageState extends State<TeacherDashboardPage> {
       return const Center(
         child: Text(
           'No data available',
-          style: TextStyle(color: Colors.white70),
+          style: TextStyle(color: Color(0xFF5C6B8C)),
         ),
       );
     }
@@ -1430,7 +1438,7 @@ class _TeacherDashboardPageState extends State<TeacherDashboardPage> {
             overflow: TextOverflow.ellipsis,
             style: const TextStyle(
               fontSize: 12,
-              color: Colors.white70,
+              color: Color(0xFF5C6B8C),
               fontWeight: FontWeight.w500,
             ),
           ),
@@ -1522,7 +1530,7 @@ class _TeacherDashboardPageState extends State<TeacherDashboardPage> {
           const SizedBox(height: 4),
           Text(
             title,
-            style: const TextStyle(fontSize: 11, color: Colors.white70),
+            style: const TextStyle(fontSize: 11, color: Color(0xFF5C6B8C)),
           ),
         ],
       ),
@@ -1532,7 +1540,7 @@ class _TeacherDashboardPageState extends State<TeacherDashboardPage> {
   Widget _xpVsPerformance() {
     if (_filteredStudents.isEmpty) {
       return const Center(
-        child: Text('No student data', style: TextStyle(color: Colors.white70)),
+        child: Text('No student data', style: TextStyle(color: Color(0xFF5C6B8C))),
       );
     }
 
@@ -1559,7 +1567,7 @@ class _TeacherDashboardPageState extends State<TeacherDashboardPage> {
               showTitles: true,
               getTitlesWidget: (value, meta) => Text(
                 '${value.toInt()}',
-                style: const TextStyle(color: Colors.white70, fontSize: 10),
+                style: const TextStyle(color: Color(0xFF5C6B8C), fontSize: 10),
               ),
             ),
           ),
@@ -1568,7 +1576,7 @@ class _TeacherDashboardPageState extends State<TeacherDashboardPage> {
               showTitles: true,
               getTitlesWidget: (value, meta) => Text(
                 '${value.toInt()}',
-                style: const TextStyle(color: Colors.white70, fontSize: 10),
+                style: const TextStyle(color: Color(0xFF5C6B8C), fontSize: 10),
               ),
             ),
           ),
@@ -1579,9 +1587,9 @@ class _TeacherDashboardPageState extends State<TeacherDashboardPage> {
           horizontalInterval: 10,
           verticalInterval: 1,
           getDrawingHorizontalLine: (value) =>
-              FlLine(color: Colors.white.withOpacity(0.1), strokeWidth: 1),
+              FlLine(color: const Color(0x1A2E6BFF), strokeWidth: 1),
           getDrawingVerticalLine: (value) =>
-              FlLine(color: Colors.white.withOpacity(0.1), strokeWidth: 1),
+              FlLine(color: const Color(0x1A2E6BFF), strokeWidth: 1),
         ),
         minX: 0,
         maxX: 10,
@@ -1594,7 +1602,7 @@ class _TeacherDashboardPageState extends State<TeacherDashboardPage> {
   Widget _buildStudentsTable() {
     if (_filteredStudents.isEmpty) {
       return const Center(
-        child: Text('No student data', style: TextStyle(color: Colors.white70)),
+        child: Text('No student data', style: TextStyle(color: Color(0xFF5C6B8C))),
       );
     }
 
@@ -1606,7 +1614,7 @@ class _TeacherDashboardPageState extends State<TeacherDashboardPage> {
             label: Text(
               'Student',
               style: TextStyle(
-                color: Colors.white,
+                color: Color(0xFF0D1B3D),
                 fontWeight: FontWeight.w600,
               ),
             ),
@@ -1615,7 +1623,7 @@ class _TeacherDashboardPageState extends State<TeacherDashboardPage> {
             label: Text(
               'Quiz %',
               style: TextStyle(
-                color: Colors.white,
+                color: Color(0xFF0D1B3D),
                 fontWeight: FontWeight.w600,
               ),
             ),
@@ -1624,7 +1632,7 @@ class _TeacherDashboardPageState extends State<TeacherDashboardPage> {
             label: Text(
               'Community',
               style: TextStyle(
-                color: Colors.white,
+                color: Color(0xFF0D1B3D),
                 fontWeight: FontWeight.w600,
               ),
             ),
@@ -1633,7 +1641,7 @@ class _TeacherDashboardPageState extends State<TeacherDashboardPage> {
             label: Text(
               'PBL',
               style: TextStyle(
-                color: Colors.white,
+                color: Color(0xFF0D1B3D),
                 fontWeight: FontWeight.w600,
               ),
             ),
@@ -1642,7 +1650,7 @@ class _TeacherDashboardPageState extends State<TeacherDashboardPage> {
             label: Text(
               'Attend %',
               style: TextStyle(
-                color: Colors.white,
+                color: Color(0xFF0D1B3D),
                 fontWeight: FontWeight.w600,
               ),
             ),
@@ -1651,7 +1659,7 @@ class _TeacherDashboardPageState extends State<TeacherDashboardPage> {
             label: Text(
               'XP',
               style: TextStyle(
-                color: Colors.white,
+                color: Color(0xFF0D1B3D),
                 fontWeight: FontWeight.w600,
               ),
             ),
@@ -1664,7 +1672,10 @@ class _TeacherDashboardPageState extends State<TeacherDashboardPage> {
                   DataCell(
                     Text(
                       student['name'] as String,
-                      style: const TextStyle(color: Colors.white, fontSize: 12),
+                      style: const TextStyle(
+                        color: Color(0xFF0D1B3D),
+                        fontSize: 12,
+                      ),
                     ),
                   ),
                   DataCell(

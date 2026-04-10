@@ -2,6 +2,8 @@ allprojects {
     repositories {
         google()
         mavenCentral()
+        maven("https://repo1.maven.org/maven2")
+        maven("https://plugins.gradle.org/m2/")
     }
 }
 

@@ -46,7 +46,7 @@ class EmptyStateWidget extends StatelessWidget {
             title,
             style: Theme.of(context).textTheme.titleLarge?.copyWith(
               fontWeight: FontWeight.bold,
-              color: Colors.white,
+              color: const Color(0xFF0D1B3D),
             ),
           ),
           const SizedBox(height: 8),
@@ -55,7 +55,7 @@ class EmptyStateWidget extends StatelessWidget {
             textAlign: TextAlign.center,
             style: Theme.of(
               context,
-            ).textTheme.bodyMedium?.copyWith(color: Colors.white),
+            ).textTheme.bodyMedium?.copyWith(color: const Color(0xFF5C6B8C)),
           ),
           if (onRetry != null) ...[
             const SizedBox(height: 24),

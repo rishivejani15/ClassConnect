@@ -11,6 +11,7 @@ import 'productivity_screen.dart';
 import 'weekly_insights_screen.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:demo/widgets/ui/cc_decorated_background.dart';
 
 enum _TimeFilter { today, tomorrow, next7 }
 
@@ -30,12 +31,6 @@ class _TeacherTaskScreenState extends State<TeacherTaskScreen>
   _TimeFilter _filter = _TimeFilter.today;
   final ScrollController _listController = ScrollController();
   final BorderRadius _cardRadius = BorderRadius.circular(20);
-
-  static const _backgroundGradient = LinearGradient(
-    colors: [Color(0xFF0F1C3F), Color(0xFF1A2847)],
-    begin: Alignment.topCenter,
-    end: Alignment.bottomCenter,
-  );
 
   @override
   void initState() {
@@ -58,9 +53,9 @@ class _TeacherTaskScreenState extends State<TeacherTaskScreen>
     return DefaultTabController(
       length: 2,
       child: Scaffold(
-        backgroundColor: const Color(0xFF0F1C3F),
+        backgroundColor: const Color(0xFFF4F8FF),
         appBar: AppBar(
-          backgroundColor: const Color(0xFF0F1C3F),
+          backgroundColor: const Color(0xFFF4F8FF),
           elevation: 0, // removes shadow
           scrolledUnderElevation:
               0, // 🔑 removes white line on scroll (Flutter 3.7+)
@@ -68,13 +63,13 @@ class _TeacherTaskScreenState extends State<TeacherTaskScreen>
           // elevation: 0,
           title: const Text(
             'Planned Work',
-            style: TextStyle(color: Colors.white),
+            style: TextStyle(color: Color(0xFF0D1B3D)),
           ),
           actions: [
             IconButton(
               icon: const Icon(
                 Icons.add_circle_outline,
-                color: Colors.cyanAccent,
+                color: Color(0xFF2E6BFF),
               ),
               tooltip: 'Plan workload',
               onPressed: () {
@@ -87,7 +82,7 @@ class _TeacherTaskScreenState extends State<TeacherTaskScreen>
             PopupMenuButton<String>(
               icon: const Icon(
                 Icons.notifications_active_outlined,
-                color: Colors.cyanAccent,
+                color: Color(0xFF2E6BFF),
               ),
               tooltip: 'Send nudges',
               onSelected: (value) async {
@@ -110,26 +105,25 @@ class _TeacherTaskScreenState extends State<TeacherTaskScreen>
             ),
           ],
           bottom: const TabBar(
-            indicatorColor: Colors.cyanAccent,
-            labelColor: Colors.white, // selected tab text
-            unselectedLabelColor: Colors.white,
+            indicatorColor: Color(0xFF2E6BFF),
+            labelColor: Color(0xFF0D1B3D),
+            unselectedLabelColor: Color(0xFF5C6B8C),
             tabs: [
               Tab(
                 icon: Icon(
                   Icons.format_list_bulleted,
-                  color: Colors.cyanAccent,
+                  color: Color(0xFF2E6BFF),
                 ),
                 text: 'List',
               ),
               Tab(
-                icon: Icon(Icons.calendar_month, color: Colors.cyanAccent),
+                icon: Icon(Icons.calendar_month, color: Color(0xFF2E6BFF)),
                 text: 'Calendar',
               ),
             ],
           ),
         ),
-        body: Container(
-          color: const Color(0xFF0F1C3F),
+        body: CcDecoratedBackground(
           child: Column(
             children: [
               Padding(
@@ -142,11 +136,11 @@ class _TeacherTaskScreenState extends State<TeacherTaskScreen>
                       style: TextStyle(
                         fontSize: 16,
                         fontWeight: FontWeight.w600,
-                        color: Colors.white,
+                        color: Color(0xFF0D1B3D),
                       ),
                     ),
                     IconButton(
-                      icon: const Icon(Icons.bolt, color: Colors.cyanAccent),
+                      icon: const Icon(Icons.bolt, color: Color(0xFF2E6BFF)),
                       tooltip: 'Jump to top',
                       onPressed: () => _listController.animateTo(
                         0,
@@ -198,18 +192,19 @@ class _TeacherTaskScreenState extends State<TeacherTaskScreen>
     return AnimatedContainer(
       duration: const Duration(milliseconds: 250),
       decoration: BoxDecoration(
-        color: selected ? Colors.transparent : Color(0xFF1E2D4F),
+        color: selected ? const Color(0xFFEAF3FF) : Colors.white,
         borderRadius: BorderRadius.circular(999),
         border: Border.all(
-          color: selected ? Colors.cyanAccent : Color(0xFF2A3A5F),
+          color: selected
+              ? const Color(0xFF2E6BFF)
+              : const Color(0x1A2E6BFF),
         ),
         boxShadow: selected
             ? [
                 BoxShadow(
-                  color: Colors.cyanAccent.withOpacity(0.2),
-                  blurRadius: 16,
-                  offset: const Offset(0, 6),
-                  
+                  color: const Color(0xFF2E6BFF).withOpacity(0.16),
+                  blurRadius: 12,
+                  offset: const Offset(0, 4),
                 ),
               ]
             : null,
@@ -222,12 +217,12 @@ class _TeacherTaskScreenState extends State<TeacherTaskScreen>
           child: Row(
             mainAxisSize: MainAxisSize.min,
             children: [
-              Icon(icon, size: 18, color: Colors.white),
+              Icon(icon, size: 18, color: const Color(0xFF2E6BFF)),
               const SizedBox(width: 6),
               Text(
                 label,
-                style: TextStyle(
-                  color: Colors.white,
+                style: const TextStyle(
+                  color: Color(0xFF0D1B3D),
                   fontWeight: FontWeight.w600,
                 ),
               ),
@@ -1005,7 +1000,7 @@ class _TeacherTaskScreenState extends State<TeacherTaskScreen>
           borderRadius: BorderRadius.circular(999),
           child: LinearProgressIndicator(
             value: progress,
-            backgroundColor: Color(0xFF0F1C3F),
+            backgroundColor: const Color(0xFFF4F8FF),
             valueColor: AlwaysStoppedAnimation<Color>(
               status == 'completed'
                   ? Colors.green

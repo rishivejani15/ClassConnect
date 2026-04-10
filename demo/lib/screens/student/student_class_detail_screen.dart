@@ -62,7 +62,7 @@ class _StudentClassDetailScreenState extends State<StudentClassDetailScreen>
     }
 
     return Scaffold(
-      backgroundColor: const Color(0xFF0F1C3F),
+      backgroundColor: const Color(0xFFF4F8FF),
       drawer: _buildDrawer(context, student),
 
       /// 🔹 FETCH STUDENT NAME AND CLASS DATA
@@ -74,9 +74,9 @@ class _StudentClassDetailScreenState extends State<StudentClassDetailScreen>
         builder: (context, classSnapshot) {
           if (!classSnapshot.hasData || !classSnapshot.data!.exists) {
             return Container(
-              color: const Color(0xFF0F1C3F),
+              color: const Color(0xFFF4F8FF),
               child: const Center(
-                child: CircularProgressIndicator(color: Colors.white30),
+                child: CircularProgressIndicator(color: Color(0xFF2E6BFF)),
               ),
             );
           }
@@ -92,9 +92,9 @@ class _StudentClassDetailScreenState extends State<StudentClassDetailScreen>
             builder: (context, studentSnap) {
               if (!studentSnap.hasData || !studentSnap.data!.exists) {
                 return Container(
-                  color: const Color(0xFF0F1C3F),
+                  color: const Color(0xFFF4F8FF),
                   child: const Center(
-                    child: CircularProgressIndicator(color: Colors.white30),
+                    child: CircularProgressIndicator(color: Color(0xFF2E6BFF)),
                   ),
                 );
               }
@@ -107,13 +107,16 @@ class _StudentClassDetailScreenState extends State<StudentClassDetailScreen>
                 children: [
                   // Custom AppBar
                   Container(
-                    color: const Color(0xFF0F1C3F),
+                    color: const Color(0xFFF4F8FF),
                     padding: const EdgeInsets.only(top: 30),
                     child: Row(
                       children: [
                         Builder(
                           builder: (context) => IconButton(
-                            icon: const Icon(Icons.menu, color: Colors.white),
+                            icon: const Icon(
+                              Icons.menu,
+                              color: Color(0xFF0D1B3D),
+                            ),
                             onPressed: () {
                               Scaffold.of(context).openDrawer();
                             },
@@ -123,7 +126,7 @@ class _StudentClassDetailScreenState extends State<StudentClassDetailScreen>
                           child: Text(
                             className,
                             style: const TextStyle(
-                              color: Colors.white,
+                              color: Color(0xFF0D1B3D),
                               fontSize: 20,
                               fontWeight: FontWeight.bold,
                             ),
@@ -133,7 +136,7 @@ class _StudentClassDetailScreenState extends State<StudentClassDetailScreen>
                         IconButton(
                           icon: const Icon(
                             Icons.arrow_back_ios_new_rounded,
-                            color: Colors.white,
+                            color: Color(0xFF0D1B3D),
                           ),
                           onPressed: () {
                             Navigator.pop(context);
@@ -145,12 +148,12 @@ class _StudentClassDetailScreenState extends State<StudentClassDetailScreen>
 
                   // Tab Bar
                   Container(
-                    color: const Color(0xFF0F1C3F),
+                    color: const Color(0xFFF4F8FF),
                     child: TabBar(
                       controller: _tabController,
-                      indicatorColor: Colors.white,
-                      labelColor: Colors.white,
-                      unselectedLabelColor: Colors.white54,
+                      indicatorColor: const Color(0xFF2E6BFF),
+                      labelColor: const Color(0xFF0D1B3D),
+                      unselectedLabelColor: const Color(0xFF5C6B8C),
                       tabs: const [
                         Tab(text: "Posts"),
                         Tab(text: "Assignments"),
@@ -193,7 +196,7 @@ class _StudentClassDetailScreenState extends State<StudentClassDetailScreen>
   /// 🔹 SIDE NAVIGATION DRAWER
   Widget _buildDrawer(BuildContext context, User student) {
     return Drawer(
-      backgroundColor: const Color(0xFF0F1C3F),
+      backgroundColor: const Color(0xFFF4F8FF),
       child: StreamBuilder<DocumentSnapshot>(
         stream: FirebaseFirestore.instance
             .collection('students')
@@ -356,7 +359,7 @@ class _StudentClassDetailScreenState extends State<StudentClassDetailScreen>
                           child: Text(
                             "PROJECT-BASED LEARNING",
                             style: TextStyle(
-                              color: Colors.white.withOpacity(0.5),
+                              color: const Color(0xFF0D1B3D).withOpacity(0.5),
                               fontSize: 11,
                               fontWeight: FontWeight.bold,
                               letterSpacing: 1.2,
@@ -410,9 +413,12 @@ class _StudentClassDetailScreenState extends State<StudentClassDetailScreen>
     return Container(
       margin: const EdgeInsets.symmetric(horizontal: 4),
       decoration: BoxDecoration(
-        color: Colors.white.withOpacity(0.05),
+        color: const Color(0xFF0D1B3D).withOpacity(0.05),
         borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: Colors.white.withOpacity(0.1), width: 1),
+        border: Border.all(
+          color: const Color(0xFF0D1B3D).withOpacity(0.1),
+          width: 1,
+        ),
       ),
       child: Material(
         color: Colors.transparent,
@@ -439,7 +445,7 @@ class _StudentClassDetailScreenState extends State<StudentClassDetailScreen>
                       Text(
                         title,
                         style: const TextStyle(
-                          color: Colors.white,
+                          color: const Color(0xFF0D1B3D),
                           fontSize: 15,
                           fontWeight: FontWeight.w600,
                         ),
@@ -448,7 +454,7 @@ class _StudentClassDetailScreenState extends State<StudentClassDetailScreen>
                       Text(
                         subtitle,
                         style: TextStyle(
-                          color: Colors.white.withOpacity(0.6),
+                          color: const Color(0xFF0D1B3D).withOpacity(0.6),
                           fontSize: 12,
                         ),
                       ),
@@ -457,7 +463,7 @@ class _StudentClassDetailScreenState extends State<StudentClassDetailScreen>
                 ),
                 Icon(
                   Icons.arrow_forward_ios,
-                  color: Colors.white.withOpacity(0.3),
+                  color: const Color(0xFF0D1B3D).withOpacity(0.3),
                   size: 16,
                 ),
               ],
@@ -537,11 +543,14 @@ class _StudentClassDetailScreenState extends State<StudentClassDetailScreen>
     showDialog(
       context: context,
       builder: (dialogContext) => AlertDialog(
-        backgroundColor: const Color(0xFF1A2856),
+        backgroundColor: Colors.white,
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
         title: Text(
           'Confirm Selection',
-          style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
+          style: TextStyle(
+            color: const Color(0xFF0D1B3D),
+            fontWeight: FontWeight.bold,
+          ),
         ),
         content: Column(
           mainAxisSize: MainAxisSize.min,
@@ -549,13 +558,13 @@ class _StudentClassDetailScreenState extends State<StudentClassDetailScreen>
           children: [
             Text(
               'Are you sure you want to select this mini project?',
-              style: TextStyle(color: Colors.white70),
+              style: TextStyle(color: Color(0xFF5C6B8C)),
             ),
             const SizedBox(height: 16),
             Container(
               padding: const EdgeInsets.all(12),
               decoration: BoxDecoration(
-                color: Colors.white.withOpacity(0.05),
+                color: const Color(0xFF0D1B3D).withOpacity(0.05),
                 borderRadius: BorderRadius.circular(8),
               ),
               child: Column(
@@ -564,7 +573,7 @@ class _StudentClassDetailScreenState extends State<StudentClassDetailScreen>
                   Text(
                     'Project: ${miniProject['title']}',
                     style: const TextStyle(
-                      color: Colors.white,
+                      color: const Color(0xFF0D1B3D),
                       fontWeight: FontWeight.w600,
                       fontSize: 14,
                     ),
@@ -572,7 +581,10 @@ class _StudentClassDetailScreenState extends State<StudentClassDetailScreen>
                   const SizedBox(height: 8),
                   Text(
                     miniProject['description'] ?? '',
-                    style: const TextStyle(color: Colors.white60, fontSize: 12),
+                    style: const TextStyle(
+                      color: Color(0xFF5C6B8C),
+                      fontSize: 12,
+                    ),
                     maxLines: 2,
                     overflow: TextOverflow.ellipsis,
                   ),
@@ -582,14 +594,14 @@ class _StudentClassDetailScreenState extends State<StudentClassDetailScreen>
             const SizedBox(height: 8),
             Text(
               'Once selected, your steps and progress will be saved and personalized for this project.',
-              style: TextStyle(color: Colors.white54, fontSize: 12),
+              style: TextStyle(color: Color(0xFF7A89A8), fontSize: 12),
             ),
           ],
         ),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(dialogContext),
-            child: Text('Cancel', style: TextStyle(color: Colors.white54)),
+            child: Text('Cancel', style: TextStyle(color: Color(0xFF7A89A8))),
           ),
           TextButton(
             onPressed: () {
@@ -604,7 +616,7 @@ class _StudentClassDetailScreenState extends State<StudentClassDetailScreen>
             child: Text(
               'Confirm',
               style: TextStyle(
-                color: Colors.cyanAccent,
+                color: const Color(0xFF2E6BFF),
                 fontWeight: FontWeight.bold,
               ),
             ),
@@ -785,17 +797,17 @@ class _QuizSection extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: const Color(0xFF0F1C3F),
+      backgroundColor: const Color(0xFFF4F8FF),
       appBar: AppBar(
         elevation: 0,
-        backgroundColor: const Color(0xFF0F1C3F),
-        foregroundColor: Colors.white,
+        backgroundColor: const Color(0xFFF4F8FF),
+        foregroundColor: const Color(0xFF0D1B3D),
         title: const Text("Concept Practice"),
         centerTitle: true,
         leading: IconButton(
           icon: const Icon(
             Icons.arrow_back_ios_new_rounded,
-            color: Colors.white,
+            color: Color(0xFF0D1B3D),
           ),
           onPressed: () {
             Navigator.pop(context);
@@ -814,7 +826,7 @@ class _QuizSection extends StatelessWidget {
             // 🔄 Loading
             if (snapshot.connectionState == ConnectionState.waiting) {
               return const Center(
-                child: CircularProgressIndicator(color: Colors.white54),
+                child: CircularProgressIndicator(color: Color(0xFF7A89A8)),
               );
             }
 
@@ -920,14 +932,15 @@ class _ImproveConceptsCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: const Color(0xFF0F1C3F), // app theme bg
+      backgroundColor: const Color(0xFFF4F8FF), // app theme bg
 
       body: Padding(
         padding: const EdgeInsets.all(16),
         child: Card(
-          color: const Color(0xFF1E1E1E),
+          color: Colors.white,
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(16),
+            side: const BorderSide(color: Color(0x1A2E6BFF)),
           ),
           elevation: 4,
           child: Padding(
@@ -940,7 +953,7 @@ class _ImproveConceptsCard extends StatelessWidget {
                   style: TextStyle(
                     fontWeight: FontWeight.bold,
                     fontSize: 18,
-                    color: Colors.white,
+                    color: Color(0xFF0D1B3D),
                   ),
                 ),
 
@@ -948,7 +961,10 @@ class _ImproveConceptsCard extends StatelessWidget {
 
                 Text(
                   "Weak concepts: ${weakConcepts.length}",
-                  style: const TextStyle(fontSize: 14, color: Colors.white),
+                  style: const TextStyle(
+                    fontSize: 14,
+                    color: Color(0xFF5C6B8C),
+                  ),
                 ),
 
                 const SizedBox(height: 12),
@@ -957,7 +973,8 @@ class _ImproveConceptsCard extends StatelessWidget {
                   value: masteryScore / 100,
                   minHeight: 8,
                   borderRadius: BorderRadius.circular(8),
-                  color: Colors.cyanAccent,
+                  color: const Color(0xFF2E6BFF),
+                  backgroundColor: const Color(0x1A2E6BFF),
                 ),
 
                 const SizedBox(height: 16),
@@ -966,8 +983,8 @@ class _ImproveConceptsCard extends StatelessWidget {
                   width: double.infinity,
                   child: ElevatedButton(
                     style: ElevatedButton.styleFrom(
-                      backgroundColor: Colors.cyanAccent,
-                      foregroundColor: Colors.black,
+                      backgroundColor: const Color(0xFF2E6BFF),
+                      foregroundColor: Colors.white,
                       shape: RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(12),
                       ),
@@ -1050,7 +1067,7 @@ class _PostsTab extends StatelessWidget {
     }
 
     return Container(
-      color: const Color(0xFF0F1C3F),
+      color: const Color(0xFFF4F8FF),
       child: StreamBuilder<QuerySnapshot>(
         stream: FirebaseFirestore.instance
             .collection('classes')
@@ -1069,7 +1086,7 @@ class _PostsTab extends StatelessWidget {
             return const Center(
               child: Text(
                 "No quizzes posted yet",
-                style: TextStyle(fontSize: 16, color: Colors.white70),
+                style: TextStyle(fontSize: 16, color: Color(0xFF5C6B8C)),
               ),
             );
           }
@@ -1091,7 +1108,7 @@ class _PostsTab extends StatelessWidget {
                     data['publishedAt'] ?? Timestamp.now();
 
                 return Card(
-                  color: const Color(0xFF1E1E1E),
+                  color: Colors.white,
                   elevation: 2,
                   margin: const EdgeInsets.only(bottom: 12),
                   shape: RoundedRectangleBorder(
@@ -1120,7 +1137,7 @@ class _PostsTab extends StatelessWidget {
                                 style: const TextStyle(
                                   fontSize: 16,
                                   fontWeight: FontWeight.bold,
-                                  color: Colors.white,
+                                  color: const Color(0xFF0D1B3D),
                                 ),
                               ),
                             ),
@@ -1133,7 +1150,7 @@ class _PostsTab extends StatelessWidget {
                         Text(
                           content,
                           style: const TextStyle(
-                            color: Colors.white,
+                            color: const Color(0xFF0D1B3D),
                             fontSize: 18,
                             // height: 1.5,
                           ),
@@ -1146,7 +1163,10 @@ class _PostsTab extends StatelessWidget {
                         /// 🔹 PUBLISHED DATE
                         Text(
                           "Posted: ${publishedAt.toDate().toLocal().toString().split(' ')[0]}",
-                          style: TextStyle(color: Colors.white54, fontSize: 12),
+                          style: TextStyle(
+                            color: Color(0xFF7A89A8),
+                            fontSize: 12,
+                          ),
                         ),
                       ],
                     ),
@@ -1168,12 +1188,12 @@ class _PostsTab extends StatelessWidget {
               final bool isExpired = DateTime.now().isAfter(deadline);
 
               return Card(
-                color: const Color(0xFF1E1E1E),
+                color: Colors.white,
                 elevation: 3,
                 margin: const EdgeInsets.only(bottom: 12),
                 shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(14),
-                  side: BorderSide(color: Colors.white),
+                  side: const BorderSide(color: Color(0x1A2E6BFF)),
                 ),
                 child: Padding(
                   padding: const EdgeInsets.all(14),
@@ -1185,7 +1205,7 @@ class _PostsTab extends StatelessWidget {
                         children: [
                           const Icon(
                             Icons.assignment,
-                            color: Colors.cyanAccent,
+                            color: Color(0xFF2E6BFF),
                           ),
                           const SizedBox(width: 10),
                           Expanded(
@@ -1194,7 +1214,7 @@ class _PostsTab extends StatelessWidget {
                               style: const TextStyle(
                                 fontSize: 16,
                                 fontWeight: FontWeight.bold,
-                                color: Colors.white,
+                                color: const Color(0xFF0D1B3D),
                               ),
                             ),
                           ),
@@ -1232,8 +1252,8 @@ class _PostsTab extends StatelessWidget {
                           ),
                           style: ElevatedButton.styleFrom(
                             backgroundColor: isExpired
-                                ? Colors.grey
-                                : Colors.cyanAccent,
+                                ? Colors.grey.shade300
+                                : const Color(0xFF2E6BFF),
                             shape: RoundedRectangleBorder(
                               borderRadius: BorderRadius.circular(10),
                             ),
@@ -1278,7 +1298,7 @@ class _AssignmentsTab extends StatelessWidget {
     if (classId.isEmpty) return const SizedBox();
 
     return Container(
-      color: const Color(0xFF0F1C3F),
+      color: const Color(0xFFF4F8FF),
       child: StreamBuilder<QuerySnapshot>(
         stream: FirebaseFirestore.instance
             .collection('classes')
@@ -1289,7 +1309,7 @@ class _AssignmentsTab extends StatelessWidget {
         builder: (context, snapshot) {
           if (snapshot.connectionState == ConnectionState.waiting) {
             return const Center(
-              child: CircularProgressIndicator(color: Colors.white30),
+              child: CircularProgressIndicator(color: Color(0xFF2E6BFF)),
             );
           }
 
@@ -1301,12 +1321,12 @@ class _AssignmentsTab extends StatelessWidget {
                   Icon(
                     Icons.assignment_outlined,
                     size: 60,
-                    color: Colors.white24,
+                    color: Color(0xFFB5C3DE),
                   ),
                   SizedBox(height: 16),
                   Text(
                     "No assignments yet",
-                    style: TextStyle(color: Colors.white60, fontSize: 16),
+                    style: TextStyle(color: Color(0xFF5C6B8C), fontSize: 16),
                   ),
                 ],
               ),
@@ -1321,10 +1341,10 @@ class _AssignmentsTab extends StatelessWidget {
               final data = doc.data() as Map<String, dynamic>;
 
               return Card(
-                color: const Color(0xFF1E1E1E),
+                color: Colors.white,
                 shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(12),
-                  side: BorderSide(color: Colors.white),
+                  side: const BorderSide(color: Color(0x1A2E6BFF)),
                 ),
                 margin: const EdgeInsets.only(bottom: 12),
                 child: ListTile(
@@ -1332,30 +1352,30 @@ class _AssignmentsTab extends StatelessWidget {
                   leading: Container(
                     padding: const EdgeInsets.all(12),
                     decoration: BoxDecoration(
-                      color: Colors.cyanAccent.withOpacity(0.2),
+                      color: const Color(0x142E6BFF),
                       borderRadius: BorderRadius.circular(12),
                     ),
                     child: const Icon(
                       Icons.assignment,
-                      color: Colors.cyanAccent,
+                      color: Color(0xFF2E6BFF),
                     ),
                   ),
                   title: Text(
                     data['title'] ?? 'Untitled Assignment',
                     style: const TextStyle(
-                      color: Colors.white,
+                      color: const Color(0xFF0D1B3D),
                       fontWeight: FontWeight.bold,
                     ),
                   ),
                   subtitle: Text(
                     data['description'] ?? '',
-                    style: const TextStyle(color: Colors.white60),
+                    style: const TextStyle(color: Color(0xFF5C6B8C)),
                     maxLines: 2,
                     overflow: TextOverflow.ellipsis,
                   ),
                   trailing: const Icon(
                     Icons.arrow_forward_ios,
-                    color: Colors.white30,
+                    color: Color(0xFFA5B2C8),
                     size: 16,
                   ),
                   onTap: () {
@@ -1527,14 +1547,14 @@ class _HomeworkTabState extends State<_HomeworkTab> {
     final confirm = await showDialog<bool>(
       context: context,
       builder: (context) => AlertDialog(
-        backgroundColor: const Color(0xFF1B2B50),
+        backgroundColor: Colors.white,
         title: const Text(
           "Regenerate Homework?",
-          style: TextStyle(color: Colors.white),
+          style: TextStyle(color: Color(0xFF0D1B3D)),
         ),
         content: const Text(
           "This will discard the current questions and generate new ones based on your weak concepts.",
-          style: TextStyle(color: Colors.white70),
+          style: TextStyle(color: Color(0xFF5C6B8C)),
         ),
         actions: [
           TextButton(
@@ -1545,7 +1565,7 @@ class _HomeworkTabState extends State<_HomeworkTab> {
             onPressed: () => Navigator.pop(context, true),
             child: const Text(
               "Regenerate",
-              style: TextStyle(color: Colors.cyanAccent),
+              style: TextStyle(color: Color(0xFF2E6BFF)),
             ),
           ),
         ],
@@ -1566,16 +1586,16 @@ class _HomeworkTabState extends State<_HomeworkTab> {
   Widget build(BuildContext context) {
     if (_isLoading) {
       return Container(
-        color: const Color(0xFF0F1C3F),
+        color: const Color(0xFFF4F8FF),
         child: const Center(
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              CircularProgressIndicator(color: Colors.cyanAccent),
+              CircularProgressIndicator(color: Color(0xFF2E6BFF)),
               SizedBox(height: 16),
               Text(
                 "AI is crafting your personal homework...",
-                style: TextStyle(color: Colors.white70),
+                style: TextStyle(color: Color(0xFF5C6B8C)),
               ),
             ],
           ),
@@ -1584,7 +1604,7 @@ class _HomeworkTabState extends State<_HomeworkTab> {
     }
 
     return Container(
-      color: const Color(0xFF0F1C3F),
+      color: const Color(0xFFF4F8FF),
       child: StreamBuilder<QuerySnapshot>(
         // 1. Get ALL homeworks for student, then filter client-side to avoid Index errors
         stream: FirebaseFirestore.instance
@@ -1680,12 +1700,12 @@ class _HomeworkTabState extends State<_HomeworkTab> {
                   child: Column(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
-                      const CircularProgressIndicator(color: Colors.cyanAccent),
+                      const CircularProgressIndicator(color: Color(0xFF2E6BFF)),
                       const SizedBox(height: 16),
                       Text(
                         "New weak concepts detected!\nGenerating personalized homework...",
                         textAlign: TextAlign.center,
-                        style: const TextStyle(color: Colors.white70),
+                        style: const TextStyle(color: Color(0xFF5C6B8C)),
                       ),
                     ],
                   ),
@@ -1727,7 +1747,7 @@ class _HomeworkTabState extends State<_HomeworkTab> {
                     const Text(
                       "No homework needed! 🎉",
                       style: TextStyle(
-                        color: Colors.white,
+                        color: const Color(0xFF0D1B3D),
                         fontSize: 18,
                         fontWeight: FontWeight.bold,
                       ),
@@ -1735,7 +1755,7 @@ class _HomeworkTabState extends State<_HomeworkTab> {
                     const SizedBox(height: 8),
                     const Text(
                       "You have no weak concepts pending.\nKeep taking quizzes to check your progress.",
-                      style: TextStyle(color: Colors.white60),
+                      style: TextStyle(color: Color(0xFF5C6B8C)),
                       textAlign: TextAlign.center,
                     ),
                   ],
@@ -1928,7 +1948,7 @@ class _ActiveHomeworkViewState extends State<_ActiveHomeworkView> {
                       const Text(
                         "OUT OF 100",
                         style: TextStyle(
-                          color: Colors.white70,
+                          color: Color(0xFFE5F9EE),
                           fontSize: 12,
                           fontWeight: FontWeight.bold,
                           letterSpacing: 1.5,
@@ -1938,7 +1958,7 @@ class _ActiveHomeworkViewState extends State<_ActiveHomeworkView> {
                       Container(
                         padding: const EdgeInsets.all(12),
                         decoration: BoxDecoration(
-                          color: Colors.white.withOpacity(0.2),
+                          color: Colors.white.withOpacity(0.15),
                           borderRadius: BorderRadius.circular(12),
                         ),
                         child: Text(
@@ -1996,12 +2016,12 @@ class _ActiveHomeworkViewState extends State<_ActiveHomeworkView> {
                 return Container(
                   margin: const EdgeInsets.only(bottom: 24),
                   decoration: BoxDecoration(
-                    color: const Color(0xFF1E2E52),
+                    color: Colors.white,
                     borderRadius: BorderRadius.circular(16),
-                    border: Border.all(color: Colors.white.withOpacity(0.05)),
+                    border: Border.all(color: const Color(0x1A2E6BFF)),
                     boxShadow: [
                       BoxShadow(
-                        color: Colors.black.withOpacity(0.2),
+                        color: const Color(0xFF2E6BFF).withOpacity(0.08),
                         blurRadius: 10,
                         offset: const Offset(0, 4),
                       ),
@@ -2015,14 +2035,12 @@ class _ActiveHomeworkViewState extends State<_ActiveHomeworkView> {
                         width: double.infinity,
                         padding: const EdgeInsets.all(16),
                         decoration: BoxDecoration(
-                          color: Colors.white.withOpacity(0.02),
+                          color: const Color(0xFFF7FAFF),
                           borderRadius: const BorderRadius.vertical(
                             top: Radius.circular(16),
                           ),
                           border: Border(
-                            bottom: BorderSide(
-                              color: Colors.white.withOpacity(0.05),
-                            ),
+                            bottom: BorderSide(color: const Color(0x1A2E6BFF)),
                           ),
                         ),
                         child: Row(
@@ -2031,7 +2049,7 @@ class _ActiveHomeworkViewState extends State<_ActiveHomeworkView> {
                             Text(
                               "Q${index + 1}",
                               style: const TextStyle(
-                                color: Colors.cyanAccent,
+                                color: Color(0xFF2E6BFF),
                                 fontWeight: FontWeight.bold,
                                 fontSize: 16,
                               ),
@@ -2041,7 +2059,7 @@ class _ActiveHomeworkViewState extends State<_ActiveHomeworkView> {
                               child: Text(
                                 q['question'],
                                 style: const TextStyle(
-                                  color: Colors.white,
+                                  color: const Color(0xFF0D1B3D),
                                   fontWeight: FontWeight.w600,
                                   fontSize: 16,
                                   height: 1.4,
@@ -2060,18 +2078,18 @@ class _ActiveHomeworkViewState extends State<_ActiveHomeworkView> {
                           maxLines: 5,
                           readOnly: widget.isReadOnly,
                           style: const TextStyle(
-                            color: Colors.white,
+                            color: const Color(0xFF0D1B3D),
                             fontSize: 14,
                           ),
-                          cursorColor: Colors.cyanAccent,
+                          cursorColor: const Color(0xFF2E6BFF),
                           decoration: InputDecoration(
                             hintText: "Type your detailed answer here...",
                             hintStyle: TextStyle(
-                              color: Colors.white.withOpacity(0.3),
+                              color: const Color(0xFF0D1B3D).withOpacity(0.3),
                               fontSize: 14,
                             ),
                             filled: true,
-                            fillColor: const Color(0xFF0F1C3F),
+                            fillColor: const Color(0xFFF4F8FF),
                             contentPadding: const EdgeInsets.all(16),
                             border: OutlineInputBorder(
                               borderRadius: BorderRadius.circular(12),
@@ -2080,13 +2098,13 @@ class _ActiveHomeworkViewState extends State<_ActiveHomeworkView> {
                             enabledBorder: OutlineInputBorder(
                               borderRadius: BorderRadius.circular(12),
                               borderSide: BorderSide(
-                                color: Colors.white.withOpacity(0.1),
+                                color: const Color(0xFF0D1B3D).withOpacity(0.1),
                               ),
                             ),
                             focusedBorder: OutlineInputBorder(
                               borderRadius: BorderRadius.circular(12),
                               borderSide: const BorderSide(
-                                color: Colors.cyanAccent,
+                                color: Color(0xFF2E6BFF),
                                 width: 1.5,
                               ),
                             ),
@@ -2109,9 +2127,9 @@ class _ActiveHomeworkViewState extends State<_ActiveHomeworkView> {
                 Container(
                   padding: const EdgeInsets.all(16),
                   decoration: BoxDecoration(
-                    color: Colors.white.withOpacity(0.05),
+                    color: const Color(0xFF0D1B3D).withOpacity(0.05),
                     borderRadius: BorderRadius.circular(12),
-                    border: Border.all(color: Colors.white12),
+                    border: Border.all(color: Color(0x1A2E6BFF)),
                   ),
                   child: Row(
                     children: [
@@ -2134,7 +2152,7 @@ class _ActiveHomeworkViewState extends State<_ActiveHomeworkView> {
                             Text(
                               previousFileName ?? "No file attached",
                               style: const TextStyle(
-                                color: Colors.white,
+                                color: const Color(0xFF0D1B3D),
                                 fontWeight: FontWeight.w500,
                               ),
                             ),
@@ -2144,7 +2162,9 @@ class _ActiveHomeworkViewState extends State<_ActiveHomeworkView> {
                                 child: Text(
                                   "Tap to view",
                                   style: TextStyle(
-                                    color: Colors.white.withOpacity(0.5),
+                                    color: const Color(
+                                      0xFF0D1B3D,
+                                    ).withOpacity(0.5),
                                     fontSize: 12,
                                   ),
                                 ),
@@ -2164,15 +2184,15 @@ class _ActiveHomeworkViewState extends State<_ActiveHomeworkView> {
                     decoration: BoxDecoration(
                       border: Border.all(
                         color: _attachedFile == null
-                            ? Colors.white24
-                            : Colors.greenAccent,
+                            ? const Color(0x553C5A99)
+                            : const Color(0xFF10B981),
                         style: BorderStyle.solid,
                         width: 1.5,
                       ),
                       borderRadius: BorderRadius.circular(16),
                       color: _attachedFile == null
-                          ? Colors.transparent
-                          : Colors.greenAccent.withOpacity(0.1),
+                          ? Colors.white
+                          : const Color(0x1910B981),
                     ),
                     child: Row(
                       mainAxisAlignment: MainAxisAlignment.center,
@@ -2182,8 +2202,8 @@ class _ActiveHomeworkViewState extends State<_ActiveHomeworkView> {
                               ? Icons.cloud_upload_outlined
                               : Icons.check_circle_rounded,
                           color: _attachedFile == null
-                              ? Colors.cyanAccent
-                              : Colors.greenAccent,
+                              ? const Color(0xFF2E6BFF)
+                              : const Color(0xFF10B981),
                           size: 28,
                         ),
                         const SizedBox(width: 12),
@@ -2194,8 +2214,8 @@ class _ActiveHomeworkViewState extends State<_ActiveHomeworkView> {
                                 : _attachedFile!.name,
                             style: TextStyle(
                               color: _attachedFile == null
-                                  ? Colors.white
-                                  : Colors.greenAccent,
+                                  ? const Color(0xFF0D1B3D)
+                                  : const Color(0xFF10B981),
                               fontWeight: FontWeight.bold,
                               fontSize: 16,
                             ),
@@ -2218,8 +2238,8 @@ class _ActiveHomeworkViewState extends State<_ActiveHomeworkView> {
                   child: ElevatedButton(
                     onPressed: _handleSubmit,
                     style: ElevatedButton.styleFrom(
-                      backgroundColor: Colors.cyanAccent,
-                      foregroundColor: const Color(0xFF0F1C3F),
+                      backgroundColor: const Color(0xFF2E6BFF),
+                      foregroundColor: Colors.white,
                       elevation: 4,
                       shape: RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(16),
@@ -2248,7 +2268,7 @@ class _ActiveHomeworkViewState extends State<_ActiveHomeworkView> {
                   children: [
                     const Text(
                       "Want to improve your score?",
-                      style: TextStyle(color: Colors.white54),
+                      style: TextStyle(color: Color(0xFF7A89A8)),
                     ),
                     const SizedBox(height: 12),
                     SizedBox(
@@ -2257,9 +2277,9 @@ class _ActiveHomeworkViewState extends State<_ActiveHomeworkView> {
                       child: OutlinedButton.icon(
                         onPressed: widget.onRetry,
                         style: OutlinedButton.styleFrom(
-                          foregroundColor: Colors.white,
+                          foregroundColor: const Color(0xFF0D1B3D),
                           side: const BorderSide(
-                            color: Colors.cyanAccent,
+                            color: Color(0xFF2E6BFF),
                             width: 1.5,
                           ),
                           shape: RoundedRectangleBorder(
@@ -2268,14 +2288,14 @@ class _ActiveHomeworkViewState extends State<_ActiveHomeworkView> {
                         ),
                         icon: const Icon(
                           Icons.refresh_rounded,
-                          color: Colors.cyanAccent,
+                          color: Color(0xFF2E6BFF),
                         ),
                         label: const Text(
                           "Retry / Get New Homework",
                           style: TextStyle(
                             fontWeight: FontWeight.bold,
                             fontSize: 16,
-                            color: Colors.cyanAccent,
+                            color: Color(0xFF2E6BFF),
                           ),
                         ),
                       ),
@@ -2296,12 +2316,12 @@ class _ActiveHomeworkViewState extends State<_ActiveHomeworkView> {
       padding: const EdgeInsets.only(bottom: 12, top: 8),
       child: Row(
         children: [
-          Icon(icon, color: Colors.cyanAccent, size: 24),
+          Icon(icon, color: const Color(0xFF2E6BFF), size: 24),
           const SizedBox(width: 8),
           Text(
             title,
             style: const TextStyle(
-              color: Colors.white,
+              color: const Color(0xFF0D1B3D),
               fontSize: 20,
               fontWeight: FontWeight.bold,
             ),
@@ -2326,7 +2346,7 @@ class _DetailsTab extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: const Color(0xFF0F1C3F),
+      backgroundColor: const Color(0xFFF4F8FF),
 
       body: SingleChildScrollView(
         padding: const EdgeInsets.all(16),
@@ -2348,22 +2368,25 @@ class _DetailsTab extends StatelessWidget {
               style: TextStyle(
                 fontSize: 18,
                 fontWeight: FontWeight.bold,
-                color: Colors.white,
+                color: const Color(0xFF0D1B3D),
               ),
             ),
             const SizedBox(height: 8),
 
             Card(
-              color: const Color(0xFF1E1E1E),
+              color: Colors.white,
               shape: RoundedRectangleBorder(
                 borderRadius: BorderRadius.circular(12),
-                side: BorderSide(color: Colors.white),
+                side: const BorderSide(color: Color(0x1A2E6BFF)),
               ),
               child: Padding(
                 padding: const EdgeInsets.all(16),
                 child: Text(
                   classData['description'] ?? "No description provided",
-                  style: const TextStyle(fontSize: 15, color: Colors.white70),
+                  style: const TextStyle(
+                    fontSize: 15,
+                    color: Color(0xFF5C6B8C),
+                  ),
                 ),
               ),
             ),
@@ -2376,10 +2399,10 @@ class _DetailsTab extends StatelessWidget {
   Widget _infoCard(String label, String? value) {
     return Card(
       margin: const EdgeInsets.only(bottom: 12),
-      color: const Color(0xFF1E1E1E),
+      color: Colors.white,
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(12),
-        side: BorderSide(color: Colors.white),
+        side: const BorderSide(color: Color(0x1A2E6BFF)),
       ),
       child: Padding(
         padding: const EdgeInsets.symmetric(vertical: 14, horizontal: 16),
@@ -2391,7 +2414,7 @@ class _DetailsTab extends StatelessWidget {
                 label,
                 style: const TextStyle(
                   fontWeight: FontWeight.w600,
-                  color: Colors.white,
+                  color: const Color(0xFF0D1B3D),
                 ),
               ),
             ),
@@ -2400,7 +2423,7 @@ class _DetailsTab extends StatelessWidget {
               child: Text(
                 value ?? "-",
                 textAlign: TextAlign.right,
-                style: const TextStyle(color: Colors.white70),
+                style: const TextStyle(color: Color(0xFF5C6B8C)),
               ),
             ),
           ],
@@ -2436,11 +2459,11 @@ class _PblListSheet extends StatelessWidget {
       builder: (context, snapshot) {
         if (!snapshot.hasData || snapshot.data!.docs.isEmpty) {
           return Container(
-            color: const Color(0xFF1A2856),
+            color: const Color(0xFFF4F8FF),
             child: const Center(
               child: Text(
                 "No PBL projects assigned yet",
-                style: TextStyle(color: Colors.white70),
+                style: TextStyle(color: Color(0xFF5C6B8C)),
               ),
             ),
           );
@@ -2481,18 +2504,18 @@ class _PblListSheet extends StatelessWidget {
 
         if (assignedPbls.isEmpty) {
           return Container(
-            color: const Color(0xFF1A2856),
+            color: const Color(0xFFF4F8FF),
             child: const Center(
               child: Text(
                 "No PBL projects assigned to you yet",
-                style: TextStyle(color: Colors.white70),
+                style: TextStyle(color: Color(0xFF5C6B8C)),
               ),
             ),
           );
         }
 
         return Container(
-          color: const Color(0xFF1A2856),
+          color: const Color(0xFFF4F8FF),
           child: Column(
             children: [
               Container(
@@ -2500,7 +2523,7 @@ class _PblListSheet extends StatelessWidget {
                 child: const Text(
                   "My PBL Projects",
                   style: TextStyle(
-                    color: Colors.white,
+                    color: const Color(0xFF0D1B3D),
                     fontSize: 20,
                     fontWeight: FontWeight.bold,
                   ),
@@ -2587,21 +2610,21 @@ class _MiniProjectsScreenState extends State<_MiniProjectsScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: const Color(0xFF0F1C3F),
+      backgroundColor: const Color(0xFFF4F8FF),
       appBar: AppBar(
-        backgroundColor: const Color(0xFF0F1C3F),
+        backgroundColor: const Color(0xFFF4F8FF),
         elevation: 0,
         leading: IconButton(
           icon: const Icon(
             Icons.arrow_back_ios_new_rounded,
-            color: Colors.white,
+            color: const Color(0xFF0D1B3D),
           ),
           onPressed: () => Navigator.pop(context),
         ),
         title: const Text(
           "Mini Projects",
           style: TextStyle(
-            color: Colors.white,
+            color: const Color(0xFF0D1B3D),
             fontSize: 20,
             fontWeight: FontWeight.bold,
           ),
@@ -2619,7 +2642,7 @@ class _MiniProjectsScreenState extends State<_MiniProjectsScreen> {
         builder: (context, pblSnapshot) {
           if (pblSnapshot.connectionState == ConnectionState.waiting) {
             return const Center(
-              child: CircularProgressIndicator(color: Colors.white30),
+              child: CircularProgressIndicator(color: Color(0xFFA5B2C8)),
             );
           }
 
@@ -2627,7 +2650,7 @@ class _MiniProjectsScreenState extends State<_MiniProjectsScreen> {
             return const Center(
               child: Text(
                 "No mini projects available yet",
-                style: TextStyle(color: Colors.white54, fontSize: 16),
+                style: TextStyle(color: Color(0xFF7A89A8), fontSize: 16),
               ),
             );
           }
@@ -2641,7 +2664,7 @@ class _MiniProjectsScreenState extends State<_MiniProjectsScreen> {
               if (selectionSnapshot.connectionState ==
                   ConnectionState.waiting) {
                 return const Center(
-                  child: CircularProgressIndicator(color: Colors.white30),
+                  child: CircularProgressIndicator(color: Color(0xFFA5B2C8)),
                 );
               }
 
@@ -2680,12 +2703,12 @@ class _MiniProjectsScreenState extends State<_MiniProjectsScreen> {
           Container(
             padding: const EdgeInsets.all(24),
             decoration: BoxDecoration(
-              color: const Color(0xFF1A2856),
+              color: Colors.white,
               borderRadius: BorderRadius.circular(20),
-              border: Border.all(color: Colors.cyanAccent.withOpacity(0.3)),
+              border: Border.all(color: const Color(0x1A2E6BFF)),
               boxShadow: [
                 BoxShadow(
-                  color: Colors.cyanAccent.withOpacity(0.1),
+                  color: const Color(0xFF2E6BFF).withOpacity(0.08),
                   blurRadius: 20,
                   spreadRadius: -5,
                 ),
@@ -2696,13 +2719,13 @@ class _MiniProjectsScreenState extends State<_MiniProjectsScreen> {
                 const Icon(
                   Icons.check_circle_outline_rounded,
                   size: 64,
-                  color: Colors.cyanAccent,
+                  color: Color(0xFF2E6BFF),
                 ),
                 const SizedBox(height: 16),
                 const Text(
                   "Active Project",
                   style: TextStyle(
-                    color: Colors.cyanAccent,
+                    color: Color(0xFF2E6BFF),
                     fontSize: 14,
                     fontWeight: FontWeight.bold,
                     letterSpacing: 1,
@@ -2713,7 +2736,7 @@ class _MiniProjectsScreenState extends State<_MiniProjectsScreen> {
                   selectedData['title'] ?? 'Untitled Project',
                   textAlign: TextAlign.center,
                   style: const TextStyle(
-                    color: Colors.white,
+                    color: const Color(0xFF0D1B3D),
                     fontSize: 22,
                     fontWeight: FontWeight.bold,
                   ),
@@ -2723,7 +2746,7 @@ class _MiniProjectsScreenState extends State<_MiniProjectsScreen> {
                   selectedData['description'] ?? '',
                   textAlign: TextAlign.center,
                   style: TextStyle(
-                    color: Colors.white.withOpacity(0.7),
+                    color: const Color(0xFF0D1B3D).withOpacity(0.7),
                     fontSize: 14,
                   ),
                   maxLines: 3,
@@ -2751,8 +2774,8 @@ class _MiniProjectsScreenState extends State<_MiniProjectsScreen> {
                       });
                     },
                     style: ElevatedButton.styleFrom(
-                      backgroundColor: Colors.cyanAccent,
-                      foregroundColor: const Color(0xFF0F1C3F),
+                      backgroundColor: const Color(0xFF2E6BFF),
+                      foregroundColor: Colors.white,
                       padding: const EdgeInsets.symmetric(vertical: 16),
                       shape: RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(12),
@@ -2775,7 +2798,7 @@ class _MiniProjectsScreenState extends State<_MiniProjectsScreen> {
           const Text(
             "You have limited your focus to one project.\nComplete it to unlock more opportunities.",
             textAlign: TextAlign.center,
-            style: TextStyle(color: Colors.white38, fontSize: 13),
+            style: TextStyle(color: Color(0xFF94A3BC), fontSize: 13),
           ),
         ],
       ),
@@ -2804,11 +2827,15 @@ class _MiniProjectsScreenState extends State<_MiniProjectsScreen> {
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Icon(Icons.folder_open_rounded, size: 64, color: Colors.white24),
+            const Icon(
+              Icons.folder_open_rounded,
+              size: 64,
+              color: Color(0xFFB5C3DE),
+            ),
             const SizedBox(height: 16),
             const Text(
               "No mini projects available yet",
-              style: TextStyle(color: Colors.white54, fontSize: 16),
+              style: TextStyle(color: Color(0xFF7A89A8), fontSize: 16),
             ),
           ],
         ),
@@ -2823,9 +2850,11 @@ class _MiniProjectsScreenState extends State<_MiniProjectsScreen> {
         return Container(
           margin: const EdgeInsets.only(bottom: 16),
           decoration: BoxDecoration(
-            color: Colors.white.withOpacity(0.05),
+            color: const Color(0xFF0D1B3D).withOpacity(0.05),
             borderRadius: BorderRadius.circular(16),
-            border: Border.all(color: Colors.white.withOpacity(0.08)),
+            border: Border.all(
+              color: const Color(0xFF0D1B3D).withOpacity(0.08),
+            ),
           ),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
@@ -2862,7 +2891,7 @@ class _MiniProjectsScreenState extends State<_MiniProjectsScreen> {
                     Text(
                       project['title'] ?? 'Untitled',
                       style: const TextStyle(
-                        color: Colors.white,
+                        color: const Color(0xFF0D1B3D),
                         fontSize: 18,
                         fontWeight: FontWeight.bold,
                       ),
@@ -2871,7 +2900,7 @@ class _MiniProjectsScreenState extends State<_MiniProjectsScreen> {
                     Text(
                       project['description'] ?? 'No description',
                       style: TextStyle(
-                        color: Colors.white.withOpacity(0.7),
+                        color: const Color(0xFF0D1B3D).withOpacity(0.7),
                         fontSize: 14,
                         height: 1.5,
                       ),
@@ -2885,9 +2914,11 @@ class _MiniProjectsScreenState extends State<_MiniProjectsScreen> {
                 width: double.infinity,
                 padding: const EdgeInsets.all(4),
                 decoration: BoxDecoration(
-                  color: Colors.black12,
+                  color: const Color(0xFFF7FAFF),
                   border: Border(
-                    top: BorderSide(color: Colors.white.withOpacity(0.05)),
+                    top: BorderSide(
+                      color: const Color(0xFF0D1B3D).withOpacity(0.05),
+                    ),
                   ),
                 ),
                 child: TextButton.icon(
@@ -2906,7 +2937,7 @@ class _MiniProjectsScreenState extends State<_MiniProjectsScreen> {
                   },
                   style: TextButton.styleFrom(
                     padding: const EdgeInsets.symmetric(vertical: 12),
-                    foregroundColor: Colors.cyanAccent,
+                    foregroundColor: const Color(0xFF2E6BFF),
                   ),
                   icon: const Icon(Icons.touch_app_rounded, size: 20),
                   label: const Text(
@@ -2938,21 +2969,21 @@ class _PblProjectsScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: const Color(0xFF0F1C3F),
+      backgroundColor: const Color(0xFFF4F8FF),
       appBar: AppBar(
-        backgroundColor: const Color(0xFF0F1C3F),
+        backgroundColor: const Color(0xFFF4F8FF),
         elevation: 0,
         leading: IconButton(
           icon: const Icon(
             Icons.arrow_back_ios_new_rounded,
-            color: Colors.white,
+            color: const Color(0xFF0D1B3D),
           ),
           onPressed: () => Navigator.pop(context),
         ),
         title: const Text(
           "My PBL Projects",
           style: TextStyle(
-            color: Colors.white,
+            color: const Color(0xFF0D1B3D),
             fontSize: 20,
             fontWeight: FontWeight.bold,
           ),
@@ -2969,7 +3000,7 @@ class _PblProjectsScreen extends StatelessWidget {
         builder: (context, snapshot) {
           if (!snapshot.hasData) {
             return const Center(
-              child: CircularProgressIndicator(color: Colors.white30),
+              child: CircularProgressIndicator(color: Color(0xFFA5B2C8)),
             );
           }
 
@@ -2977,7 +3008,7 @@ class _PblProjectsScreen extends StatelessWidget {
             return const Center(
               child: Text(
                 "No PBL projects assigned yet",
-                style: TextStyle(color: Colors.white70, fontSize: 16),
+                style: TextStyle(color: Color(0xFF5C6B8C), fontSize: 16),
               ),
             );
           }
@@ -3019,7 +3050,7 @@ class _PblProjectsScreen extends StatelessWidget {
             return const Center(
               child: Text(
                 "No PBL projects assigned to you yet",
-                style: TextStyle(color: Colors.white70, fontSize: 16),
+                style: TextStyle(color: Color(0xFF5C6B8C), fontSize: 16),
               ),
             );
           }
@@ -3077,14 +3108,14 @@ Widget _infoTile(String label, String? value) {
             "$label:",
             style: const TextStyle(
               fontWeight: FontWeight.w600,
-              color: Colors.white,
+              color: const Color(0xFF0D1B3D),
             ),
           ),
         ),
         Expanded(
           child: Text(
             value ?? "-",
-            style: const TextStyle(color: Colors.white70),
+            style: const TextStyle(color: Color(0xFF5C6B8C)),
           ),
         ),
       ],
@@ -3126,12 +3157,12 @@ class _PblSubmissionCard extends StatelessWidget {
     };
 
     return Card(
-      color: const Color(0xFF1A2856),
+      color: Colors.white,
       elevation: 4,
       margin: const EdgeInsets.only(bottom: 12),
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(14),
-        side: BorderSide(color: Colors.indigo.shade200.withOpacity(0.2)),
+        side: const BorderSide(color: Color(0x1A2E6BFF)),
       ),
       child: InkWell(
         onTap: () {
@@ -3145,7 +3176,7 @@ class _PblSubmissionCard extends StatelessWidget {
             children: [
               Row(
                 children: [
-                  const Icon(Icons.rocket_launch, color: Colors.cyanAccent),
+                  const Icon(Icons.rocket_launch, color: Color(0xFF2E6BFF)),
                   const SizedBox(width: 12),
                   Expanded(
                     child: Text(
@@ -3153,7 +3184,7 @@ class _PblSubmissionCard extends StatelessWidget {
                       style: const TextStyle(
                         fontSize: 16,
                         fontWeight: FontWeight.bold,
-                        color: Colors.white,
+                        color: const Color(0xFF0D1B3D),
                       ),
                     ),
                   ),
@@ -3163,13 +3194,13 @@ class _PblSubmissionCard extends StatelessWidget {
                       vertical: 4,
                     ),
                     decoration: BoxDecoration(
-                      color: Colors.white10,
+                      color: Color(0x142E6BFF),
                       borderRadius: BorderRadius.circular(8),
                     ),
                     child: Text(
                       'Pair #$pairNumber',
                       style: const TextStyle(
-                        color: Colors.cyanAccent,
+                        color: Color(0xFF2E6BFF),
                         fontWeight: FontWeight.bold,
                         fontSize: 12,
                       ),
@@ -3182,16 +3213,16 @@ class _PblSubmissionCard extends StatelessWidget {
                 problemStatement,
                 maxLines: 2,
                 overflow: TextOverflow.ellipsis,
-                style: const TextStyle(color: Colors.white70, fontSize: 13),
+                style: const TextStyle(color: Color(0xFF5C6B8C), fontSize: 13),
               ),
               const SizedBox(height: 12),
               const Row(
                 children: [
-                  Icon(Icons.touch_app, size: 14, color: Colors.white54),
+                  Icon(Icons.touch_app, size: 14, color: Color(0xFF7A89A8)),
                   SizedBox(width: 4),
                   Text(
                     'Tap to view details & submit work',
-                    style: TextStyle(color: Colors.white54, fontSize: 12),
+                    style: TextStyle(color: Color(0xFF7A89A8), fontSize: 12),
                   ),
                 ],
               ),
@@ -3209,7 +3240,7 @@ class _PblSubmissionCard extends StatelessWidget {
     showModalBottomSheet(
       context: context,
       isScrollControlled: true,
-      backgroundColor: const Color(0xFF1A2856),
+      backgroundColor: const Color(0xFFF4F8FF),
       shape: const RoundedRectangleBorder(
         borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
       ),
@@ -3277,9 +3308,9 @@ class _PblMiniProjectStatus extends StatelessWidget {
         return Container(
           margin: const EdgeInsets.only(bottom: 12),
           decoration: BoxDecoration(
-            color: Colors.white.withOpacity(0.05),
+            color: const Color(0xFF0D1B3D).withOpacity(0.05),
             borderRadius: BorderRadius.circular(12),
-            border: Border.all(color: Colors.white10),
+            border: Border.all(color: Color(0x142E6BFF)),
           ),
           child: Column(
             children: [
@@ -3316,7 +3347,7 @@ class _PblMiniProjectStatus extends StatelessWidget {
                             child: Text(
                               "Selected: ${selectionData['title']}",
                               style: const TextStyle(
-                                color: Colors.white,
+                                color: const Color(0xFF0D1B3D),
                                 fontWeight: FontWeight.w600,
                                 fontSize: 16,
                               ),
@@ -3324,7 +3355,7 @@ class _PblMiniProjectStatus extends StatelessWidget {
                           ),
                           const Icon(
                             Icons.arrow_forward_ios,
-                            color: Colors.white54,
+                            color: Color(0xFF7A89A8),
                             size: 16,
                           ),
                         ],

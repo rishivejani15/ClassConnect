@@ -63,7 +63,9 @@ class _PblSubmissionSheetState extends State<PblSubmissionSheet> {
     _audioRecorder = AudioRecorder();
     _audioPlayer = AudioPlayer();
 
-    _playerStateSubscription = _audioPlayer.onPlayerStateChanged.listen((state) {
+    _playerStateSubscription = _audioPlayer.onPlayerStateChanged.listen((
+      state,
+    ) {
       if (mounted) {
         setState(() {
           _isPlaying = state == PlayerState.playing;
@@ -117,7 +119,7 @@ class _PblSubmissionSheetState extends State<PblSubmissionSheet> {
             final milestoneName = key.substring('feedback_'.length);
             feedbackMap[milestoneName] = value.toString();
           } else if (value is bool) {
-              checklistMap[key] = value;
+            checklistMap[key] = value;
           }
         });
 
@@ -704,7 +706,9 @@ class _PblSubmissionSheetState extends State<PblSubmissionSheet> {
                                   ? Colors.green
                                   : (isSubmitted
                                         ? Colors.orangeAccent.withOpacity(0.2)
-                                        : (isUnlocked ? Colors.cyan : Colors.grey)),
+                                        : (isUnlocked
+                                              ? Colors.cyan
+                                              : Colors.grey)),
                               radius: 16,
                               child: Icon(
                                 isCompleted
@@ -740,7 +744,8 @@ class _PblSubmissionSheetState extends State<PblSubmissionSheet> {
                                     ),
                                   )
                                 : null,
-                            trailing: (isUnlocked && !isCompleted && !isSubmitted)
+                            trailing:
+                                (isUnlocked && !isCompleted && !isSubmitted)
                                 ? const Icon(
                                     Icons.arrow_forward_ios,
                                     size: 14,
@@ -748,7 +753,9 @@ class _PblSubmissionSheetState extends State<PblSubmissionSheet> {
                                   )
                                 : null,
                           ),
-                          if (isCompleted && _milestoneFeedback.containsKey(name) && (_milestoneFeedback[name]?.isNotEmpty ?? false))
+                          if (isCompleted &&
+                              _milestoneFeedback.containsKey(name) &&
+                              (_milestoneFeedback[name]?.isNotEmpty ?? false))
                             Container(
                               width: double.infinity,
                               margin: const EdgeInsets.fromLTRB(16, 0, 16, 16),
@@ -756,29 +763,43 @@ class _PblSubmissionSheetState extends State<PblSubmissionSheet> {
                               decoration: BoxDecoration(
                                 color: Colors.green.withOpacity(0.1),
                                 borderRadius: BorderRadius.circular(8),
-                                border: Border.all(color: Colors.green.withOpacity(0.3))
+                                border: Border.all(
+                                  color: Colors.green.withOpacity(0.3),
+                                ),
                               ),
                               child: Column(
                                 crossAxisAlignment: CrossAxisAlignment.start,
                                 children: [
                                   const Row(
                                     children: [
-                                      Icon(Icons.comment, size: 14, color: Colors.greenAccent),
+                                      Icon(
+                                        Icons.comment,
+                                        size: 14,
+                                        color: Colors.greenAccent,
+                                      ),
                                       SizedBox(width: 6),
                                       Text(
-                                        "Teacher Feedback:", 
-                                        style: TextStyle(color: Colors.greenAccent, fontSize: 12, fontWeight: FontWeight.bold)
+                                        "Teacher Feedback:",
+                                        style: TextStyle(
+                                          color: Colors.greenAccent,
+                                          fontSize: 12,
+                                          fontWeight: FontWeight.bold,
+                                        ),
                                       ),
                                     ],
                                   ),
                                   const SizedBox(height: 6),
                                   Text(
                                     _milestoneFeedback[name]!,
-                                    style: const TextStyle(color: Colors.white70, fontSize: 13, fontStyle: FontStyle.italic),
+                                    style: const TextStyle(
+                                      color: Colors.white70,
+                                      fontSize: 13,
+                                      fontStyle: FontStyle.italic,
+                                    ),
                                   ),
                                 ],
                               ),
-                            )
+                            ),
                         ],
                       ),
                     );
@@ -981,9 +1002,9 @@ class _PblSubmissionSheetState extends State<PblSubmissionSheet> {
                           vertical: 8,
                         ),
                         decoration: BoxDecoration(
-                          color: Colors.black26,
+                          color: const Color(0xFFF7FAFF),
                           borderRadius: BorderRadius.circular(8),
-                          border: Border.all(color: Colors.white24),
+                          border: Border.all(color: const Color(0x1A2E6BFF)),
                         ),
                         child: Row(
                           children: [
@@ -1000,7 +1021,9 @@ class _PblSubmissionSheetState extends State<PblSubmissionSheet> {
                             Expanded(
                               child: Text(
                                 'Voice Note (${_formatDuration(_recordDuration)})',
-                                style: const TextStyle(color: Colors.white70),
+                                style: const TextStyle(
+                                  color: Color(0xFF5C6B8C),
+                                ),
                               ),
                             ),
                             IconButton(
@@ -1036,9 +1059,9 @@ class _PblSubmissionSheetState extends State<PblSubmissionSheet> {
                           vertical: 8,
                         ),
                         decoration: BoxDecoration(
-                          color: Colors.black26,
+                          color: const Color(0xFFF7FAFF),
                           borderRadius: BorderRadius.circular(8),
-                          border: Border.all(color: Colors.white24),
+                          border: Border.all(color: const Color(0x1A2E6BFF)),
                         ),
                         child: Row(
                           children: [
@@ -1053,7 +1076,9 @@ class _PblSubmissionSheetState extends State<PblSubmissionSheet> {
                                 _selectedFile!.name,
                                 maxLines: 1,
                                 overflow: TextOverflow.ellipsis,
-                                style: const TextStyle(color: Colors.white70),
+                                style: const TextStyle(
+                                  color: Color(0xFF5C6B8C),
+                                ),
                               ),
                             ),
                             IconButton(
@@ -1084,8 +1109,8 @@ class _PblSubmissionSheetState extends State<PblSubmissionSheet> {
                                   : 'Change File',
                             ),
                             style: OutlinedButton.styleFrom(
-                              foregroundColor: Colors.cyan,
-                              side: const BorderSide(color: Colors.cyan),
+                              foregroundColor: const Color(0xFF2E6BFF),
+                              side: const BorderSide(color: Color(0xFF2E6BFF)),
                               padding: const EdgeInsets.symmetric(vertical: 12),
                               shape: RoundedRectangleBorder(
                                 borderRadius: BorderRadius.circular(8),
@@ -1113,8 +1138,8 @@ class _PblSubmissionSheetState extends State<PblSubmissionSheet> {
                               _isUploading ? 'Submitting...' : 'Submit',
                             ),
                             style: ElevatedButton.styleFrom(
-                              backgroundColor: Colors.cyan,
-                              foregroundColor: Colors.black,
+                              backgroundColor: const Color(0xFF2E6BFF),
+                              foregroundColor: Colors.white,
                               disabledBackgroundColor: Colors.grey.shade800,
                               disabledForegroundColor: Colors.grey,
                               padding: const EdgeInsets.symmetric(vertical: 12),

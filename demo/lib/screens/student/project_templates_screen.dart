@@ -99,19 +99,19 @@ class ProjectTemplatesScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: const Color(0xFF0F1C3F),
+      backgroundColor: const Color(0xFFF4F8FF),
       appBar: AppBar(
         title: const Text(
           "Project Templates",
-          style: TextStyle(color: Colors.white),
+          style: TextStyle(color: Color(0xFF0D1B3D)),
         ),
-        backgroundColor: const Color(0xFF0F1C3F),
+        backgroundColor: const Color(0xFFF4F8FF),
         elevation: 0,
         // 🔹 BACK ROUTING BUTTON
         leading: IconButton(
           icon: const Icon(
             Icons.arrow_back_ios_new_rounded,
-            color: Colors.white,
+            color: Color(0xFF0D1B3D),
           ),
           onPressed: () {
             // Option 1: Just pop if this was pushed from StudentClassesPage
@@ -133,17 +133,21 @@ class ProjectTemplatesScreen extends StatelessWidget {
 
           return Card(
             margin: const EdgeInsets.only(bottom: 16),
-            color: const Color(0xFF1E1E1E),
+            color: Colors.white,
             shape: RoundedRectangleBorder(
               borderRadius: BorderRadius.circular(12),
-              side: const BorderSide(color: Colors.white),
+              side: BorderSide(
+                color: const Color(0xFF2E6BFF).withValues(alpha: 0.14),
+              ),
             ),
             child: ListTile(
               contentPadding: const EdgeInsets.all(16),
               leading: Container(
                 padding: const EdgeInsets.all(12),
                 decoration: BoxDecoration(
-                  color: _getColorForType(template['icon']!).withOpacity(0.2),
+                  color: _getColorForType(
+                    template['icon']!,
+                  ).withValues(alpha: 0.2),
                   borderRadius: BorderRadius.circular(12),
                 ),
                 child: Icon(
@@ -155,14 +159,14 @@ class ProjectTemplatesScreen extends StatelessWidget {
               title: Text(
                 template['name']!,
                 style: const TextStyle(
-                  color: Colors.white,
+                  color: Color(0xFF0D1B3D),
                   fontWeight: FontWeight.bold,
                   fontSize: 16,
                 ),
               ),
               subtitle: Text(
                 template['file']!,
-                style: const TextStyle(color: Colors.white54, fontSize: 12),
+                style: const TextStyle(color: Color(0xFF5C6B8C), fontSize: 12),
               ),
               trailing: IconButton(
                 icon: const Icon(

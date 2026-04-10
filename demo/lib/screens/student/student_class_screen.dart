@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:demo/widgets/ui/cc_decorated_background.dart';
 import 'student_class_detail_screen.dart';
 import 'project_templates_screen.dart';
 
@@ -12,77 +13,89 @@ class StudentClassesPage extends StatelessWidget {
     final user = FirebaseAuth.instance.currentUser;
 
     if (user == null) {
-      return const Center(
-        child: Text("Not logged in", style: TextStyle(color: Colors.white)),
+      return const CcDecoratedBackground(
+        child: Center(
+          child: Text(
+            "Not logged in",
+            style: TextStyle(color: Color(0xFF0D1B3D)),
+          ),
+        ),
       );
     }
 
-    return StreamBuilder<QuerySnapshot>(
-      stream: FirebaseFirestore.instance
-          .collection('class_students')
-          .where('studentId', isEqualTo: user.uid)
-          .snapshots(),
-      builder: (context, snapshot) {
-        if (snapshot.connectionState == ConnectionState.waiting) {
-          return const Center(
-            child: CircularProgressIndicator(color: Color(0xFF00D9FF)),
-          );
-        }
-
-        if (!snapshot.hasData || snapshot.data!.docs.isEmpty) {
-          return const Center(
-            child: Text(
-              "📘 Your enrolled classes will appear here",
-              style: TextStyle(color: Colors.white70, fontSize: 16),
-              textAlign: TextAlign.center,
-            ),
-          );
-        }
-
-        final classIds = snapshot.data!.docs.map((d) => d['classId']).toList();
-
-        return StreamBuilder<QuerySnapshot>(
-          stream: FirebaseFirestore.instance
-              .collection('classes')
-              .where(FieldPath.documentId, whereIn: classIds)
-              .snapshots(),
-          builder: (context, classSnapshot) {
-            if (classSnapshot.connectionState == ConnectionState.waiting) {
-              return const Center(
-                child: CircularProgressIndicator(color: Color(0xFF00D9FF)),
-              );
-            }
-
-            if (!classSnapshot.hasData || classSnapshot.data!.docs.isEmpty) {
-              return const Center(
-                child: Text(
-                  "No classes found",
-                  style: TextStyle(color: Colors.white),
-                ),
-              );
-            }
-
-            return ListView.builder(
-              padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 24),
-              itemCount: classSnapshot.data!.docs.length + 1,
-              itemBuilder: (context, index) {
-                if (index == classSnapshot.data!.docs.length) {
-                  return _buildTemplateButton(context);
-                }
-
-                final doc = classSnapshot.data!.docs[index];
-                final data = doc.data() as Map<String, dynamic>;
-
-                return _buildModernClassCard(
-                  context,
-                  classId: doc.id,
-                  data: data,
-                );
-              },
+    return CcDecoratedBackground(
+      child: StreamBuilder<QuerySnapshot>(
+        stream: FirebaseFirestore.instance
+            .collection('class_students')
+            .where('studentId', isEqualTo: user.uid)
+            .snapshots(),
+        builder: (context, snapshot) {
+          if (snapshot.connectionState == ConnectionState.waiting) {
+            return const Center(
+              child: CircularProgressIndicator(color: Color(0xFF00D9FF)),
             );
-          },
-        );
-      },
+          }
+
+          if (!snapshot.hasData || snapshot.data!.docs.isEmpty) {
+            return const Center(
+              child: Text(
+                "Your enrolled classes will appear here",
+                style: TextStyle(color: Color(0xFF5C6B8C), fontSize: 16),
+                textAlign: TextAlign.center,
+              ),
+            );
+          }
+
+          final classIds = snapshot.data!.docs
+              .map((d) => d['classId'])
+              .toList();
+
+          return StreamBuilder<QuerySnapshot>(
+            stream: FirebaseFirestore.instance
+                .collection('classes')
+                .where(FieldPath.documentId, whereIn: classIds)
+                .snapshots(),
+            builder: (context, classSnapshot) {
+              if (classSnapshot.connectionState == ConnectionState.waiting) {
+                return const Center(
+                  child: CircularProgressIndicator(color: Color(0xFF00D9FF)),
+                );
+              }
+
+              if (!classSnapshot.hasData || classSnapshot.data!.docs.isEmpty) {
+                return const Center(
+                  child: Text(
+                    "No classes found",
+                    style: TextStyle(color: Color(0xFF0D1B3D)),
+                  ),
+                );
+              }
+
+              return ListView.builder(
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 20,
+                  vertical: 24,
+                ),
+                itemCount: classSnapshot.data!.docs.length + 1,
+                itemBuilder: (context, index) {
+                  if (index == classSnapshot.data!.docs.length) {
+                    return _buildTemplateButton(context);
+                  }
+
+                  final doc = classSnapshot.data!.docs[index];
+                  final data = doc.data() as Map<String, dynamic>;
+
+                  return _buildModernClassCard(
+                    context,
+                    classId: doc.id,
+                    data: data,
+                  );
+                },
+              );
+            },
+          );
+        },
+      ),
     );
   }
 
@@ -101,12 +114,14 @@ class StudentClassesPage extends StatelessWidget {
       child: Container(
         margin: const EdgeInsets.only(bottom: 20),
         decoration: BoxDecoration(
-          color: const Color(0xFF1E1E1E), // Keeps your dark theme
+          color: Colors.white,
           borderRadius: BorderRadius.circular(20),
-          border: Border.all(color: Colors.white),
+          border: Border.all(
+            color: const Color(0xFF2E6BFF).withValues(alpha: 0.14),
+          ),
           boxShadow: [
             BoxShadow(
-              color: const Color(0xFF00D9FF).withOpacity(0.05),
+              color: const Color(0xFF2E6BFF).withValues(alpha: 0.10),
               blurRadius: 15,
               offset: const Offset(0, 8),
             ),
@@ -123,7 +138,7 @@ class StudentClassesPage extends StatelessWidget {
                 child: Icon(
                   Icons.school_rounded,
                   size: 100,
-                  color: const Color(0xFF00D9FF).withOpacity(0.03),
+                  color: const Color(0xFF00D9FF).withValues(alpha: 0.08),
                 ),
               ),
               Padding(
@@ -148,7 +163,7 @@ class StudentClassesPage extends StatelessWidget {
                             data['class_name']?.toUpperCase() ??
                                 'UNTITLED CLASS',
                             style: const TextStyle(
-                              color: Colors.white,
+                              color: Color(0xFF0D1B3D),
                               fontSize: 18,
                               fontWeight: FontWeight.bold,
                               letterSpacing: 0.5,
@@ -158,7 +173,7 @@ class StudentClassesPage extends StatelessWidget {
                           Text(
                             data['subject'] ?? 'General',
                             style: TextStyle(
-                              color: const Color(0xFF00D9FF).withOpacity(0.8),
+                              color: const Color(0xFF2E6BFF),
                               fontSize: 14,
                               fontWeight: FontWeight.w500,
                             ),
@@ -182,7 +197,7 @@ class StudentClassesPage extends StatelessWidget {
                     ),
                     const Icon(
                       Icons.chevron_right_rounded,
-                      color: Colors.white54,
+                      color: Color(0xFF5C6B8C),
                     ),
                   ],
                 ),
@@ -198,16 +213,16 @@ class StudentClassesPage extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
       decoration: BoxDecoration(
-        color: Colors.white.withOpacity(0.05),
+        color: const Color(0xFFEAF3FF),
         borderRadius: BorderRadius.circular(6),
       ),
       child: Row(
         children: [
-          Icon(icon, size: 14, color: Colors.white38),
+          Icon(icon, size: 14, color: const Color(0xFF5C6B8C)),
           const SizedBox(width: 4),
           Text(
             label,
-            style: const TextStyle(color: Colors.white60, fontSize: 12),
+            style: const TextStyle(color: Color(0xFF4A5A7A), fontSize: 12),
           ),
         ],
       ),
@@ -230,12 +245,14 @@ class StudentClassesPage extends StatelessWidget {
           decoration: BoxDecoration(
             gradient: LinearGradient(
               colors: [
-                const Color(0xFF00D9FF).withOpacity(0.15),
-                const Color(0xFF00D9FF).withOpacity(0.05),
+                const Color(0xFF00D9FF).withValues(alpha: 0.15),
+                const Color(0xFF00D9FF).withValues(alpha: 0.05),
               ],
             ),
             borderRadius: BorderRadius.circular(16),
-            border: Border.all(color: const Color(0xFF00D9FF).withOpacity(0.4)),
+            border: Border.all(
+              color: const Color(0xFF00D9FF).withValues(alpha: 0.4),
+            ),
           ),
           child: const Row(
             mainAxisAlignment: MainAxisAlignment.center,

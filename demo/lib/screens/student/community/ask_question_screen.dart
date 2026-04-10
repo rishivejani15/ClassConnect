@@ -3,6 +3,12 @@ import 'package:demo/services/firestore_service.dart';
 import 'package:demo/services/moderation_service.dart';
 import 'package:demo/models/tag.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:demo/widgets/ui/cc_button.dart';
+import 'package:demo/widgets/ui/cc_card.dart';
+import 'package:demo/widgets/ui/cc_dialog.dart';
+import 'package:demo/widgets/ui/cc_section_header.dart';
+import 'package:demo/widgets/ui/cc_decorated_background.dart';
+import 'package:demo/widgets/ui/cc_text_field.dart';
 
 class AskQuestionScreen extends StatefulWidget {
   const AskQuestionScreen({super.key});
@@ -115,24 +121,16 @@ class _AskQuestionScreenState extends State<AskQuestionScreen> {
   }
 
   void _showModerationDialog(String title, String message) {
-    showDialog(
+    showCcDialog(
       context: context,
-      builder: (context) => AlertDialog(
-        title: Row(
-          children: [
-            const Icon(Icons.warning_amber_rounded, color: Colors.red),
-            const SizedBox(width: 8),
-            Text(title),
-          ],
+      title: title,
+      content: Text(message),
+      actions: [
+        TextButton(
+          onPressed: () => Navigator.of(context).pop(),
+          child: const Text('OK'),
         ),
-        content: Text(message),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.of(context).pop(),
-            child: const Text('OK'),
-          ),
-        ],
-      ),
+      ],
     );
   }
 
@@ -193,17 +191,19 @@ class _AskQuestionScreenState extends State<AskQuestionScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      backgroundColor: const Color(0xFFF4F8FF),
       appBar: AppBar(
         title: const Text(
           'Ask a Question',
-          style: TextStyle(color: Colors.white),
+          style: TextStyle(color: Color(0xFF0D1B3D)),
         ),
-        backgroundColor: const Color(0xFF0F1C3F),
+        backgroundColor: const Color(0xFFF4F8FF),
+        foregroundColor: const Color(0xFF0D1B3D),
         leading: IconButton(
           icon: const Icon(
             Icons.arrow_back_ios_new_rounded,
           ), // Modern rounded back icon
-          color: Colors.white, // Matching your Cyan accent
+          color: const Color(0xFF0D1B3D),
           onPressed: () {
             if (Navigator.canPop(context)) {
               Navigator.pop(context);
@@ -211,248 +211,243 @@ class _AskQuestionScreenState extends State<AskQuestionScreen> {
           },
         ),
       ),
-      body: SingleChildScrollView(
-        child: Padding(
-          padding: const EdgeInsets.all(16),
-          child: Form(
-            key: _formKey,
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                // Title field
-                Text(
-                  'Question Title',
-                  style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                    fontWeight: FontWeight.bold,
-                    color: Colors.white,
-                  ),
-                ),
-                const SizedBox(height: 8),
-                TextFormField(
-                  controller: _titleController,
-                  maxLines: 2,
-                  minLines: 1,
-                  maxLength: 200,
-                  style: const TextStyle(color: Colors.white),
-                  decoration: InputDecoration(
-                    hintText: 'What is your question?',
-                    hintStyle: const TextStyle(color: Colors.white70),
-                    border: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(8),
-                    ),
-                  ),
-                  validator: (value) {
-                    if (value == null || value.trim().isEmpty) {
-                      return 'Please enter a question title';
-                    }
-                    if (value.trim().length < 10) {
-                      return 'Title must be at least 10 characters';
-                    }
-                    return null;
-                  },
-                ),
-                const SizedBox(height: 20),
-
-                // Description field
-                Text(
-                  'Description',
-                  style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                    fontWeight: FontWeight.bold,
-                    color: Colors.white,
-                  ),
-                ),
-                const SizedBox(height: 8),
-                TextFormField(
-                  controller: _descriptionController,
-                  maxLines: 8,
-                  minLines: 4,
-                  maxLength: 2000,
-                  style: const TextStyle(color: Colors.white),
-                  decoration: InputDecoration(
-                    hintText:
-                        'Provide details about your question. Include relevant code snippets if applicable.',
-                    hintStyle: const TextStyle(color: Colors.white70),
-                    border: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(8),
-                    ),
-                  ),
-                  validator: (value) {
-                    if (value == null || value.trim().isEmpty) {
-                      return 'Please enter a description';
-                    }
-                    if (value.trim().length < 20) {
-                      return 'Description must be at least 20 characters';
-                    }
-                    return null;
-                  },
-                ),
-                const SizedBox(height: 20),
-
-                // Tags selection
-                Text(
-                  'Tags (Select at least one)',
-                  style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                    fontWeight: FontWeight.bold,
-                    color: Colors.white,
-                  ),
-                ),
-                const SizedBox(height: 8),
-
-                // Predefined tags
-                Text(
-                  'Predefined Tags:',
-                  style: Theme.of(
-                    context,
-                  ).textTheme.labelMedium?.copyWith(color: Colors.white),
-                ),
-                const SizedBox(height: 8),
-                Wrap(
-                  spacing: 8,
-                  runSpacing: 8,
-                  children: _availableTags.map((tag) {
-                    final isSelected = _selectedTags.any((t) => t.id == tag.id);
-                    return FilterChip(
-                      label: Text(tag.name),
-                      selected: isSelected,
-                      onSelected: (selected) {
-                        setState(() {
-                          if (selected) {
-                            _selectedTags.add(tag);
-                          } else {
-                            _selectedTags.removeWhere((t) => t.id == tag.id);
-                          }
-                        });
-                      },
-                    );
-                  }).toList(),
-                ),
-                const SizedBox(height: 16),
-
-                // Custom tag input
-                Text(
-                  'Add Custom Tag:',
-                  style: Theme.of(
-                    context,
-                  ).textTheme.labelMedium?.copyWith(color: Colors.white),
-                ),
-                const SizedBox(height: 8),
-                Row(
-                  children: [
-                    Expanded(
-                      child: TextField(
-                        controller: _customTagController,
-                        maxLength: 20,
-                        style: const TextStyle(color: Colors.white),
-                        decoration: InputDecoration(
-                          hintText: 'Enter custom tag name',
-                          hintStyle: const TextStyle(color: Colors.white70),
-                          border: OutlineInputBorder(
-                            borderRadius: BorderRadius.circular(8),
-                          ),
-                          counterText: '',
-                        ),
-                        onSubmitted: (_) => _addCustomTag(),
-                      ),
-                    ),
-                    const SizedBox(width: 8),
-                    ElevatedButton.icon(
-                      onPressed: _addCustomTag,
-                      icon: const Icon(Icons.add),
-                      label: const Text('Add'),
-                    ),
-                  ],
-                ),
-                const SizedBox(height: 8),
-
-                // Custom tags display
-                if (_customTags.isNotEmpty) ...[
-                  Text(
-                    'Your Custom Tags:',
-                    style: Theme.of(
-                      context,
-                    ).textTheme.labelMedium?.copyWith(color: Colors.white),
+      body: CcDecoratedBackground(
+        child: SingleChildScrollView(
+          child: Padding(
+            padding: const EdgeInsets.all(16),
+            child: Form(
+              key: _formKey,
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  const CcSectionHeader(
+                    title: 'Ask a Question',
+                    subtitle: 'Share a clear problem so others can help faster',
                   ),
                   const SizedBox(height: 8),
-                  Wrap(
-                    spacing: 8,
-                    runSpacing: 8,
-                    children: _customTags.map((tag) {
-                      final isSelected = _selectedTags.any(
-                        (t) => t.id == tag.id,
-                      );
-                      return FilterChip(
-                        label: Text(tag.name),
-                        selected: isSelected,
-                        onSelected: (selected) {
-                          setState(() {
-                            if (selected) {
-                              _selectedTags.add(tag);
-                            } else {
-                              _selectedTags.removeWhere((t) => t.id == tag.id);
-                            }
-                          });
-                        },
-                      );
-                    }).toList(),
-                  ),
-                ],
-                const SizedBox(height: 20),
-
-                // Selected tags display
-                if (_selectedTags.isNotEmpty) ...[
-                  Text(
-                    'Selected Tags:',
-                    style: Theme.of(
-                      context,
-                    ).textTheme.labelMedium?.copyWith(color: Colors.white),
-                  ),
-                  const SizedBox(height: 8),
-                  Wrap(
-                    spacing: 8,
-                    children: _selectedTags.map((tag) {
-                      return Chip(
-                        label: Text(tag.name),
-                        onDeleted: () {
-                          setState(() {
-                            _selectedTags.removeWhere((t) => t.id == tag.id);
-                          });
-                        },
-                      );
-                    }).toList(),
+                  CcTextField(
+                    controller: _titleController,
+                    label: 'Question Title',
+                    icon: Icons.title_rounded,
+                    maxLength: 200,
+                    maxLines: 2,
+                    validator: (value) {
+                      if (value == null || value.trim().isEmpty) {
+                        return 'Please enter a question title';
+                      }
+                      if (value.trim().length < 10) {
+                        return 'Title must be at least 10 characters';
+                      }
+                      return null;
+                    },
                   ),
                   const SizedBox(height: 20),
-                ],
 
-                // Submit button
-                SizedBox(
-                  width: double.infinity,
-                  child: ElevatedButton.icon(
-                    onPressed: _isSubmitting ? null : _submitQuestion,
-                    icon: _isSubmitting
-                        ? const SizedBox(
-                            height: 20,
-                            width: 20,
-                            child: CircularProgressIndicator(strokeWidth: 2),
-                          )
-                        : const Icon(Icons.send),
-                    label: Text(_isSubmitting ? 'Posting...' : 'Post Question'),
+                  const Text(
+                    'Description',
+                    style: TextStyle(
+                      color: Color(0xFF0D1B3D),
+                      fontSize: 15,
+                      fontWeight: FontWeight.w700,
+                    ),
                   ),
-                ),
-                const SizedBox(height: 16),
+                  const SizedBox(height: 8),
+                  Container(
+                    decoration: BoxDecoration(
+                      color: Colors.white,
+                      borderRadius: BorderRadius.circular(16),
+                      border: Border.all(
+                        color: const Color(0x1A2E6BFF),
+                        width: 1.2,
+                      ),
+                      boxShadow: [
+                        BoxShadow(
+                          color: const Color(
+                            0xFF2E6BFF,
+                          ).withValues(alpha: 0.06),
+                          blurRadius: 10,
+                          offset: const Offset(0, 4),
+                        ),
+                      ],
+                    ),
+                    child: TextFormField(
+                      controller: _descriptionController,
+                      maxLength: 2000,
+                      maxLines: 4,
+                      textAlignVertical: TextAlignVertical.top,
+                      style: const TextStyle(
+                        color: Color(0xFF0D1B3D),
+                        fontSize: 14,
+                        height: 0.6,
+                      ),
+                      decoration: const InputDecoration(
+                        hintText:
+                            'Describe your problem clearly. Mention what you tried and where you got stuck.',
+                        hintStyle: TextStyle(
+                          color: Color(0xFF7A89A8),
+                          height: 1.4,
+                        ),
+                        prefixIcon: Padding(
+                          padding: EdgeInsets.only(bottom: 38),
+                          child: Icon(
+                            Icons.description_rounded,
+                            color: Color(0xFF5C6B8C),
+                          ),
+                        ),
+                        prefixIconConstraints: BoxConstraints(
+                          minWidth: 44,
+                          minHeight: 44,
+                        ),
+                        contentPadding: EdgeInsets.fromLTRB(14, 10, 14, 10),
+                        border: InputBorder.none,
+                      ),
+                      validator: (value) {
+                        if (value == null || value.trim().isEmpty) {
+                          return 'Please enter a description';
+                        }
+                        if (value.trim().length < 20) {
+                          return 'Description must be at least 20 characters';
+                        }
+                        return null;
+                      },
+                    ),
+                  ),
+                  const SizedBox(height: 20),
 
-                // Cancel button
-                SizedBox(
-                  width: double.infinity,
-                  child: OutlinedButton(
+                  const CcSectionHeader(
+                    title: 'Tags',
+                    subtitle: 'Select at least one topic tag',
+                  ),
+                  const SizedBox(height: 8),
+
+                  CcCard(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          'Predefined Tags',
+                          style: Theme.of(context).textTheme.labelMedium,
+                        ),
+                        const SizedBox(height: 12),
+                        Wrap(
+                          spacing: 8,
+                          runSpacing: 8,
+                          children: _availableTags.map((tag) {
+                            final isSelected = _selectedTags.any(
+                              (t) => t.id == tag.id,
+                            );
+                            return FilterChip(
+                              label: Text(tag.name),
+                              selected: isSelected,
+                              onSelected: (selected) {
+                                setState(() {
+                                  if (selected) {
+                                    _selectedTags.add(tag);
+                                  } else {
+                                    _selectedTags.removeWhere(
+                                      (t) => t.id == tag.id,
+                                    );
+                                  }
+                                });
+                              },
+                            );
+                          }).toList(),
+                        ),
+                      ],
+                    ),
+                  ),
+                  const SizedBox(height: 16),
+
+                  CcTextField(
+                    controller: _customTagController,
+                    label: 'Add Custom Tag',
+                    icon: Icons.add_circle_outline,
+                    maxLength: 20,
+                    onChanged: (_) {},
+                  ),
+                  const SizedBox(height: 10),
+                  CcButton(
+                    label: 'Add Tag',
+                    variant: CcButtonVariant.secondary,
+                    icon: const Icon(Icons.add_rounded, size: 18),
+                    onPressed: _addCustomTag,
+                  ),
+                  const SizedBox(height: 8),
+
+                  if (_customTags.isNotEmpty) ...[
+                    Text(
+                      'Your Custom Tags:',
+                      style: Theme.of(context).textTheme.labelMedium?.copyWith(
+                        color: const Color(0xFF0D1B3D),
+                      ),
+                    ),
+                    const SizedBox(height: 8),
+                    Wrap(
+                      spacing: 8,
+                      runSpacing: 8,
+                      children: _customTags.map((tag) {
+                        final isSelected = _selectedTags.any(
+                          (t) => t.id == tag.id,
+                        );
+                        return FilterChip(
+                          label: Text(tag.name),
+                          selected: isSelected,
+                          onSelected: (selected) {
+                            setState(() {
+                              if (selected) {
+                                _selectedTags.add(tag);
+                              } else {
+                                _selectedTags.removeWhere(
+                                  (t) => t.id == tag.id,
+                                );
+                              }
+                            });
+                          },
+                        );
+                      }).toList(),
+                    ),
+                  ],
+                  const SizedBox(height: 20),
+
+                  if (_selectedTags.isNotEmpty) ...[
+                    Text(
+                      'Selected Tags',
+                      style: Theme.of(context).textTheme.labelLarge,
+                    ),
+                    const SizedBox(height: 8),
+                    Wrap(
+                      spacing: 8,
+                      children: _selectedTags.map((tag) {
+                        return Chip(
+                          label: Text(tag.name),
+                          onDeleted: () {
+                            setState(() {
+                              _selectedTags.removeWhere((t) => t.id == tag.id);
+                            });
+                          },
+                        );
+                      }).toList(),
+                    ),
+                    const SizedBox(height: 20),
+                  ],
+                  CcButton(
+                    label: _isSubmitting ? 'Posting...' : 'Post Question',
+                    isLoading: _isSubmitting,
+                    icon: const Icon(Icons.send_rounded, size: 18),
+                    onPressed: _isSubmitting ? null : _submitQuestion,
+                  ),
+                  const SizedBox(height: 16),
+                  CcButton(
+                    label: 'Cancel',
+                    variant: CcButtonVariant.ghost,
                     onPressed: _isSubmitting
                         ? null
                         : () {
                             Navigator.of(context).pop();
                           },
-                    child: const Text('Cancel'),
                   ),
-                ),
-              ],
+                ],
+              ),
             ),
           ),
         ),

@@ -8,6 +8,10 @@ import 'package:demo/models/reaction.dart';
 import 'package:demo/widgets/tag_widget.dart';
 import 'package:demo/widgets/answer_card.dart';
 import 'package:demo/widgets/common_widgets.dart';
+import 'package:demo/widgets/ui/cc_button.dart';
+import 'package:demo/widgets/ui/cc_decorated_background.dart';
+import 'package:demo/widgets/ui/cc_dialog.dart';
+import 'package:demo/widgets/ui/cc_sheet.dart';
 import 'package:file_picker/file_picker.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:intl/intl.dart';
@@ -261,25 +265,90 @@ class _QuestionDetailScreenState extends State<QuestionDetailScreen> {
   }
 
   void _showModerationDialog(String title, String message) {
-    showDialog(
+    showCcDialog(
       context: context,
-      builder: (context) => AlertDialog(
-        title: Row(
-          children: [
-            const Icon(Icons.warning_amber_rounded, color: Colors.red),
-            const SizedBox(width: 8),
-            Expanded(child: Text(title)),
-          ],
+      title: title,
+      content: Text(message),
+      actions: [
+        TextButton(
+          onPressed: () => Navigator.of(context).pop(),
+          child: const Text('OK'),
         ),
-        content: Text(message),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.of(context).pop(),
-            child: const Text('OK'),
+      ],
+    );
+  }
+
+  Future<void> _showAttachmentSheet() async {
+    final selected = await showCcSheet<String>(
+      context: context,
+      child: SafeArea(
+        child: Padding(
+          padding: const EdgeInsets.fromLTRB(16, 12, 16, 20),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              Text(
+                'Attach a file',
+                style: Theme.of(context).textTheme.titleMedium,
+                textAlign: TextAlign.center,
+              ),
+              const SizedBox(height: 12),
+              CcButton(
+                label: 'Photo',
+                variant: CcButtonVariant.secondary,
+                icon: const Icon(Icons.photo_library_rounded, size: 18),
+                onPressed: () => Navigator.of(context).pop('image'),
+              ),
+              const SizedBox(height: 10),
+              CcButton(
+                label: 'Camera',
+                variant: CcButtonVariant.secondary,
+                icon: const Icon(Icons.camera_alt_rounded, size: 18),
+                onPressed: () => Navigator.of(context).pop('camera'),
+              ),
+              const SizedBox(height: 10),
+              CcButton(
+                label: 'Video',
+                variant: CcButtonVariant.secondary,
+                icon: const Icon(Icons.videocam_rounded, size: 18),
+                onPressed: () => Navigator.of(context).pop('video'),
+              ),
+              const SizedBox(height: 10),
+              CcButton(
+                label: 'Document',
+                variant: CcButtonVariant.secondary,
+                icon: const Icon(Icons.picture_as_pdf_rounded, size: 18),
+                onPressed: () => Navigator.of(context).pop('document'),
+              ),
+              const SizedBox(height: 10),
+              CcButton(
+                label: 'Cancel',
+                variant: CcButtonVariant.ghost,
+                onPressed: () => Navigator.of(context).pop(),
+              ),
+            ],
           ),
-        ],
+        ),
       ),
     );
+
+    if (selected == null) return;
+
+    switch (selected) {
+      case 'image':
+        await _pickImage();
+        break;
+      case 'camera':
+        await _capturePhoto();
+        break;
+      case 'video':
+        await _pickVideo();
+        break;
+      case 'document':
+        await _pickDocument();
+        break;
+    }
   }
 
   void _onAnswerReaction(Answer answer, ReactionType type) {
@@ -337,17 +406,19 @@ class _QuestionDetailScreenState extends State<QuestionDetailScreen> {
       builder: (context, questionSnapshot) {
         if (questionSnapshot.connectionState == ConnectionState.waiting) {
           return Scaffold(
+            backgroundColor: const Color(0xFFF4F8FF),
             appBar: AppBar(
               title: const Text(
                 'Question Details',
-                style: TextStyle(color: Colors.white),
+                style: TextStyle(color: Color(0xFF0D1B3D)),
               ),
-              backgroundColor: const Color(0xFF0F1C3F),
+              backgroundColor: const Color(0xFFF4F8FF),
+              foregroundColor: const Color(0xFF0D1B3D),
               leading: IconButton(
                 icon: const Icon(
                   Icons.arrow_back_ios_new_rounded,
                 ), // Modern rounded back icon
-                color: Colors.white, // Matching your Cyan accent
+                color: Color(0xFF0D1B3D),
                 onPressed: () {
                   if (Navigator.canPop(context)) {
                     Navigator.pop(context);
@@ -369,17 +440,19 @@ class _QuestionDetailScreenState extends State<QuestionDetailScreen> {
         final question = questionSnapshot.data!;
 
         return Scaffold(
+          backgroundColor: const Color(0xFFF4F8FF),
           appBar: AppBar(
             title: const Text(
               'Question Details',
-              style: TextStyle(color: Colors.white),
+              style: TextStyle(color: Color(0xFF0D1B3D)),
             ),
-            backgroundColor: const Color(0xFF0F1C3F),
+            backgroundColor: const Color(0xFFF4F8FF),
+            foregroundColor: const Color(0xFF0D1B3D),
             leading: IconButton(
               icon: const Icon(
                 Icons.arrow_back_ios_new_rounded,
               ), // Modern rounded back icon
-              color: Colors.white, // Matching your Cyan accent
+              color: Color(0xFF0D1B3D),
               onPressed: () {
                 if (Navigator.canPop(context)) {
                   Navigator.pop(context);
@@ -387,445 +460,380 @@ class _QuestionDetailScreenState extends State<QuestionDetailScreen> {
               },
             ),
           ),
-          body: SingleChildScrollView(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                // Question section
-                Padding(
-                  padding: const EdgeInsets.all(16),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      // Title
-                      Text(
-                        question.title,
-                        style: Theme.of(context).textTheme.headlineSmall
-                            ?.copyWith(
-                              fontWeight: FontWeight.bold,
-                              color: Colors.white,
-                            ),
-                      ),
-                      const SizedBox(height: 12),
-
-                      // Author info
-                      Row(
-                        children: [
-                          SizedBox(
-                            width: 40,
-                            height: 40,
-                            child: CircleAvatar(
-                              backgroundColor: Colors.grey[800],
-                              backgroundImage:
-                                  question.userAvatar.toLowerCase().startsWith(
-                                    'http',
-                                  )
-                                  ? NetworkImage(question.userAvatar)
-                                  : null,
-                              child:
-                                  question.userAvatar.toLowerCase().startsWith(
-                                    'http',
-                                  )
-                                  ? null
-                                  : Text(
-                                      (question.userName.isNotEmpty
-                                              ? question.userName[0]
-                                              : question.userAvatar.isNotEmpty
-                                              ? question.userAvatar[0]
-                                              : '👤')
-                                          .toUpperCase(),
-                                      style: const TextStyle(
-                                        fontSize: 18,
-                                        color: Colors.white,
-                                      ),
-                                    ),
-                            ),
-                          ),
-                          const SizedBox(width: 12),
-                          Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Text(
-                                question.userName,
-                                style: Theme.of(context).textTheme.labelLarge
-                                    ?.copyWith(color: Colors.white),
-                              ),
-                              Text(
-                                DateFormat(
-                                  'MMM d, yyyy - HH:mm',
-                                ).format(question.createdAt),
-                                style: Theme.of(context).textTheme.labelSmall
-                                    ?.copyWith(color: Colors.white70),
-                              ),
-                            ],
-                          ),
-                        ],
-                      ),
-                      const SizedBox(height: 12),
-
-                      // Description
-                      Text(
-                        question.description,
-                        style: Theme.of(
-                          context,
-                        ).textTheme.bodyMedium?.copyWith(color: Colors.white),
-                      ),
-                      const SizedBox(height: 16),
-
-                      // Tags
-                      Wrap(
-                        spacing: 8,
-                        children: question.tags
-                            .map(
-                              (tag) => TagWidget(tag: tag, isClickable: false),
-                            )
-                            .toList(),
-                      ),
-                      const SizedBox(height: 16),
-
-                      // Stats and reactions
-                      Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                        children: [
-                          Row(
-                            children: [
-                              _StatChip(
-                                icon: Icons.chat_bubble_outline,
-                                label: '${question.answerCount} Answers',
-                              ),
-                              const SizedBox(width: 8),
-                              _StatChip(
-                                icon: Icons.visibility_outlined,
-                                label: '${question.views} Views',
-                              ),
-                            ],
-                          ),
-                        ],
-                      ),
-                      const SizedBox(height: 12),
-
-                      // Question reactions
-                      Row(
-                        children: [
-                          _ReactionButton(
-                            icon: Icons.thumb_up_outlined,
-                            count: question.likeCount,
-                            label: 'Like',
-                            onPressed: () => _onQuestionReaction(
-                              question,
-                              ReactionType.like,
-                            ),
-                            isActive: question.reactions.any(
-                              (r) =>
-                                  r.userId == _currentUserId &&
-                                  r.type == ReactionType.like,
-                            ),
-                          ),
-                          const SizedBox(width: 8),
-                          _ReactionButton(
-                            icon: Icons.favorite_outline,
-                            count: question.heartCount,
-                            label: 'Heart',
-                            onPressed: () => _onQuestionReaction(
-                              question,
-                              ReactionType.heart,
-                            ),
-                            isActive: question.reactions.any(
-                              (r) =>
-                                  r.userId == _currentUserId &&
-                                  r.type == ReactionType.heart,
-                            ),
-                          ),
-                        ],
-                      ),
-                      const SizedBox(height: 16),
-                      const Divider(),
-                    ],
-                  ),
-                ),
-                // 🔽 ATTACHMENT PREVIEW (with remove)
-                if (_uploadedFileName != null)
+          body: CcDecoratedBackground(
+            child: SingleChildScrollView(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  // Question section
                   Padding(
-                    padding: const EdgeInsets.symmetric(
-                      horizontal: 16,
-                      vertical: 6,
-                    ),
-                    child: Container(
-                      padding: const EdgeInsets.all(10),
-                      decoration: BoxDecoration(
-                        color: Colors.blue.withOpacity(0.1),
-                        borderRadius: BorderRadius.circular(8),
-                        border: Border.all(color: Colors.blue.withOpacity(0.3)),
-                      ),
-                      child: Row(
-                        children: [
-                          Icon(
-                            _selectedImage != null
-                                ? Icons.image
-                                : _selectedVideo != null
-                                ? Icons.videocam
-                                : Icons.description,
-                            color: Colors.blue[200],
-                          ),
-                          const SizedBox(width: 8),
-                          Expanded(
-                            child: Text(
-                              _uploadedFileName!,
-                              maxLines: 1,
-                              overflow: TextOverflow.ellipsis,
-                              style: const TextStyle(color: Colors.white),
-                            ),
-                          ),
-                          IconButton(
-                            icon: const Icon(
-                              Icons.close,
-                              size: 18,
-                              color: Colors.white70,
-                            ),
-                            onPressed: _removeAttachment, // ✅ NOW CALLED
-                            padding: EdgeInsets.zero,
-                            constraints: const BoxConstraints(),
-                          ),
-                        ],
-                      ),
-                    ),
-                  ),
-                const SizedBox(height: 12),
-                Container(
-                  margin: const EdgeInsets.symmetric(horizontal: 16),
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: 16,
-                    vertical: 8,
-                  ),
-                  decoration: BoxDecoration(
-                    color: Colors.white.withOpacity(0.1),
-                    borderRadius: BorderRadius.circular(24),
-                    border: Border.all(color: Colors.white.withOpacity(0.1)),
-                    boxShadow: [
-                      BoxShadow(
-                        color: Colors.black.withOpacity(0.08),
-                        blurRadius: 12,
-                        offset: const Offset(0, 4),
-                      ),
-                    ],
-                  ),
-                  child: Row(
-                    crossAxisAlignment: CrossAxisAlignment.end,
-                    children: [
-                      // 📎 Attachment button
-                      InkWell(
-                        key: _attachKey,
-                        onTap: () async {
-                          final RenderBox renderBox =
-                              _attachKey.currentContext!.findRenderObject()
-                                  as RenderBox;
-                          final Offset offset = renderBox.localToGlobal(
-                            Offset.zero,
-                          );
-
-                          final selected = await showMenu<String>(
-                            context: context,
-                            position: RelativeRect.fromLTRB(
-                              offset.dx,
-                              offset.dy - 160,
-                              offset.dx + renderBox.size.width,
-                              offset.dy,
-                            ),
-                            items: const [
-                              PopupMenuItem(
-                                value: 'image',
-                                child: Row(
-                                  children: [
-                                    Icon(Icons.photo_library, size: 20),
-                                    SizedBox(width: 12),
-                                    Text('Photo'),
-                                  ],
-                                ),
-                              ),
-                              PopupMenuItem(
-                                value: 'camera',
-                                child: Row(
-                                  children: [
-                                    Icon(Icons.camera_alt, size: 20),
-                                    SizedBox(width: 12),
-                                    Text('Camera'),
-                                  ],
-                                ),
-                              ),
-                              PopupMenuItem(
-                                value: 'video',
-                                child: Row(
-                                  children: [
-                                    Icon(Icons.videocam, size: 20),
-                                    SizedBox(width: 12),
-                                    Text('Video'),
-                                  ],
-                                ),
-                              ),
-                              PopupMenuItem(
-                                value: 'document',
-                                child: Row(
-                                  children: [
-                                    Icon(Icons.picture_as_pdf, size: 20),
-                                    SizedBox(width: 12),
-                                    Text('Document'),
-                                  ],
-                                ),
-                              ),
-                            ],
-                          );
-
-                          if (selected == null) return;
-
-                          switch (selected) {
-                            case 'image':
-                              _pickImage();
-                              break;
-                            case 'camera':
-                              _capturePhoto();
-                              break;
-                            case 'video':
-                              _pickVideo();
-                              break;
-                            case 'document':
-                              _pickDocument();
-                              break;
-                          }
-                        },
-                        child: const Padding(
-                          padding: EdgeInsets.all(6),
-                          child: Icon(
-                            Icons.attach_file,
-                            size: 22,
-                            color: Colors.white70,
-                          ),
-                        ),
-                      ),
-
-                      const SizedBox(width: 8),
-
-                      // 📝 Text input
-                      Expanded(
-                        child: TextField(
-                          controller: _answerController,
-                          minLines: 1,
-                          maxLines: 5,
-                          style: const TextStyle(color: Colors.white),
-                          decoration: const InputDecoration(
-                            hintText: 'Write your answer...',
-                            border: InputBorder.none,
-                            isDense: true,
-                            contentPadding: EdgeInsets.symmetric(vertical: 8),
-                            hintStyle: TextStyle(color: Colors.white54),
-                          ),
-                        ),
-                      ),
-
-                      const SizedBox(width: 8),
-
-                      // ➤ Send button
-                      InkWell(
-                        onTap: _isSubmittingAnswer ? null : _submitAnswer,
-                        child: Container(
-                          padding: const EdgeInsets.all(8),
-                          decoration: BoxDecoration(
-                            color: _isSubmittingAnswer
-                                ? Colors.grey
-                                : Colors.blue,
-                            borderRadius: BorderRadius.circular(8),
-                          ),
-                          child: _isSubmittingAnswer
-                              ? const SizedBox(
-                                  width: 16,
-                                  height: 16,
-                                  child: CircularProgressIndicator(
-                                    strokeWidth: 2,
-                                    valueColor: AlwaysStoppedAnimation<Color>(
-                                      Colors.white,
-                                    ),
-                                  ),
-                                )
-                              : const Icon(
-                                  Icons.send,
-                                  color: Colors.white,
-                                  size: 18,
-                                ),
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-
-                const SizedBox(height: 8),
-
-                // Answers section
-                StreamBuilder<List<Answer>>(
-                  stream: _answersStream,
-                  builder: (context, snapshot) {
-                    if (snapshot.connectionState == ConnectionState.waiting) {
-                      return const Padding(
-                        padding: EdgeInsets.all(16),
-                        child: CircularProgressIndicator(),
-                      );
-                    }
-
-                    final answers = snapshot.data ?? [];
-
-                    return Column(
+                    padding: const EdgeInsets.all(16),
+                    child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        Padding(
-                          padding: const EdgeInsets.symmetric(
-                            horizontal: 16,
-                            vertical: 8,
-                          ),
-                          child: Text(
-                            'Answers (${answers.length})',
-                            style: Theme.of(context).textTheme.titleLarge
-                                ?.copyWith(
-                                  fontWeight: FontWeight.bold,
-                                  color: Colors.white,
+                        // Title
+                        Text(
+                          question.title,
+                          style: Theme.of(context).textTheme.headlineSmall
+                              ?.copyWith(
+                                fontWeight: FontWeight.bold,
+                                color: const Color(0xFF0D1B3D),
+                              ),
+                        ),
+                        const SizedBox(height: 12),
+
+                        // Author info
+                        Row(
+                          children: [
+                            SizedBox(
+                              width: 40,
+                              height: 40,
+                              child: CircleAvatar(
+                                backgroundColor: const Color(0xFFEAF1FF),
+                                backgroundImage:
+                                    question.userAvatar
+                                        .toLowerCase()
+                                        .startsWith('http')
+                                    ? NetworkImage(question.userAvatar)
+                                    : null,
+                                child:
+                                    question.userAvatar
+                                        .toLowerCase()
+                                        .startsWith('http')
+                                    ? null
+                                    : Text(
+                                        (question.userName.isNotEmpty
+                                                ? question.userName[0]
+                                                : question.userAvatar.isNotEmpty
+                                                ? question.userAvatar[0]
+                                                : '👤')
+                                            .toUpperCase(),
+                                        style: const TextStyle(
+                                          fontSize: 18,
+                                          color: Colors.white,
+                                        ),
+                                      ),
+                              ),
+                            ),
+                            const SizedBox(width: 12),
+                            Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Text(
+                                  question.userName,
+                                  style: Theme.of(context).textTheme.labelLarge
+                                      ?.copyWith(
+                                        color: const Color(0xFF0D1B3D),
+                                      ),
                                 ),
+                                Text(
+                                  DateFormat(
+                                    'MMM d, yyyy - HH:mm',
+                                  ).format(question.createdAt),
+                                  style: Theme.of(context).textTheme.labelSmall
+                                      ?.copyWith(
+                                        color: const Color(0xFF7A89A8),
+                                      ),
+                                ),
+                              ],
+                            ),
+                          ],
+                        ),
+                        const SizedBox(height: 12),
+
+                        // Description
+                        Text(
+                          question.description,
+                          style: Theme.of(context).textTheme.bodyMedium
+                              ?.copyWith(color: const Color(0xFF0D1B3D)),
+                        ),
+                        const SizedBox(height: 16),
+
+                        // Tags
+                        Wrap(
+                          spacing: 8,
+                          children: question.tags
+                              .map(
+                                (tag) =>
+                                    TagWidget(tag: tag, isClickable: false),
+                              )
+                              .toList(),
+                        ),
+                        const SizedBox(height: 16),
+
+                        // Stats and reactions
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          children: [
+                            Row(
+                              children: [
+                                _StatChip(
+                                  icon: Icons.chat_bubble_outline,
+                                  label: '${question.answerCount} Answers',
+                                ),
+                                const SizedBox(width: 8),
+                                _StatChip(
+                                  icon: Icons.visibility_outlined,
+                                  label: '${question.views} Views',
+                                ),
+                              ],
+                            ),
+                          ],
+                        ),
+                        const SizedBox(height: 12),
+
+                        // Question reactions
+                        Row(
+                          children: [
+                            _ReactionButton(
+                              icon: Icons.thumb_up_outlined,
+                              count: question.likeCount,
+                              label: 'Like',
+                              onPressed: () => _onQuestionReaction(
+                                question,
+                                ReactionType.like,
+                              ),
+                              isActive: question.reactions.any(
+                                (r) =>
+                                    r.userId == _currentUserId &&
+                                    r.type == ReactionType.like,
+                              ),
+                            ),
+                            const SizedBox(width: 8),
+                            _ReactionButton(
+                              icon: Icons.favorite_outline,
+                              count: question.heartCount,
+                              label: 'Heart',
+                              onPressed: () => _onQuestionReaction(
+                                question,
+                                ReactionType.heart,
+                              ),
+                              isActive: question.reactions.any(
+                                (r) =>
+                                    r.userId == _currentUserId &&
+                                    r.type == ReactionType.heart,
+                              ),
+                            ),
+                          ],
+                        ),
+                        const SizedBox(height: 16),
+                        const Divider(),
+                      ],
+                    ),
+                  ),
+                  // 🔽 ATTACHMENT PREVIEW (with remove)
+                  if (_uploadedFileName != null)
+                    Padding(
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 16,
+                        vertical: 6,
+                      ),
+                      child: Container(
+                        padding: const EdgeInsets.all(10),
+                        decoration: BoxDecoration(
+                          color: Colors.blue.withOpacity(0.1),
+                          borderRadius: BorderRadius.circular(8),
+                          border: Border.all(
+                            color: Colors.blue.withOpacity(0.3),
+                          ),
+                        ),
+                        child: Row(
+                          children: [
+                            Icon(
+                              _selectedImage != null
+                                  ? Icons.image
+                                  : _selectedVideo != null
+                                  ? Icons.videocam
+                                  : Icons.description,
+                              color: Colors.blue[200],
+                            ),
+                            const SizedBox(width: 8),
+                            Expanded(
+                              child: Text(
+                                _uploadedFileName!,
+                                maxLines: 1,
+                                overflow: TextOverflow.ellipsis,
+                                style: const TextStyle(
+                                  color: Color(0xFF0D1B3D),
+                                ),
+                              ),
+                            ),
+                            IconButton(
+                              icon: const Icon(
+                                Icons.close,
+                                size: 18,
+                                color: Color(0xFF5C6B8C),
+                              ),
+                              onPressed: _removeAttachment, // ✅ NOW CALLED
+                              padding: EdgeInsets.zero,
+                              constraints: const BoxConstraints(),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ),
+                  const SizedBox(height: 12),
+                  Container(
+                    margin: const EdgeInsets.symmetric(horizontal: 16),
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 16,
+                      vertical: 8,
+                    ),
+                    decoration: BoxDecoration(
+                      color: Colors.white,
+                      borderRadius: BorderRadius.circular(24),
+                      border: Border.all(color: const Color(0x1A2E6BFF)),
+                      boxShadow: [
+                        BoxShadow(
+                          color: const Color(0xFF2E6BFF).withOpacity(0.08),
+                          blurRadius: 12,
+                          offset: const Offset(0, 4),
+                        ),
+                      ],
+                    ),
+                    child: Row(
+                      crossAxisAlignment: CrossAxisAlignment.end,
+                      children: [
+                        // 📎 Attachment button
+                        InkWell(
+                          key: _attachKey,
+                          onTap: _showAttachmentSheet,
+                          child: const Padding(
+                            padding: EdgeInsets.all(6),
+                            child: Icon(
+                              Icons.attach_file,
+                              size: 22,
+                              color: Color(0xFF5C6B8C),
+                            ),
                           ),
                         ),
 
-                        // Answers list
-                        if (answers.isEmpty)
-                          const Padding(
-                            padding: EdgeInsets.all(16),
-                            child: EmptyStateWidget(
-                              title: 'No Answers Yet',
-                              message: 'Be the first to answer this question!',
-                              icon: Icons.rate_review_outlined,
-                            ),
-                          )
-                        else
-                          Column(
-                            children: answers
-                                .map(
-                                  (answer) => AnswerCard(
-                                    answer: answer,
-                                    currentUserId: _currentUserId,
-                                    isQuestionAuthor:
-                                        question.userId == _currentUserId,
-                                    onMarkHelpful: () =>
-                                        _firestoreService.markAnswerAsHelpful(
-                                          question.id,
-                                          answer.id,
-                                        ),
-                                    onReaction: (type) =>
-                                        _onAnswerReaction(answer, type),
-                                  ),
-                                )
-                                .toList(),
-                          ),
-                      ],
-                    );
-                  },
-                ),
+                        const SizedBox(width: 8),
 
-                const SizedBox(height: 16),
-              ],
+                        // 📝 Text input
+                        Expanded(
+                          child: TextField(
+                            controller: _answerController,
+                            minLines: 1,
+                            maxLines: 5,
+                            style: const TextStyle(color: Color(0xFF0D1B3D)),
+                            decoration: const InputDecoration(
+                              hintText: 'Write your answer...',
+                              border: InputBorder.none,
+                              isDense: true,
+                              contentPadding: EdgeInsets.symmetric(vertical: 8),
+                              hintStyle: TextStyle(color: Color(0xFF7A89A8)),
+                            ),
+                          ),
+                        ),
+
+                        const SizedBox(width: 8),
+
+                        // ➤ Send button
+                        InkWell(
+                          onTap: _isSubmittingAnswer ? null : _submitAnswer,
+                          child: Container(
+                            padding: const EdgeInsets.all(8),
+                            decoration: BoxDecoration(
+                              color: _isSubmittingAnswer
+                                  ? Colors.grey
+                                  : const Color(0xFF2E6BFF),
+                              borderRadius: BorderRadius.circular(8),
+                            ),
+                            child: _isSubmittingAnswer
+                                ? const SizedBox(
+                                    width: 16,
+                                    height: 16,
+                                    child: CircularProgressIndicator(
+                                      strokeWidth: 2,
+                                      valueColor: AlwaysStoppedAnimation<Color>(
+                                        Colors.white,
+                                      ),
+                                    ),
+                                  )
+                                : const Icon(
+                                    Icons.send,
+                                    color: Colors.white,
+                                    size: 18,
+                                  ),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+
+                  const SizedBox(height: 8),
+
+                  // Answers section
+                  StreamBuilder<List<Answer>>(
+                    stream: _answersStream,
+                    builder: (context, snapshot) {
+                      if (snapshot.connectionState == ConnectionState.waiting) {
+                        return const Padding(
+                          padding: EdgeInsets.all(16),
+                          child: CircularProgressIndicator(),
+                        );
+                      }
+
+                      final answers = snapshot.data ?? [];
+
+                      return Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Padding(
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: 16,
+                              vertical: 8,
+                            ),
+                            child: Text(
+                              'Answers (${answers.length})',
+                              style: Theme.of(context).textTheme.titleLarge
+                                  ?.copyWith(
+                                    fontWeight: FontWeight.bold,
+                                    color: const Color(0xFF0D1B3D),
+                                  ),
+                            ),
+                          ),
+
+                          // Answers list
+                          if (answers.isEmpty)
+                            const Padding(
+                              padding: EdgeInsets.all(16),
+                              child: EmptyStateWidget(
+                                title: 'No Answers Yet',
+                                message:
+                                    'Be the first to answer this question!',
+                                icon: Icons.rate_review_outlined,
+                              ),
+                            )
+                          else
+                            Column(
+                              children: answers
+                                  .map(
+                                    (answer) => AnswerCard(
+                                      answer: answer,
+                                      currentUserId: _currentUserId,
+                                      isQuestionAuthor:
+                                          question.userId == _currentUserId,
+                                      onMarkHelpful: () =>
+                                          _firestoreService.markAnswerAsHelpful(
+                                            question.id,
+                                            answer.id,
+                                          ),
+                                      onReaction: (type) =>
+                                          _onAnswerReaction(answer, type),
+                                    ),
+                                  )
+                                  .toList(),
+                            ),
+                        ],
+                      );
+                    },
+                  ),
+
+                  const SizedBox(height: 16),
+                ],
+              ),
             ),
           ),
         );
@@ -843,9 +851,14 @@ class _StatChip extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Chip(
-      avatar: Icon(icon, size: 18, color: Colors.black),
-      label: Text(label, style: const TextStyle(color: Colors.black)),
-      backgroundColor: Colors.white.withOpacity(0.1),
+      avatar: Icon(icon, size: 18, color: const Color(0xFF2E6BFF)),
+      label: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Text(label, style: const TextStyle(color: Color(0xFF0D1B3D))),
+        ],
+      ),
+      backgroundColor: const Color(0xFFEAF1FF),
       side: BorderSide.none,
     );
   }
@@ -874,12 +887,16 @@ class _ReactionButton extends StatelessWidget {
         padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
         child: Row(
           children: [
-            Icon(icon, size: 20, color: isActive ? Colors.red : Colors.white70),
+            Icon(
+              icon,
+              size: 20,
+              color: isActive ? Colors.red : const Color(0xFF5C6B8C),
+            ),
             const SizedBox(width: 8),
             Text(
               count > 0 ? '$count' : label,
               style: TextStyle(
-                color: isActive ? Colors.red : Colors.white70,
+                color: isActive ? Colors.red : const Color(0xFF5C6B8C),
                 fontWeight: isActive ? FontWeight.bold : null,
               ),
             ),

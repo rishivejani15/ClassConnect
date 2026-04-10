@@ -5,12 +5,15 @@ import 'package:demo/models/question.dart';
 import 'package:demo/models/reaction.dart';
 import 'package:demo/widgets/question_card.dart';
 import 'package:demo/widgets/common_widgets.dart';
+import 'package:demo/widgets/ui/cc_decorated_background.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'question_detail_screen.dart';
 import 'ask_question_screen.dart';
 
 class QuestionsListScreen extends StatefulWidget {
-  const QuestionsListScreen({super.key});
+  final bool showAppBar;
+
+  const QuestionsListScreen({super.key, this.showAppBar = false});
 
   @override
   State<QuestionsListScreen> createState() => _QuestionsListScreenState();
@@ -70,9 +73,24 @@ class _QuestionsListScreenState extends State<QuestionsListScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      backgroundColor: const Color(0xFFF4F8FF),
+      appBar: widget.showAppBar
+          ? AppBar(
+              backgroundColor: const Color(0xFFF4F8FF),
+              elevation: 0,
+              foregroundColor: const Color(0xFF0D1B3D),
+              title: const Text(
+                'Community Questions',
+                style: TextStyle(
+                  color: Color(0xFF0D1B3D),
+                  fontWeight: FontWeight.w700,
+                ),
+              ),
+            )
+          : null,
       // appBar: AppBar(
       //   title: const Text('Questions', style: TextStyle(color: Colors.white)),
-      //   backgroundColor: const Color(0xFF0F1C3F),
+      //   backgroundColor: const Color(0xFFF4F8FF),
       //   elevation: 0,
       //   centerTitle: true,
       //   leading: IconButton(
@@ -87,101 +105,106 @@ class _QuestionsListScreenState extends State<QuestionsListScreen> {
       //     },
       //   ),
       // ),
-      body: Column(
-        children: [
-          // Search bar
-          Padding(
-            padding: const EdgeInsets.all(16),
-            child: SearchBar(
-  controller: _searchController,
-  onChanged: _searchQuestions,
-  backgroundColor: MaterialStateProperty.all(
-    const Color(0xFF1E1E1E),
-  ),
-  surfaceTintColor: MaterialStateProperty.all(
-    const Color(0xFF1E1E1E),
-  ),
-  shadowColor: MaterialStateProperty.all(Colors.transparent),
-  leading: const Icon(Icons.search, color: Colors.white70),
-  hintText: 'Search questions...',
-  hintStyle: MaterialStateProperty.all(
-    const TextStyle(color: Colors.white54),
-  ),
-  textStyle: MaterialStateProperty.all(
-    const TextStyle(color: Colors.white),
-  ),
-  trailing: [
-    if (_searchController.text.isNotEmpty)
-      IconButton(
-        icon: const Icon(Icons.clear, color: Colors.white70),
-        onPressed: () {
-          _searchController.clear();
-          _searchQuestions('');
-        },
-      ),
-  ],
-),
-
-          ),
-
-          // Questions list
-          Expanded(
-            child: _searchResults != null
-                ? _buildQuestionsList(_searchResults!)
-                : StreamBuilder<List<Question>>(
-                    stream: _firestoreService.getQuestionsStream(),
-                    builder: (context, snapshot) {
-                      if (snapshot.connectionState == ConnectionState.waiting) {
-                        return const Center(child: CircularProgressIndicator());
-                      }
-
-                      if (snapshot.hasError) {
-                        return EmptyStateWidget(
-                          title: 'Error',
-                          message:
-                              'Failed to load questions: ${snapshot.error}',
-                          icon: Icons.error_outline,
+      body: CcDecoratedBackground(
+        child: Column(
+          children: [
+            // Search bar
+            Padding(
+              padding: const EdgeInsets.all(16),
+              child: SearchBar(
+                controller: _searchController,
+                onChanged: _searchQuestions,
+                backgroundColor: MaterialStateProperty.all(Colors.white),
+                surfaceTintColor: MaterialStateProperty.all(Colors.white),
+                shadowColor: MaterialStateProperty.all(const Color(0x1A2E6BFF)),
+                leading: const Icon(Icons.search, color: Color(0xFF5C6B8C)),
+                hintText: 'Search questions...',
+                hintStyle: MaterialStateProperty.all(
+                  const TextStyle(color: Color(0xFF7A89A8)),
+                ),
+                textStyle: MaterialStateProperty.all(
+                  const TextStyle(color: Color(0xFF0D1B3D)),
+                ),
+                trailing: [
+                  if (_searchController.text.isNotEmpty)
+                    IconButton(
+                      icon: const Icon(Icons.clear, color: Color(0xFF5C6B8C)),
+                      onPressed: () {
+                        _searchController.clear();
+                        _searchQuestions('');
+                      },
+                    ),
+                ],
+              ),
+            ),
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 16),
+              child: Row(
+                children: [
+                  Expanded(
+                    child: _QuickActionCard(
+                      icon: Icons.leaderboard_rounded,
+                      label: 'Leaderboard',
+                      onTap: () {
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (_) => const LeaderboardScreen(),
+                          ),
                         );
-                      }
-
-                      final questions = snapshot.data ?? [];
-                      return _buildQuestionsList(questions);
-                    },
+                      },
+                    ),
                   ),
-          ),
-        ],
-      ),
-      floatingActionButton: Column(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          FloatingActionButton(
-            heroTag: 'leaderboardFab',
-            backgroundColor: Colors.white,
-            onPressed: () {
-              Navigator.push(
-                context,
-                MaterialPageRoute(builder: (_) => const LeaderboardScreen()),
-              );
-            },
-            tooltip: 'Leaderboard',
-            child: const Icon(Icons.leaderboard, color: Colors.black),
-          ),
+                  const SizedBox(width: 12),
+                  Expanded(
+                    child: _QuickActionCard(
+                      icon: Icons.add_circle_outline_rounded,
+                      label: 'Ask Question',
+                      onTap: () {
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (_) => const AskQuestionScreen(),
+                          ),
+                        );
+                      },
+                    ),
+                  ),
+                ],
+              ),
+            ),
+            const SizedBox(height: 12),
 
-          const SizedBox(height: 12),
+            // Questions list
+            Expanded(
+              child: _searchResults != null
+                  ? _buildQuestionsList(_searchResults!)
+                  : StreamBuilder<List<Question>>(
+                      stream: _firestoreService.getQuestionsStream(),
+                      builder: (context, snapshot) {
+                        if (snapshot.connectionState ==
+                            ConnectionState.waiting) {
+                          return const Center(
+                            child: CircularProgressIndicator(),
+                          );
+                        }
 
-          FloatingActionButton(
-            heroTag: 'askQuestionFab',
-            backgroundColor: Colors.white,
-            onPressed: () {
-              Navigator.push(
-                context,
-                MaterialPageRoute(builder: (_) => const AskQuestionScreen()),
-              );
-            },
-            tooltip: 'Ask a question',
-            child: const Icon(Icons.add, color: Colors.black),
-          ),
-        ],
+                        if (snapshot.hasError) {
+                          return EmptyStateWidget(
+                            title: 'Error',
+                            message:
+                                'Failed to load questions: ${snapshot.error}',
+                            icon: Icons.error_outline,
+                          );
+                        }
+
+                        final questions = snapshot.data ?? [];
+                        return _buildQuestionsList(questions);
+                      },
+                    ),
+            ),
+          ],
+        ),
       ),
     );
   }
@@ -198,7 +221,7 @@ class _QuestionsListScreenState extends State<QuestionsListScreen> {
     }
 
     return ListView.builder(
-      padding: const EdgeInsets.only(bottom: 16),
+      padding: const EdgeInsets.only(bottom: 110),
       itemCount: questions.length,
       itemBuilder: (context, index) {
         final question = questions[index];
@@ -217,6 +240,52 @@ class _QuestionsListScreenState extends State<QuestionsListScreen> {
           onReaction: (type) => _onQuestionReaction(question, type),
         );
       },
+    );
+  }
+}
+
+class _QuickActionCard extends StatelessWidget {
+  const _QuickActionCard({
+    required this.icon,
+    required this.label,
+    required this.onTap,
+  });
+
+  final IconData icon;
+  final String label;
+  final VoidCallback onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    return Material(
+      color: Colors.white,
+      borderRadius: BorderRadius.circular(14),
+      child: InkWell(
+        onTap: onTap,
+        borderRadius: BorderRadius.circular(14),
+        child: Container(
+          padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
+          decoration: BoxDecoration(
+            borderRadius: BorderRadius.circular(14),
+            border: Border.all(color: const Color(0x1A2E6BFF)),
+          ),
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Icon(icon, size: 18, color: const Color(0xFF2E6BFF)),
+              const SizedBox(width: 8),
+              Text(
+                label,
+                style: const TextStyle(
+                  color: Color(0xFF0D1B3D),
+                  fontWeight: FontWeight.w700,
+                  fontSize: 13,
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
     );
   }
 }

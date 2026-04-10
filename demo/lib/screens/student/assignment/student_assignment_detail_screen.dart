@@ -178,13 +178,13 @@ class _StudentAssignmentDetailScreenState
     final isSubmitted = _existingSubmission != null;
 
     return Scaffold(
-      backgroundColor: const Color(0xFF0F1C3F),
+      backgroundColor: const Color(0xFFF4F8FF),
       appBar: AppBar(
         title: const Text(
           "Assignment Details",
           style: TextStyle(color: Colors.white),
         ),
-        backgroundColor: const Color(0xFF0F1C3F),
+        backgroundColor: const Color(0xFFF4F8FF),
         elevation: 0,
       ),
       body: SingleChildScrollView(

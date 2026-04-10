@@ -8,7 +8,6 @@ import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:intl/intl.dart';
 import 'pbl_submission_sheet.dart';
 
-
 import 'package:demo/screens/student/resources/student_resources_screen.dart';
 
 class StudentPblScreen extends StatefulWidget {
@@ -67,7 +66,6 @@ class _StudentPblScreenState extends State<StudentPblScreen> {
                   style: TextStyle(color: Colors.white54, fontSize: 14),
                 ),
                 const SizedBox(height: 32),
-
               ],
             ),
           );
@@ -79,7 +77,6 @@ class _StudentPblScreenState extends State<StudentPblScreen> {
             children: [
               ...pblProjects.map((pbl) => _buildPblCard(context, pbl)),
               const SizedBox(height: 16),
-
             ],
           ),
         );
@@ -88,8 +85,8 @@ class _StudentPblScreenState extends State<StudentPblScreen> {
   }
 
   Future<List<Map<String, dynamic>>> _fetchStudentPblProjects(
-      String studentUid,
-      ) async {
+    String studentUid,
+  ) async {
     try {
       final classesSnapshot = await FirebaseFirestore.instance
           .collection('classes')
@@ -138,14 +135,14 @@ class _StudentPblScreenState extends State<StudentPblScreen> {
               'pblId': pblDoc.id,
               'title': pblData['title'] ?? 'Untitled',
               'problemStatement':
-              pblData['problemStatement'] ?? 'No problem statement',
+                  pblData['problemStatement'] ?? 'No problem statement',
               'learningObjectives':
-              pblData['learningObjectives'] as List<dynamic>? ?? [],
+                  pblData['learningObjectives'] as List<dynamic>? ?? [],
               'milestones': pblData['milestones'] as List<dynamic>? ?? [],
               'deadline': pblData['deadline'],
               'pairNumber': studentPairInfo?['pairNumber'] ?? 0,
               'pairStudents':
-              studentPairInfo?['students'] as List<dynamic>? ?? [],
+                  studentPairInfo?['students'] as List<dynamic>? ?? [],
             });
           }
         }
@@ -157,9 +154,6 @@ class _StudentPblScreenState extends State<StudentPblScreen> {
       return [];
     }
   }
-
-
-
 
   Widget _buildPblCard(BuildContext context, Map<String, dynamic> pblData) {
     final title = pblData['title'] as String? ?? 'Untitled';
@@ -210,7 +204,11 @@ class _StudentPblScreenState extends State<StudentPblScreen> {
                   padding: const EdgeInsets.only(top: 8),
                   child: Row(
                     children: [
-                      const Icon(Icons.calendar_today, size: 14, color: Colors.orangeAccent),
+                      const Icon(
+                        Icons.calendar_today,
+                        size: 14,
+                        color: Colors.orangeAccent,
+                      ),
                       const SizedBox(width: 4),
                       Text(
                         'Due: ${DateFormat('MMM d, h:mm a').format(deadlineDate)}',
@@ -264,28 +262,28 @@ class _StudentPblScreenState extends State<StudentPblScreen> {
                     ...pairStudents
                         .map(
                           (student) => Padding(
-                        padding: const EdgeInsets.only(bottom: 4),
-                        child: Row(
-                          children: [
-                            const Icon(
-                              Icons.person,
-                              size: 14,
-                              color: Colors.white54,
-                            ),
-                            const SizedBox(width: 8),
-                            Expanded(
-                              child: Text(
-                                student['name'] ?? 'Unknown',
-                                style: const TextStyle(
-                                  fontSize: 13,
-                                  color: Colors.white70,
+                            padding: const EdgeInsets.only(bottom: 4),
+                            child: Row(
+                              children: [
+                                const Icon(
+                                  Icons.person,
+                                  size: 14,
+                                  color: Colors.white54,
                                 ),
-                              ),
+                                const SizedBox(width: 8),
+                                Expanded(
+                                  child: Text(
+                                    student['name'] ?? 'Unknown',
+                                    style: const TextStyle(
+                                      fontSize: 13,
+                                      color: Colors.white70,
+                                    ),
+                                  ),
+                                ),
+                              ],
                             ),
-                          ],
-                        ),
-                      ),
-                    )
+                          ),
+                        )
                         .toList(),
                   ],
                 ),
@@ -315,5 +313,4 @@ class _StudentPblScreenState extends State<StudentPblScreen> {
       ),
     );
   }
-
 }
