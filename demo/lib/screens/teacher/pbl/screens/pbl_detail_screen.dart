@@ -34,7 +34,7 @@ class _PblDetailScreenState extends State<PblDetailScreen> {
           style: const TextStyle(fontWeight: FontWeight.bold),
         ),
         backgroundColor: const Color(0xFFF4F8FF),
-        foregroundColor: Colors.white,
+        foregroundColor: const Color(0xFF0D1B3D),
         elevation: 0,
       ),
       body: StreamBuilder<DocumentSnapshot>(
@@ -90,9 +90,9 @@ class _PblDetailScreenState extends State<PblDetailScreen> {
                   width: double.infinity,
                   padding: const EdgeInsets.all(20),
                   decoration: BoxDecoration(
-                    color: const Color(0xFF152349),
+                    color: Colors.white,
                     borderRadius: BorderRadius.circular(16),
-                    border: Border.all(color: Colors.white10),
+                    border: Border.all(color: const Color(0xFFF0F4FF)),
                     boxShadow: [
                       BoxShadow(
                         color: Colors.black.withOpacity(0.2),
@@ -110,7 +110,7 @@ class _PblDetailScreenState extends State<PblDetailScreen> {
                           fontSize: 12,
                           fontWeight: FontWeight.bold,
                           letterSpacing: 1.2,
-                          color: Colors.white54,
+                          color: const Color(0xFF5C6B8C),
                         ),
                       ),
                       const SizedBox(height: 12),
@@ -119,7 +119,7 @@ class _PblDetailScreenState extends State<PblDetailScreen> {
                         style: const TextStyle(
                           fontSize: 16,
                           height: 1.5,
-                          color: Colors.white,
+                          color: const Color(0xFF0D1B3D),
                         ),
                       ),
                     ],
@@ -142,7 +142,7 @@ class _PblDetailScreenState extends State<PblDetailScreen> {
                     ),
                     style: ElevatedButton.styleFrom(
                       padding: const EdgeInsets.symmetric(vertical: 16),
-                      backgroundColor: Colors.cyanAccent,
+                      backgroundColor: const Color(0xFF2E6BFF),
                       shape: RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(12),
                       ),
@@ -158,15 +158,15 @@ class _PblDetailScreenState extends State<PblDetailScreen> {
                     onPressed: () => _showAssignments(pblData),
                     icon: const Icon(
                       Icons.visibility,
-                      color: Colors.cyanAccent,
+                      color: const Color(0xFF2E6BFF),
                     ),
                     label: const Text(
                       'View Student Assignments',
-                      style: TextStyle(color: Colors.cyanAccent),
+                      style: TextStyle(color: const Color(0xFF2E6BFF)),
                     ),
                     style: OutlinedButton.styleFrom(
                       padding: const EdgeInsets.symmetric(vertical: 16),
-                      side: const BorderSide(color: Colors.cyanAccent),
+                      side: const BorderSide(color: const Color(0xFF2E6BFF)),
                       shape: RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(12),
                       ),
@@ -182,17 +182,17 @@ class _PblDetailScreenState extends State<PblDetailScreen> {
                     onPressed: () => _pickDeadline(pblData),
                     icon: const Icon(
                       Icons.calendar_today,
-                      color: Colors.white70,
+                      color: const Color(0xFF5C6B8C),
                     ),
                     label: Text(
                       deadline == null
                           ? 'Set Project Deadline'
                           : 'Edit Deadline (Due: ${DateFormat('MMM d').format(deadline)})',
-                      style: const TextStyle(color: Colors.white70),
+                      style: const TextStyle(color: const Color(0xFF5C6B8C)),
                     ),
                     style: OutlinedButton.styleFrom(
                       padding: const EdgeInsets.symmetric(vertical: 16),
-                      side: const BorderSide(color: Colors.white24),
+                      side: const BorderSide(color: const Color(0x1A2E6BFF)),
                       shape: RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(12),
                       ),
@@ -209,7 +209,7 @@ class _PblDetailScreenState extends State<PblDetailScreen> {
                     style: TextStyle(
                       fontSize: 12,
                       fontWeight: FontWeight.bold,
-                      color: Colors.white54,
+                      color: const Color(0xFF5C6B8C),
                       letterSpacing: 1.2,
                     ),
                   ),
@@ -233,7 +233,7 @@ class _PblDetailScreenState extends State<PblDetailScreen> {
                                   titleStyle: const TextStyle(
                                     fontSize: 16,
                                     fontWeight: FontWeight.bold,
-                                    color: Colors.white,
+                                    color: const Color(0xFF0D1B3D),
                                   ),
                                 ),
                                 PieChartSectionData(
@@ -264,7 +264,7 @@ class _PblDetailScreenState extends State<PblDetailScreen> {
                             Text(
                               'Total Students: $totalStudents',
                               style: const TextStyle(
-                                color: Colors.white54,
+                                color: const Color(0xFF5C6B8C),
                                 fontWeight: FontWeight.w500,
                               ),
                             ),
@@ -288,35 +288,35 @@ class _PblDetailScreenState extends State<PblDetailScreen> {
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
-        backgroundColor: const Color(0xFF152349),
+        backgroundColor: Colors.white,
         title: const Text(
           'Create Student Pairs',
-          style: TextStyle(color: Colors.white),
+          style: TextStyle(color: const Color(0xFF0D1B3D)),
         ),
         content: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
             const Text(
               'How many students in each pair?',
-              style: TextStyle(color: Colors.white70),
+              style: TextStyle(color: const Color(0xFF5C6B8C)),
             ),
             const SizedBox(height: 16),
             TextField(
               controller: pairCountController,
               keyboardType: TextInputType.number,
-              style: const TextStyle(color: Colors.white),
+              style: const TextStyle(color: const Color(0xFF0D1B3D)),
               decoration: InputDecoration(
                 labelText: 'Students per pair',
-                labelStyle: const TextStyle(color: Colors.white54),
+                labelStyle: const TextStyle(color: const Color(0xFF5C6B8C)),
                 hintText: 'e.g., 2 or 3',
-                hintStyle: const TextStyle(color: Colors.white24),
+                hintStyle: const TextStyle(color: Color(0xFF5C6B8C)),
                 enabledBorder: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(8),
-                  borderSide: const BorderSide(color: Colors.white24),
+                  borderSide: const BorderSide(color: const Color(0x1A2E6BFF)),
                 ),
                 focusedBorder: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(8),
-                  borderSide: const BorderSide(color: Colors.cyanAccent),
+                  borderSide: const BorderSide(color: const Color(0xFF2E6BFF)),
                 ),
               ),
             ),
@@ -327,7 +327,7 @@ class _PblDetailScreenState extends State<PblDetailScreen> {
             onPressed: () => Navigator.pop(context),
             child: const Text(
               'Cancel',
-              style: TextStyle(color: Colors.white54),
+              style: TextStyle(color: const Color(0xFF5C6B8C)),
             ),
           ),
           ElevatedButton(
@@ -337,7 +337,7 @@ class _PblDetailScreenState extends State<PblDetailScreen> {
               Navigator.pop(context);
               _assignStudents(studentsPerPair);
             },
-            style: ElevatedButton.styleFrom(backgroundColor: Colors.cyanAccent),
+            style: ElevatedButton.styleFrom(backgroundColor: const Color(0xFF2E6BFF)),
             child: const Text(
               'Assign',
               style: TextStyle(
@@ -481,7 +481,7 @@ class _PblDetailScreenState extends State<PblDetailScreen> {
           text,
           style: const TextStyle(
             fontWeight: FontWeight.bold,
-            color: Colors.white,
+            color: const Color(0xFF0D1B3D),
           ),
         ),
       ],
@@ -580,12 +580,12 @@ class _PblDetailScreenState extends State<PblDetailScreen> {
                   style: TextStyle(
                     fontSize: 18,
                     fontWeight: FontWeight.bold,
-                    color: Colors.white,
+                    color: const Color(0xFF0D1B3D),
                   ),
                 ),
                 IconButton(
                   onPressed: () => Navigator.pop(context),
-                  icon: const Icon(Icons.close, color: Colors.white54),
+                  icon: const Icon(Icons.close, color: const Color(0xFF5C6B8C)),
                 ),
               ],
             ),
@@ -601,9 +601,9 @@ class _PblDetailScreenState extends State<PblDetailScreen> {
                   return Container(
                     margin: const EdgeInsets.only(bottom: 12),
                     decoration: BoxDecoration(
-                      color: const Color(0xFF152349),
+                      color: Colors.white,
                       borderRadius: BorderRadius.circular(12),
-                      border: Border.all(color: Colors.white10),
+                      border: Border.all(color: const Color(0xFFF0F4FF)),
                     ),
                     child: Material(
                       color: Colors.transparent,
@@ -635,7 +635,7 @@ class _PblDetailScreenState extends State<PblDetailScreen> {
                                 style: TextStyle(
                                   fontSize: 14,
                                   fontWeight: FontWeight.bold,
-                                  color: Colors.cyanAccent.shade200,
+                                  color: const Color(0xFF2E6BFF),
                                 ),
                               ),
                               const SizedBox(height: 8),
@@ -651,7 +651,7 @@ class _PblDetailScreenState extends State<PblDetailScreen> {
                                       const Icon(
                                         Icons.person,
                                         size: 16,
-                                        color: Colors.white38,
+                                        color: Colors.black38,
                                       ),
                                       const SizedBox(width: 8),
                                       Expanded(
@@ -663,14 +663,14 @@ class _PblDetailScreenState extends State<PblDetailScreen> {
                                               student['name'] ?? 'Unknown',
                                               style: const TextStyle(
                                                 fontWeight: FontWeight.w500,
-                                                color: Colors.white,
+                                                color: const Color(0xFF0D1B3D),
                                               ),
                                             ),
                                             Text(
                                               student['email'] ?? '',
                                               style: const TextStyle(
                                                 fontSize: 12,
-                                                color: Colors.white38,
+                                                color: Colors.black38,
                                               ),
                                             ),
                                           ],
@@ -686,7 +686,7 @@ class _PblDetailScreenState extends State<PblDetailScreen> {
                                               : Icons.circle_outlined,
                                           color: isSubmitted
                                               ? Colors.greenAccent
-                                              : Colors.white24,
+                                              : const Color(0x1A2E6BFF),
                                           size: 20,
                                         ),
                                       ),
@@ -709,3 +709,8 @@ class _PblDetailScreenState extends State<PblDetailScreen> {
     );
   }
 }
+
+
+
+
+

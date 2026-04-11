@@ -337,10 +337,7 @@ class _TeacherTaskScreenState extends State<TeacherTaskScreen>
                     const SizedBox(height: 8),
                     Text(
                       'Est ${_formatMins(estMin)} · Actual ${_formatMins(actMin)}',
-                      style: const TextStyle(
-                        color: Colors.white60,
-                        fontSize: 12,
-                      ),
+                      style: const TextStyle(color: Colors.white, fontSize: 12),
                     ),
                   ],
                 ),
@@ -408,7 +405,7 @@ class _TeacherTaskScreenState extends State<TeacherTaskScreen>
             style: TextStyle(
               fontSize: 15,
               fontWeight: FontWeight.w700,
-              color: _surface,
+              color: Colors.black,
             ),
           ),
         ],
@@ -581,7 +578,7 @@ class _TeacherTaskScreenState extends State<TeacherTaskScreen>
                           ? _surfaceLight
                           : _accentCyan,
                       foregroundColor: task.status == 'completed'
-                          ? Colors.white
+                          ? Colors.black
                           : Colors.black,
                       shape: RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(14),
@@ -851,7 +848,7 @@ class _TeacherTaskScreenState extends State<TeacherTaskScreen>
                     child: const Center(
                       child: Text(
                         'No tasks planned for this day.',
-                        style: TextStyle(color: Colors.white60),
+                        style: TextStyle(color: Colors.black54),
                       ),
                     ),
                   )
@@ -1007,7 +1004,7 @@ class _TeacherTaskScreenState extends State<TeacherTaskScreen>
                 Text(
                   score.toStringAsFixed(0),
                   style: const TextStyle(
-                    color: Colors.white,
+                    color: Colors.black,
                     fontSize: 28,
                     fontWeight: FontWeight.bold,
                   ),
@@ -1058,7 +1055,7 @@ class _TeacherTaskScreenState extends State<TeacherTaskScreen>
             width: 65,
             child: Text(
               label,
-              style: const TextStyle(color: Colors.white60, fontSize: 11),
+              style: const TextStyle(color: Colors.white, fontSize: 11),
             ),
           ),
           Expanded(
@@ -1123,7 +1120,7 @@ class _TeacherTaskScreenState extends State<TeacherTaskScreen>
                     Text(
                       '$streak day${streak == 1 ? '' : 's'}',
                       style: const TextStyle(
-                        color: Colors.white,
+                        color: Colors.black,
                         fontSize: 22,
                         fontWeight: FontWeight.bold,
                       ),
@@ -1131,14 +1128,14 @@ class _TeacherTaskScreenState extends State<TeacherTaskScreen>
                     const SizedBox(width: 8),
                     const Text(
                       'streak',
-                      style: TextStyle(color: Colors.white60, fontSize: 14),
+                      style: TextStyle(color: Colors.black54, fontSize: 14),
                     ),
                   ],
                 ),
                 const SizedBox(height: 4),
                 Text(
                   'Personal best: $best day${best == 1 ? '' : 's'}',
-                  style: const TextStyle(color: Colors.white54, fontSize: 12),
+                  style: const TextStyle(color: Colors.black54, fontSize: 12),
                 ),
               ],
             ),
@@ -1154,7 +1151,7 @@ class _TeacherTaskScreenState extends State<TeacherTaskScreen>
             child: Text(
               streak > 0 ? 'Active' : 'Start today',
               style: TextStyle(
-                color: streak > 0 ? _accentCyan : Colors.white54,
+                color: streak > 0 ? _accentCyan : Colors.black54,
                 fontWeight: FontWeight.w600,
                 fontSize: 12,
               ),
@@ -1208,7 +1205,7 @@ class _TeacherTaskScreenState extends State<TeacherTaskScreen>
               Text(
                 'Last 7 Days',
                 style: TextStyle(
-                  color: Colors.white,
+                  color: Colors.black,
                   fontSize: 16,
                   fontWeight: FontWeight.bold,
                 ),
@@ -1243,7 +1240,7 @@ class _TeacherTaskScreenState extends State<TeacherTaskScreen>
                         return Text(
                           dayNames[day.weekday - 1],
                           style: const TextStyle(
-                            color: Colors.white54,
+                            color: Colors.black54,
                             fontSize: 11,
                           ),
                         );
@@ -1300,7 +1297,7 @@ class _TeacherTaskScreenState extends State<TeacherTaskScreen>
         const SizedBox(width: 4),
         Text(
           label,
-          style: const TextStyle(color: Colors.white54, fontSize: 11),
+          style: const TextStyle(color: Colors.black54, fontSize: 11),
         ),
       ],
     );
@@ -1360,7 +1357,7 @@ class _TeacherTaskScreenState extends State<TeacherTaskScreen>
           Text(
             value,
             style: const TextStyle(
-              color: Colors.white,
+              color: Colors.black,
               fontSize: 16,
               fontWeight: FontWeight.bold,
             ),
@@ -1368,7 +1365,7 @@ class _TeacherTaskScreenState extends State<TeacherTaskScreen>
           const SizedBox(height: 4),
           Text(
             label,
-            style: const TextStyle(color: Colors.white54, fontSize: 11),
+            style: const TextStyle(color: Colors.black54, fontSize: 11),
           ),
         ],
       ),
@@ -1414,7 +1411,7 @@ class _TeacherTaskScreenState extends State<TeacherTaskScreen>
               Text(
                 'Task Breakdown',
                 style: TextStyle(
-                  color: Colors.white,
+                  color: Colors.black,
                   fontSize: 16,
                   fontWeight: FontWeight.bold,
                 ),
@@ -1444,7 +1441,7 @@ class _TeacherTaskScreenState extends State<TeacherTaskScreen>
                     child: Text(
                       e.key.replaceAll('_', ' '),
                       style: const TextStyle(
-                        color: Colors.white70,
+                        color: Colors.black87,
                         fontSize: 13,
                       ),
                     ),
@@ -1452,7 +1449,7 @@ class _TeacherTaskScreenState extends State<TeacherTaskScreen>
                   Text(
                     '${e.value}',
                     style: const TextStyle(
-                      color: Colors.white,
+                      color: Colors.black,
                       fontWeight: FontWeight.w600,
                       fontSize: 13,
                     ),
@@ -1500,7 +1497,7 @@ class _TeacherTaskScreenState extends State<TeacherTaskScreen>
               Text(
                 'Burnout Warning',
                 style: TextStyle(
-                  color: Colors.white,
+                  color: Colors.black,
                   fontWeight: FontWeight.bold,
                   fontSize: 15,
                 ),
@@ -1518,7 +1515,7 @@ class _TeacherTaskScreenState extends State<TeacherTaskScreen>
                 avatar: Icon(Icons.warning, color: Colors.orange, size: 16),
                 label: Text(
                   '$day • ${hours.toStringAsFixed(1)}h',
-                  style: const TextStyle(color: Colors.white, fontSize: 12),
+                  style: const TextStyle(color: Colors.black, fontSize: 12),
                 ),
                 backgroundColor: Colors.orange.withValues(alpha: 0.15),
                 side: BorderSide.none,
@@ -1528,7 +1525,7 @@ class _TeacherTaskScreenState extends State<TeacherTaskScreen>
           const SizedBox(height: 8),
           const Text(
             'Tip: Keep daily planned work under 6 hours to avoid burnout.',
-            style: TextStyle(color: Colors.white54, fontSize: 12),
+            style: TextStyle(color: Colors.black54, fontSize: 12),
           ),
         ],
       ),
@@ -1553,7 +1550,7 @@ class _TeacherTaskScreenState extends State<TeacherTaskScreen>
               Text(
                 '${lateTasks.length} missed deadline${lateTasks.length == 1 ? '' : 's'}',
                 style: const TextStyle(
-                  color: Colors.white,
+                  color: Colors.black,
                   fontWeight: FontWeight.bold,
                   fontSize: 15,
                 ),
@@ -1578,7 +1575,7 @@ class _TeacherTaskScreenState extends State<TeacherTaskScreen>
                         child: Text(
                           task.title,
                           style: const TextStyle(
-                            color: Colors.white70,
+                            color: Colors.black87,
                             fontSize: 13,
                           ),
                           overflow: TextOverflow.ellipsis,
@@ -1592,7 +1589,7 @@ class _TeacherTaskScreenState extends State<TeacherTaskScreen>
             Text(
               '+${lateTasks.length - 3} more',
               style: const TextStyle(
-                color: Colors.white54,
+                color: Colors.black54,
                 fontSize: 12,
                 fontStyle: FontStyle.italic,
               ),
@@ -1675,7 +1672,7 @@ class _TeacherTaskScreenState extends State<TeacherTaskScreen>
               const Text(
                 'AI Productivity Tips',
                 style: TextStyle(
-                  color: Colors.white,
+                  color: Colors.black,
                   fontSize: 16,
                   fontWeight: FontWeight.bold,
                 ),
@@ -1720,7 +1717,7 @@ class _TeacherTaskScreenState extends State<TeacherTaskScreen>
                           Text(
                             tip.title,
                             style: const TextStyle(
-                              color: Colors.white,
+                              color: Colors.black,
                               fontWeight: FontWeight.w600,
                               fontSize: 14,
                             ),
@@ -1729,7 +1726,7 @@ class _TeacherTaskScreenState extends State<TeacherTaskScreen>
                           Text(
                             tip.description,
                             style: const TextStyle(
-                              color: Colors.white60,
+                              color: Colors.black54,
                               fontSize: 12,
                             ),
                           ),
@@ -1743,7 +1740,7 @@ class _TeacherTaskScreenState extends State<TeacherTaskScreen>
           else
             const Text(
               'Tips will load when data is available.',
-              style: TextStyle(color: Colors.white54, fontSize: 13),
+              style: TextStyle(color: Colors.black54, fontSize: 13),
             ),
         ],
       ),
@@ -1850,7 +1847,7 @@ class _TeacherTaskScreenState extends State<TeacherTaskScreen>
           const Text(
             'Week Ahead',
             style: TextStyle(
-              color: Colors.white,
+              color: Colors.black,
               fontSize: 15,
               fontWeight: FontWeight.bold,
             ),
@@ -1883,7 +1880,7 @@ class _TeacherTaskScreenState extends State<TeacherTaskScreen>
                           '${day.month}/${day.day}',
                           style: const TextStyle(
                             fontSize: 10,
-                            color: Colors.white54,
+                            color: Colors.black54,
                           ),
                         );
                       },
@@ -1932,7 +1929,7 @@ class _TeacherTaskScreenState extends State<TeacherTaskScreen>
             style: const TextStyle(
               fontSize: 11,
               fontWeight: FontWeight.w600,
-              color: Colors.white,
+              color: Colors.black,
             ),
           ),
         ],
