@@ -1,143 +1,103 @@
-# 🎓 Class Connect
+# Class Connect (Mobile Application)
 
-### Adaptive Mastery & Engagement Platform (AMEP)
-
-Class Connect is a **modern, data-driven ed-tech platform** built to support **Project-Based Learning (PBL)** with structured workflows, real-time engagement tracking, and personalized mastery progression. It bridges the gap between **traditional classroom teaching** and **adaptive, student-centric learning**.
+This is the Flutter mobile application for the Class Connect Adaptive Mastery & Engagement Platform (AMEP).
 
 ---
 
-## 🚀 Problem Statement
+## Overview
 
-Modern classrooms face several challenges:
+Class Connect is a modern, data-driven ed-tech platform designed to support Project-Based Learning (PBL) with structured workflows, real-time engagement tracking, and personalized mastery progression. The platform bridges the gap between traditional classroom teaching and adaptive, student-centric learning.
 
-* Increasing **teacher workload**
-* **Delayed and subjective assessments**
-* Limited **personalized learning paths**
-* Poor visibility into **student engagement & progress**
-* Fragmented tools for projects, assignments, and evaluation
-
-**Class Connect** addresses these challenges by offering a **single unified platform** for managing PBL, tracking progress, and enabling mastery-based learning at scale.
+View the live demo: https://class-connect-web.vercel.app/
 
 ---
 
-## 🎯 Objectives
+## Key Features
 
-* Enable scalable **Project-Based Learning**
-* Provide **step-wise mini-project workflows**
-* Track **student engagement & completion status**
-* Reduce manual effort for educators
-* Support **adaptive and mastery-driven education**
+### Teacher Features
 
----
-
-## 🧩 Key Features
-
-### 👩‍🏫 Teacher Features
-
-* Create and manage classes
-* Design PBL collections with multiple mini-projects
+* Create and manage classes with syllabus uploads
+* Design PBL collections with AI-generated content
+* Define mini-projects and structured step-by-step tasks
 * View students enrolled in each mini-project
 * Track step completion and submission status
-* Monitor real-time student progress
+* Monitor real-time student progress via analytics dashboard
+* Generate quizzes and evaluate responses using AI
+* Track teacher workload and receive productivity insights
 
-### 👨‍🎓 Student Features
+### Student Features
 
-* Browse available mini-projects
-* Select & start a project independently
-* Follow structured step-by-step tasks
-* Submit project work (links/files)
-* Track personal progress and completion
-
----
-
-## 🛠️ Tech Stack
-
-### Frontend
-
-* **Flutter** (cross-platform)
-* Material UI with custom dark theme
-
-### Backend & Services
-
-* **Firebase Authentication** – secure login & role handling
-* **Cloud Firestore** – real-time NoSQL database
-* **Firebase Storage** – project submissions (optional)
+* Secure authentication via Firebase
+* Browse available mini-projects and select independently
+* Follow structured step-by-step tasks with multimedia support
+* Submit project work (links, files, images)
+* Track personal progress and completion status
+* Take quizzes with AI-powered feedback
+* Access chatbot assistance for learning support
+* Participate in community discussions and Q&A
 
 ---
 
-## 🔄 Application Flow
+## Technology Stack
 
-### Student Flow
-
-1. Login to the platform
-2. Join a class
-3. View available PBL collections
-4. Select a mini-project
-5. Selection is saved with `studentId`
-6. Complete project steps
-7. Submit final work
-
-### Teacher Flow
-
-1. Create a class
-2. Add PBL collections
-3. Define mini-projects and steps
-4. Monitor student selections
-5. Track completion and submissions
+| Category | Technology |
+|----------|------------|
+| **Framework** | Flutter (Dart) |
+| **State Management** | Flutter native (StreamBuilder, FutureBuilder) |
+| **UI/UX** | Material 3, custom dark theme |
+| **Backend** | Firebase Auth, Cloud Firestore, Firebase Storage |
+| **AI Services** | Google Generative AI (Gemini), Groq API |
+| **Media** | image_picker, file_picker, video_player |
+| **PDF** | syncfusion_flutter_pdf, pdf |
+| **Charts** | fl_chart |
+| **Notifications** | flutter_local_notifications |
+| **Other** | google_mlkit_text_recognition, share_plus |
 
 ---
 
-## 🔐 Security & Data Integrity
+## Getting Started
 
-* Firebase Authentication ensures verified users
-* Firestore rules enforce:
+### Prerequisites
 
-  * Students can only modify their own selections
-  * Teachers can view all enrolled students
+* **Flutter SDK 3.19+**
+* **Google Cloud Account** for Firebase services
+
+### Setup
+
+```bash
+cd demo
+
+# Install dependencies
+flutter pub get
+
+# Configure environment variables
+cp .env.example .env
+# Add your API keys (see main project README for details)
+
+# Run on device/emulator
+flutter run
+
+# Build for platforms
+flutter build apk      # Android
+flutter build ios      # iOS
+flutter build web      # Web
+```
+
+---
+
+## Security
+
+Firebase Authentication ensures verified users with role-based access. Firestore rules enforce:
+
+* Students can only modify their own selections and submissions
+* Teachers can view and manage all enrolled students
 * One mini-project per student per PBL (UID-based enforcement)
 
----
-
-## 📈 Why Class Connect?
-
-✔ Real-world PBL workflows (not just assignments)
-✔ Real-time progress tracking
-✔ Scalable NoSQL-friendly architecture
-✔ Clean separation of UI and business logic
-✔ Designed for real classroom usage
+For complete documentation, see the [main project README](../README.md).
 
 ---
 
-## 🧠 Learning Outcomes
+## Resources
 
-This project demonstrates:
-
-* Flutter application architecture
-* Firestore data modeling (NoSQL)
-* Authentication and role-based access
-* Scalable PBL system design
-* Ed-tech product thinking
-
----
-
-## 🔮 Future Enhancements
-
-* Engagement Index & analytics dashboard
-* Mastery scoring system
-* AI-based feedback & evaluation
-* Teacher remarks and grading rubrics
-* Parent access module
-* Offline progress sync
-
----
-
-## 🧑‍💻 Developed By
-
-**Class Connect Team**
-An initiative focused on **adaptive learning, mastery, and engagement**.
-
----
-
-## ⭐ Final Note
-
-> *Class Connect is not just an app — it is a learning ecosystem built for modern classrooms and future-ready education.*
+* [Firebase Documentation](https://firebase.google.com/docs)
+* [Flutter Documentation](https://docs.flutter.dev)
